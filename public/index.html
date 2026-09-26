@@ -27,6 +27,21 @@
         </div>
 
         <!-- ================= MÓDULO 1: INGREDIENTES & ESTOQUE ================= -->
+
+        <!-- Exemplo de cabeçalho com o botão de expandir/recolher -->
+<div class="flex justify-between items-center mb-4 cursor-pointer" onclick="toggleSecaoEstoque()">
+    <h2 class="text-lg font-bold text-stone-800">Gestão de Ingredientes e Estoque</h2>
+    <button id="btn-toggle-estoque" class="text-stone-500 font-bold text-sm hover:text-stone-700">
+        [ - ] Recolher
+    </button>
+</div>
+
+<!-- Envolva a tabela e o formulário dentro de uma div com um ID para controlar -->
+<div id="conteudo-secao-estoque" class="transition-all duration-300">
+    <!-- Formulário de cadastro e a tabela de ingredientes continuam aqui dentro -->
+</div>
+        
+        
         <div id="secao-ingredientes" class="space-y-6">
             <div class="mb-4">
                 <h2 class="text-xl font-bold text-stone-800">Gestão de Ingredientes e Estoque</h2>
@@ -394,6 +409,18 @@
         }
 
         // ---------- ESTOQUE ----------
+        function toggleSecaoEstoque() {
+    const conteudo = document.getElementById('conteudo-secao-estoque');
+    const btn = document.getElementById('btn-toggle-estoque');
+    
+    if (conteudo.style.display === 'none') {
+        conteudo.style.display = 'block';
+        if (btn) btn.textContent = '[ - ] Recolher';
+    } else {
+        conteudo.style.display = 'none';
+        if (btn) btn.textContent = '[ + ] Expandir';
+    }
+}
         async function carregarTabelaEstoque() {
             const tbody = document.getElementById('tabela-estoque-corpo');
             tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-stone-400 text-xs italic">Carregando do Banco Neon...</td></tr>';
