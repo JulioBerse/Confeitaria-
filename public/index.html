@@ -420,18 +420,20 @@
         }
 
         // ---------- ESTOQUE ----------
-        function alternarListaEstoque() {
+ function alternarListaEstoque() {
     const container = document.getElementById('container-lista-estoque');
     const botao = document.getElementById('btn-toggle-estoque');
     
     if (!container) return;
 
-    if (container.style.display === 'none') {
-        container.style.display = 'block';
-        botao.innerHTML = '▲ Minimizar';
-    } else {
+    // Se estiver visível, esconde e muda o botão para Expandir
+    if (container.style.display !== 'none') {
         container.style.display = 'none';
         botao.innerHTML = '▼ Expandir';
+    } else {
+        // Se estiver escondido, mostra e muda o botão para Minimizar
+        container.style.display = 'block';
+        botao.innerHTML = '▲ Minimizar';
     }
 }
         function toggleSecaoEstoque() {
