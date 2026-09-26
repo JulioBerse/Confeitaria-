@@ -31,9 +31,14 @@
  <!-- Cabeçalho da Seção de Estoque com o botão idêntico ao de receitas -->
 <div class="flex justify-between items-center mb-4">
     <h2 class="text-lg font-bold text-stone-800">Gestão de Ingredientes e Estoque</h2>
-    <button onclick="toggleSecaoEstoque()" id="btn-toggle-estoque" class="px-3 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
-        <span>▼</span> <span id="btn-texto-estoque">Expandir</span>
+    <button onclick="alternarListaEstoque()" id="btn-toggle-estoque" class="px-3 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+        ▼ Expandir
     </button>
+</div>
+
+<!-- Container que engloba o formulário e a tabela de estoque -->
+<div id="container-lista-estoque" style="display: none;">
+    <!-- Cole seu formulário de ingredientes e a tabela aqui dentro -->
 </div>
 
 <!-- Conteúdo que vai abrir e fechar (Formulário e Tabela de Ingredientes) -->
@@ -414,6 +419,20 @@
         }
 
         // ---------- ESTOQUE ----------
+        function alternarListaEstoque() {
+    const container = document.getElementById('container-lista-estoque');
+    const botao = document.getElementById('btn-toggle-estoque');
+    
+    if (!container) return;
+
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        botao.innerHTML = '▲ Minimizar';
+    } else {
+        container.style.display = 'none';
+        botao.innerHTML = '▼ Expandir';
+    }
+}
         function toggleSecaoEstoque() {
     const conteudo = document.getElementById('conteudo-secao-estoque');
     const btnTexto = document.getElementById('btn-texto-estoque');
