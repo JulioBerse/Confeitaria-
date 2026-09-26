@@ -114,3 +114,38 @@ app.post('/api/receitas', async (req, res) => {
 app.listen(port, () => {
   console.log(`Servidor a correr em http://localhost:${port}`);
 });
+
+// Rota para salvar um novo orçamento
+app.post('/api/orcamentos', async (req, res) => {
+    try {
+        const { cliente, descricao, valor } = req.body;
+        const novo = await pool.query(
+            'INSERT INTO orcamentos (cliente, descricao, valor, status) VALUES ($1, $2, $3, $4) RETURNING *',
+            [cliente, descricao, valor, 'aberto']
+        );
+        res.json(novo.rows[0]);
+    } catch (err) {
+        res.status(500).send('Erro ao salvar orçamento');
+    }
+});
+
+// Rota para listar apenas os orçamentos em aberto
+app.get('/api/orcamentos', async (req, res) => {
+    try {
+        const lista = await pool.query("SELECT * FROM orcamentos WHERE status = 'aberto' ORDER BY id DESC");
+        res.json(lista.rows);
+    } catch (err) {
+        res.status(500).send('Erro ao buscar orçamentos');
+    }
+});
+
+// Rota para apagar ou mudar o status para concluído/cancelado
+app.delete('/api/orcamentos/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query('DELETE FROM orcamentos WHERE id = $1', [id]);
+        res.json({ mensagem: 'Orçamento removido com sucesso!' });
+    } catch (err) {
+        res.status(500).send('Erro ao remover orçamento');
+    }
+});

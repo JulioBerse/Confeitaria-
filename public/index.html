@@ -83,22 +83,30 @@
             </div>
         </div>
 
-        <!-- ================= MÓDULO 2: FICHAS TÉCNICAS (RECEITAS) ================= -->
-        <div id="secao-receitas" class="hidden space-y-6">
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h2 class="text-xl font-bold text-stone-800">Fichas Técnicas & Receitas</h2>
-                    <p class="text-xs text-stone-500 mt-1">Clique em uma receita para ver os detalhes ou cadastre uma nova.</p>
-                </div>
-                <button onclick="abrirModalNovaReceita()" class="bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
-                    + Nova Ficha Técnica
-                </button>
-            </div>
-
-            <div id="container-lista-receitas" class="space-y-3">
-                <div class="p-6 text-center text-stone-400 text-xs italic">Carregando receitas do Banco Neon...</div>
-            </div>
+      <!-- ================= MÓDULO 2: FICHAS TÉCNICAS (RECEITAS) ================= -->
+<div id="secao-receitas" class="hidden space-y-6">
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <h2 class="text-xl font-bold text-stone-800">Fichas Técnicas & Receitas</h2>
+            <p class="text-xs text-stone-500 mt-1">Clique em uma receita para ver os detalhes ou cadastre uma nova.</p>
         </div>
+        <div class="flex items-center gap-2">
+            <!-- Botão para fechar/abrir a lista -->
+            <button onclick="alternarListaReceitas()" id="btn-toggle-receitas" class="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold px-3 py-2.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
+                ▲ Minimizar
+            </button>
+            <!-- Botão de Nova Receita -->
+            <button onclick="abrirModalNovaReceita()" class="bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
+                + Nova Ficha Técnica
+            </button>
+        </div>
+    </div>
+
+    <!-- O contêiner que vai abrir e fechar -->
+    <div id="container-lista-receitas" class="space-y-3 transition-all duration-300">
+        <div class="p-6 text-center text-stone-400 text-xs italic">Carregando receitas do Banco Neon...</div>
+    </div>
+</div> 
 
         <!-- ================= MÓDULO 3: ORÇAMENTOS & CUSTOS ================= -->
         <div id="secao-orcamento" class="hidden space-y-6">
@@ -201,6 +209,23 @@
         </div>
     </div>
 
+    <div style="margin-top: 30px; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #f3d1dc;">
+    <h3 style="color: #8c5867; margin-top: 0; font-size: 16px;">Orçamentos em Aberto</h3>
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <thead>
+            <tr style="background-color: #fbe4ec; color: #6e424f; text-align: left;">
+                <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Cliente</th>
+                <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Descrição</th>
+                <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Valor</th>
+                <th style="padding: 8px; border-bottom: 2px solid #f3d1dc; text-align: center;">Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-orcamentos-abertos">
+            <tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Carregando orçamentos...</td></tr>
+        </tbody>
+    </table>
+</div>
+
     <!-- MODAL DE CADASTRO DE NOVA RECEITA -->
     <div id="modal-receita" class="fixed inset-0 bg-stone-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
@@ -272,12 +297,12 @@
 <!-- MÓDULO DO PDF -->
     <div id="conteudo-para-pdf" style="display: none; width: 750px; height: 1050px; padding: 25px 30px; font-family: 'Helvetica', 'Arial', sans-serif; color: #4a3b32; background: #ffffff; box-sizing: border-box; position: relative; overflow: hidden;">
         
-       <!-- TOPO COM A LOGO EM IMAGEM -->
+      <!-- TOPO COM TEXTO ESTILIZADO (GARANTIDO QUE NUNCA SOME) -->
         <div style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid #f3d1dc; padding-bottom: 10px;">
-            <img src="logo.svg" alt="Silvia Iamassaki Bolos e Doces" style="max-height: 95px; width: auto; display: block; margin: 0 auto 4px auto;" crossorigin="anonymous">
+            <h1 style="color: #8c5867; margin: 0 0 2px 0; font-size: 22px; font-family: serif; font-weight: bold; letter-spacing: 1px;">Silvia Iamassaki</h1>
             <p style="color: #7a6a63; font-size: 8px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 3px; font-weight: bold;">Bolos e Doces Artesanais</p>
             <div style="display: inline-block; background: #fbe4ec; color: #8c5867; padding: 2px 12px; border-radius: 20px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; border: 1px solid #f3d1dc;">Orçamento</div>
-        </div> 
+        </div>
 
         <!-- DADOS DO CLIENTE E DESCRIÇÃO -->
         <div style="display: flex; justify-content: space-between; margin-bottom: 12px; background: #fcf8f9; padding: 8px 12px; border-radius: 6px; border: 1px solid #f3d1dc; font-size: 11px;">
@@ -592,6 +617,17 @@
             atualizarTabelaItensReceitaModal();
         }
 
+        function alternarVisibilidadeFicha() {
+            const container = document.getElementById('container-ficha-tecnica'); // Substitua pelo ID real da div da sua ficha técnica
+            if (!container) return;
+            
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
         async function salvarReceitaCompleta() {
             const nome = document.getElementById('rec-nome').value.trim();
             const rendimento = parseFloat(document.getElementById('rec-rendimento').value);
@@ -630,6 +666,21 @@
                 const res = await fetch(`/api/receitas/${id}`, { method: 'DELETE' });
                 if (res.ok) carregarReceitas();
             } catch (e) { console.error(e); }
+        }
+
+        function alternarListaReceitas() {
+            const container = document.getElementById('container-lista-receitas');
+            const botao = document.getElementById('btn-toggle-receitas');
+            
+            if (!container) return;
+
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                botao.innerHTML = '▲ Minimizar';
+            } else {
+                container.style.display = 'none';
+                botao.innerHTML = '▼ Expandir';
+            }
         }
 
         // ---------- ORÇAMENTOS ----------
@@ -739,7 +790,56 @@
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', () => atualizarTabelaPedidoAdmin());
         });
+        // ---------- ORÇAMENTOS EM ABERTO ----------
+        // ---------- ORÇAMENTOS EM ABERTO ----------
+        async function carregarOrcamentosAbertos() {
+            try {
+                const res = await fetch('/api/orcamentos');
+                if (!res.ok) return;
+                const dados = await res.json();
+                const tbody = document.getElementById('tabela-orcamentos-abertos');
+                if (!tbody) return;
 
+                tbody.innerHTML = '';
+                if (dados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Nenhum orçamento em aberto.</td></tr>';
+                    return;
+                }
+
+                dados.forEach(orc => {
+                    const valorFormatado = parseFloat(orc.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #f3d1dc';
+                    tr.innerHTML = `
+                        <td style="padding: 8px; color: #333;">${orc.cliente}</td>
+                        <td style="padding: 8px; color: #555;">${orc.descricao}</td>
+                        <td style="padding: 8px; text-align: right; font-weight: bold; color: #333;">${valorFormatado}</td>
+                        <td style="padding: 8px; text-align: center;">
+                            <button onclick="concluirOrcamento(${orc.id})" style="background: #8c5867; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Concluir / Apagar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error('Erro ao carregar orçamentos:', e);
+            }
+        }
+
+        async function concluirOrcamento(id) {
+            if (confirm('Deseja realmente concluir e remover este orçamento da lista?')) {
+                try {
+                    const res = await fetch(`/api/orcamentos/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        carregarOrcamentosAbertos();
+                    } else {
+                        alert('Erro ao apagar orçamento.');
+                    }
+                } catch (e) {
+                    console.error('Erro ao excluir:', e);
+                }
+            }
+        }
+       
         // ---------- GERAR PDF ORÇAMENTO ----------
         function gerarPDFOrcamento() {
             const inputCliente = document.getElementById('input-cliente');
@@ -773,7 +873,7 @@
 
             elemento.style.display = 'block';
 
-       const opt = {
+            const opt = {
                 margin:       [5, 5, 5, 5],
                 filename:     nomeArquivo,
                 image:        { type: 'jpeg', quality: 0.98 },
@@ -790,16 +890,50 @@
                 }
             };
 
-            html2pdf().from(elemento).set(opt).save().then(() => {
+            // Dispara a geração do PDF e, assim que termina, salva no Banco Neon e atualiza a tela
+            html2pdf().from(elemento).set(opt).save().then(async () => {
                 elemento.style.display = 'none';
+
+                try {
+                    // Pega o valor numérico limpo (ex: "R$ 150,50" vira 150.50)
+                    const valorTexto = resumoPrecoSugerido ? resumoPrecoSugerido.textContent : '0';
+                    const valorLimpo = parseFloat(
+                        valorTexto.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()
+                    ) || 0;
+
+                    const descricaoTexto = inputPedido ? (inputPedido.value || 'Encomenda de Bolos e Doces') : 'Encomenda';
+
+                    // Envia para o backend salvar no Neon
+                    const resposta = await fetch('/api/orcamentos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            cliente: nomeCliente,
+                            descricao: descricaoTexto,
+                            valor: valorLimpo
+                        })
+                    });
+
+                    if (resposta.ok) {
+                        console.log('Orçamento salvo no Neon com sucesso!');
+                        carregarOrcamentosAbertos(); // Atualiza a tabela na tela imediatamente
+                    } else {
+                        console.error('Erro do servidor ao salvar orçamento.');
+                    }
+                } catch (err) {
+                    console.error("Erro de conexão ao salvar orçamento no banco:", err);
+                }
+
             }).catch(err => {
                 console.error("Erro ao gerar PDF:", err);
                 elemento.style.display = 'none';
             });
         }
 
-        // Iniciar carregando a primeira aba
+        
+      // Inicialização
         carregarTabelaEstoque();
+        carregarOrcamentosAbertos();
     </script>
 </body>
 </html>
