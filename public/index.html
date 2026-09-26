@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Silvia Iamassaki - Bolos e Doces Artesanais</title>
+    <!-- Link para o Manifesto do PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#9f1239">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -92,7 +95,6 @@
                 </button>
             </div>
 
-            <!-- Lista e Cards Detalhados de Receitas -->
             <div id="container-lista-receitas" class="space-y-3">
                 <div class="p-6 text-center text-stone-400 text-xs italic">Carregando receitas do Banco Neon...</div>
             </div>
@@ -268,61 +270,70 @@
     </footer>
 
     <!-- MÓDULO DO PDF -->
-    <div id="conteudo-para-pdf" style="display: none; width: 794px; min-height: 1123px; padding: 50px; font-family: 'Helvetica', 'Arial', sans-serif; color: #292524; background: #ffffff; box-sizing: border-box; position: relative;">
-        <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #f43f5e; padding-bottom: 20px;">
-            <h2 style="color: #9f1239; margin: 0; font-size: 30px; font-family: serif; font-weight: bold;">Silvia Iamassaki</h2>
-            <p style="color: #78716c; font-size: 11px; margin: 6px 0 12px 0; text-transform: uppercase; letter-spacing: 3px;">Bolos e Doces Artesanais</p>
-            <div style="display: inline-block; background: #ffe4e6; color: #9f1239; padding: 5px 22px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Orçamento</div>
+    <div id="conteudo-para-pdf" style="display: none; width: 794px; min-height: 1123px; padding: 40px; font-family: 'Helvetica', 'Arial', sans-serif; color: #292524; background: #ffffff; box-sizing: border-box; position: relative;">
+        <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #f43f5e; padding-bottom: 15px;">
+            <h2 style="color: #9f1239; margin: 0; font-size: 26px; font-family: serif; font-weight: bold;">Silvia Iamassaki</h2>
+            <p style="color: #78716c; font-size: 10px; margin: 4px 0 8px 0; text-transform: uppercase; letter-spacing: 3px;">Bolos e Doces Artesanais</p>
+            <div style="display: inline-block; background: #ffe4e6; color: #9f1239; padding: 4px 18px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Orçamento</div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; margin-bottom: 25px; background: #fafaf9; padding: 15px; border-radius: 8px; border: 1px solid #e7e5e4; font-size: 13px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; background: #fafaf9; padding: 12px; border-radius: 8px; border: 1px solid #e7e5e4; font-size: 12px;">
             <div>
-                <span style="color: #78716c; text-transform: uppercase; font-size: 10px; font-weight: bold; display: block;">Cliente:</span>
-                <strong id="pdf-cliente" style="color: #1c1917; font-size: 15px;">-</strong>
+                <span style="color: #78716c; text-transform: uppercase; font-size: 9px; font-weight: bold; display: block;">Cliente:</span>
+                <strong id="pdf-cliente" style="color: #1c1917; font-size: 14px;">-</strong>
             </div>
             <div style="text-align: right;">
-                <span style="color: #78716c; text-transform: uppercase; font-size: 10px; font-weight: bold; display: block;">Descrição do Pedido:</span>
-                <strong id="pdf-descricao" style="color: #1c1917; font-size: 15px;">-</strong>
+                <span style="color: #78716c; text-transform: uppercase; font-size: 9px; font-weight: bold; display: block;">Descrição do Pedido:</span>
+                <strong id="pdf-descricao" style="color: #1c1917; font-size: 14px;">-</strong>
             </div>
         </div>
 
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px;">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;">
             <thead>
                 <tr style="background-color: #f5f5f4; color: #44403c; text-align: left;">
-                    <th style="padding: 10px 12px; border-bottom: 2px solid #d6d3d1; font-weight: bold;">DESCRIÇÃO DO PRODUTO / SERVIÇO</th>
-                    <th style="padding: 10px 12px; border-bottom: 2px solid #d6d3d1; font-weight: bold; text-align: center; width: 100px;">QTD</th>
-                    <th style="padding: 10px 12px; border-bottom: 2px solid #d6d3d1; font-weight: bold; text-align: right; width: 130px;">VALOR TOTAL</th>
+                    <th style="padding: 8px 10px; border-bottom: 2px solid #d6d3d1; font-weight: bold;">DESCRIÇÃO DO PRODUTO / SERVIÇO</th>
+                    <th style="padding: 8px 10px; border-bottom: 2px solid #d6d3d1; font-weight: bold; text-align: center; width: 90px;">QTD</th>
+                    <th style="padding: 8px 10px; border-bottom: 2px solid #d6d3d1; font-weight: bold; text-align: right; width: 120px;">VALOR TOTAL</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td style="padding: 15px 12px; border-bottom: 1px solid #e7e5e4; color: #292524;" id="pdf-item-principal">-</td>
-                    <td style="padding: 15px 12px; border-bottom: 1px solid #e7e5e4; color: #292524; text-align: center;">1 Un</td>
-                    <td style="padding: 15px 12px; border-bottom: 1px solid #e7e5e4; color: #292524; text-align: right; font-weight: bold;" id="pdf-valor-item-principal">-</td>
+                    <td style="padding: 12px 10px; border-bottom: 1px solid #e7e5e4; color: #292524;" id="pdf-item-principal">-</td>
+                    <td style="padding: 12px 10px; border-bottom: 1px solid #e7e5e4; color: #292524; text-align: center;">1 Un</td>
+                    <td style="padding: 12px 10px; border-bottom: 1px solid #e7e5e4; color: #292524; text-align: right; font-weight: bold;" id="pdf-valor-item-principal">-</td>
                 </tr>
             </tbody>
         </table>
 
-        <div style="background-color: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="background-color: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
             <div>
-                <p style="font-size: 11px; text-transform: uppercase; color: #881337; margin: 0 0 3px 0; font-weight: bold; letter-spacing: 1px;">Condições:</p>
-                <p style="font-size: 12px; color: #44403c; margin: 0;">Validade da proposta: 7 dias úteis.</p>
+                <p style="font-size: 10px; text-transform: uppercase; color: #881337; margin: 0 0 2px 0; font-weight: bold; letter-spacing: 1px;">Condições:</p>
+                <p style="font-size: 11px; color: #44403c; margin: 0;">Validade da proposta: 7 dias úteis.</p>
             </div>
             <div style="text-align: right;">
-                <p style="font-size: 11px; text-transform: uppercase; color: #881337; margin: 0 0 3px 0; font-weight: bold; letter-spacing: 1px;">Valor Total da Proposta:</p>
-                <p style="font-size: 26px; font-weight: bold; color: #9f1239; margin: 0;" id="pdf-valor-total">R$ 0,00</p>
+                <p style="font-size: 10px; text-transform: uppercase; color: #881337; margin: 0 0 2px 0; font-weight: bold; letter-spacing: 1px;">Valor Total da Proposta:</p>
+                <p style="font-size: 22px; font-weight: bold; color: #9f1239; margin: 0;" id="pdf-valor-total">R$ 0,00</p>
             </div>
         </div>
 
-        <div style="position: absolute; bottom: 40px; left: 50px; right: 50px; text-align: center; border-top: 1px dashed #d6d3d1; padding-top: 15px;">
-            <p style="font-size: 12px; color: #44403c; margin: 0 0 3px 0; font-weight: 500;">Agradecemos por contar conosco!</p>
-            <p style="font-size: 13px; color: #9f1239; font-weight: bold; margin: 0 0 2px 0;">Silvia Iamassaki</p>
-            <p style="font-size: 10px; color: #78716c; margin: 0;">Telefone / WhatsApp: (66) 99671-8582</p>
+        <div style="position: absolute; bottom: 30px; left: 40px; right: 40px; text-align: center; border-top: 1px dashed #d6d3d1; padding-top: 12px;">
+            <p style="font-size: 11px; color: #44403c; margin: 0 0 2px 0; font-weight: 500;">Agradecemos por contar conosco!</p>
+            <p style="font-size: 12px; color: #9f1239; font-weight: bold; margin: 0 0 2px 0;">Silvia Iamassaki</p>
+            <p style="font-size: 9px; color: #78716c; margin: 0;">Telefone / WhatsApp: (66) 99671-8582</p>
         </div>
     </div>
 
     <!-- SCRIPTS -->
     <script>
+        // Registro do Service Worker para o PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((reg) => console.log('Service Worker registrado com escopo:', reg.scope))
+                    .catch((err) => console.log('Erro ao registrar Service Worker:', err));
+            });
+        }
+
         let ingredientesCache = [];
         let itensReceitaAtual = [];
 
@@ -420,7 +431,7 @@
             } catch (e) { console.error(e); }
         }
 
-        // ---------- RECEITAS / FICHAS TÉCNICAS (LISTA + EXPANDIR CARD) ----------
+        // ---------- RECEITAS ----------
         async function carregarReceitas() {
             const container = document.getElementById('container-lista-receitas');
             container.innerHTML = '<div class="p-6 text-center text-stone-400 text-xs italic">Carregando receitas do Banco Neon...</div>';
@@ -469,115 +480,79 @@
                         const rendimento = parseFloat(rec.rendimento) || 1;
                         const custoUnitario = custoTotal / rendimento;
 
-                        // 1. Linha da Lista Resumida
-                        const itemLista = document.createElement('div');
-                        itemLista.className = 'bg-white p-4 rounded-xl shadow-xs border border-stone-200 flex justify-between items-center cursor-pointer hover:bg-rose-50/50 transition';
-                        itemLista.innerHTML = `
-                            <div>
-                                <h3 class="font-bold text-stone-800 text-base">${rec.nome}</h3>
-                                <p class="text-xs text-stone-500">Rendimento: ${rendimento} ${rec.unidade_rendimento || 'g'}</p>
-                            </div>
-                            <div class="flex items-center gap-4">
-                                <span class="text-rose-800 font-bold text-xs uppercase bg-rose-50 px-3 py-1 rounded-full">Custo Total: R$ ${custoTotal.toFixed(2)}</span>
-                                <span class="text-stone-400 text-xs font-semibold">▶ Ver Detalhes</span>
-                            </div>
-                        `;
-
-                        // 2. Card Detalhado (Oculto inicialmente)
-                        const detalheCard = document.createElement('div');
-                        detalheCard.className = 'hidden bg-white border border-rose-200 rounded-xl p-5 shadow-sm space-y-4 my-2 transition-all';
-                        detalheCard.innerHTML = `
-                            <div class="flex justify-between items-start border-b pb-3">
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'bg-white p-4 rounded-xl shadow-xs border border-stone-200 space-y-2';
+                        itemDiv.innerHTML = `
+                            <div class="flex justify-between items-center">
                                 <div>
-                                    <h3 class="font-bold text-rose-900 text-lg">${rec.nome}</h3>
-                                    <span class="text-xs text-stone-500">Rendimento: ${rendimento} ${rec.unidade_rendimento || 'g'}</span>
+                                    <h3 class="font-bold text-stone-800 text-base">${rec.nome}</h3>
+                                    <p class="text-xs text-stone-500">Rendimento: ${rendimento} ${rec.unidade_rendimento || 'g'} | Custo Total: R$ ${custoTotal.toFixed(2)} | Custo Unitário: R$ ${custoUnitario.toFixed(4)} por ${rec.unidade_rendimento || 'g'}</p>
                                 </div>
-                                <button onclick="fecharDetalheReceita(this)" class="text-stone-400 hover:text-stone-700 text-xs font-bold px-2.5 py-1 bg-stone-100 rounded">✕ Fechar</button>
+                                <button onclick="deletarReceita(${rec.id})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold px-2.5 py-1 bg-rose-50 rounded transition">Excluir</button>
                             </div>
-                            <div>
-                                <span class="text-xs font-bold text-stone-600 uppercase tracking-wider block mb-1">Ingredientes:</span>
-                                <div class="bg-stone-50 p-3 rounded-lg max-h-40 overflow-y-auto space-y-1">
-                                    ${itensHtml}
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center pt-2 text-xs font-semibold text-stone-700 border-t">
-                                <span class="text-rose-900 font-bold">Custo Total: R$ ${custoTotal.toFixed(2)}</span>
-                                <span>Custo por ${rec.unidade_rendimento || 'g'}: <strong class="text-rose-800">R$ ${custoUnitario.toFixed(4)}</strong></span>
+                            <div class="bg-stone-50 p-3 rounded-lg border border-stone-100 mt-2">
+                                <span class="text-[10px] uppercase font-bold tracking-widest text-stone-400 block mb-1">Ingredientes da Receita:</span>
+                                ${itensHtml}
                             </div>
                         `;
-
-                        // Alternar visão ao clicar
-                        itemLista.addEventListener('click', () => {
-                            itemLista.classList.add('hidden');
-                            detalheCard.classList.remove('hidden');
-                        });
-
-                        container.appendChild(itemLista);
-                        container.appendChild(detalheCard);
+                        container.appendChild(itemDiv);
                     });
                 }
             } catch (e) { console.error(e); }
         }
 
-        function fecharDetalheReceita(btn) {
-            const card = btn.closest('div').parentElement;
-            const linhaLista = card.previousElementSibling;
-            card.classList.add('hidden');
-            linhaLista.classList.remove('hidden');
-        }
-
-        async function abrirModalNovaReceita() {
+        function abrirModalNovaReceita() {
             document.getElementById('modal-receita').classList.remove('hidden');
+            document.getElementById('rec-nome').value = '';
+            document.getElementById('rec-rendimento').value = '';
             itensReceitaAtual = [];
             atualizarTabelaItensReceitaModal();
-            
-            try {
-                if (ingredientesCache.length === 0) {
-                    const res = await fetch('/api/ingredientes');
-                    if (res.ok) ingredientesCache = await res.json();
-                }
-                const select = document.getElementById('rec-select-ingrediente');
-                select.innerHTML = '<option value="">Selecione um ingrediente...</option>';
-                ingredientesCache.forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item.id;
-                    opt.textContent = `${item.nome} (${item.unidade})`;
-                    opt.dataset.nome = item.nome;
-                    opt.dataset.unidade = item.unidade;
-                    select.appendChild(opt);
-                });
-            } catch (e) { console.error(e); }
+            carregarSelectIngredientesModal();
         }
 
         function fecharModalNovaReceita() {
             document.getElementById('modal-receita').classList.add('hidden');
-            document.getElementById('rec-nome').value = '';
-            document.getElementById('rec-rendimento').value = '';
+        }
+
+        async function carregarSelectIngredientesModal() {
+            const select = document.getElementById('rec-select-ingrediente');
+            select.innerHTML = '<option value="">Selecione um ingrediente...</option>';
+            if (ingredientesCache.length === 0) {
+                const res = await fetch('/api/ingredientes');
+                if (res.ok) ingredientesCache = await res.json();
+            }
+            ingredientesCache.forEach(ing => {
+                const opt = document.createElement('option');
+                opt.value = ing.id;
+                opt.textContent = `${ing.nome} (${ing.unidade})`;
+                select.appendChild(opt);
+            });
         }
 
         function adicionarIngredienteReceitaForm() {
             const select = document.getElementById('rec-select-ingrediente');
-            const qtdInput = document.getElementById('rec-qtd-ingrediente');
-            
-            if (!select.value) { alert('Selecione um ingrediente.'); return; }
-            const qtd = parseFloat(qtdInput.value);
-            if (!qtd || qtd <= 0) { alert('Informe uma quantidade válida.'); return; }
+            const ingId = parseInt(select.value);
+            const qtd = parseFloat(document.getElementById('rec-qtd-ingrediente').value);
 
-            const opt = select.options[select.selectedIndex];
+            if (!ingId || !qtd || qtd <= 0) {
+                alert('Selecione um ingrediente e informe uma quantidade válida.');
+                return;
+            }
+
+            const ingData = ingredientesCache.find(x => x.id === ingId);
+            if (!ingData) return;
+
             itensReceitaAtual.push({
-                ingrediente_id: parseInt(select.value),
-                nome: opt.dataset.nome,
-                unidade: opt.dataset.unidade,
-                quantidade: qtd
+                ingrediente_id: ingId,
+                nome: ingData.nome,
+                unidade: ingData.unidade,
+                quantidade: qtd,
+                preco_embalagem: ingData.preco_embalagem,
+                quantidade_embalagem: ingData.quantidade_embalagem
             });
 
-            qtdInput.value = '';
+            document.getElementById('rec-qtd-ingrediente').value = '';
             select.value = '';
-            atualizarTabelaItensReceitaModal();
-        }
-
-        function removerIngredienteReceitaForm(index) {
-            itensReceitaAtual.splice(index, 1);
             atualizarTabelaItensReceitaModal();
         }
 
@@ -588,22 +563,26 @@
                 return;
             }
             tbody.innerHTML = '';
-            itensReceitaAtual.forEach((item, idx) => {
-                const ingData = ingredientesCache.find(x => x.id === item.ingrediente_id);
-                let custoParcial = 0;
-                if (ingData) {
-                    custoParcial = (parseFloat(ingData.preco_embalagem) / parseFloat(ingData.quantidade_embalagem)) * item.quantidade;
-                }
+            itensReceitaAtual.forEach((item, index) => {
+                const precoEmb = parseFloat(item.preco_embalagem) || 0;
+                const qtdEmb = parseFloat(item.quantidade_embalagem) || 1;
+                const custoParcial = (precoEmb / qtdEmb) * item.quantidade;
+
                 const tr = document.createElement('tr');
                 tr.className = 'border-b border-stone-100';
                 tr.innerHTML = `
                     <td class="p-2 font-medium text-stone-800">${item.nome}</td>
                     <td class="p-2 text-center text-stone-600">${item.quantidade} ${item.unidade}</td>
-                    <td class="p-2 text-right text-stone-800 font-semibold">R$ ${custoParcial.toFixed(2)}</td>
-                    <td class="p-2 text-center"><button onclick="removerIngredienteReceitaForm(${idx})" class="text-red-500 font-bold hover:text-red-700">×</button></td>
+                    <td class="p-2 text-right text-stone-600">R$ ${custoParcial.toFixed(2)}</td>
+                    <td class="p-2 text-center"><button type="button" onclick="removerItemReceitaModal(${index})" class="text-rose-600 font-bold hover:underline">X</button></td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function removerItemReceitaModal(index) {
+            itensReceitaAtual.splice(index, 1);
+            atualizarTabelaItensReceitaModal();
         }
 
         async function salvarReceitaCompleta() {
@@ -611,189 +590,209 @@
             const rendimento = parseFloat(document.getElementById('rec-rendimento').value);
             const unidade_rendimento = document.getElementById('rec-unidade').value;
 
-            if (!nome || !rendimento) { alert('Preencha o nome da receita e o rendimento.'); return; }
-            if (itensReceitaAtual.length === 0) { alert('Adicione pelo menos um ingrediente à receita.'); return; }
+            if (!nome || !rendimento || itensReceitaAtual.length === 0) {
+                alert('Preencha o nome, rendimento e adicione pelo menos um ingrediente.');
+                return;
+            }
+
+            const payload = {
+                nome,
+                rendimento,
+                unidade_rendimento,
+                itens: itensReceitaAtual.map(i => ({ ingrediente_id: i.ingrediente_id, quantidade: i.quantidade }))
+            };
 
             try {
-                const response = await fetch('/api/receitas', {
+                const res = await fetch('/api/receitas', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nome, rendimento, unidade_rendimento, itens: itensReceitaAtual })
+                    body: JSON.stringify(payload)
                 });
-
-                if (response.ok) {
+                if (res.ok) {
                     fecharModalNovaReceita();
                     carregarReceitas();
-                } else { alert('Erro ao salvar a receita no Banco Neon.'); }
+                } else {
+                    alert('Erro ao salvar receita.');
+                }
             } catch (e) { console.error(e); }
         }
 
-        // ---------- ORÇAMENTO ----------
-        async function carregarSelectOrcamento() {
+        async function deletarReceita(id) {
+            if (!confirm('Deseja realmente excluir esta ficha técnica?')) return;
             try {
-                if (ingredientesCache.length === 0) {
-                    const response = await fetch('/api/ingredientes');
-                    if (response.ok) ingredientesCache = await response.json();
-                }
-                const select = document.getElementById('select-ingrediente');
-                select.innerHTML = '<option value="">Selecione um ingrediente...</option>';
-                ingredientesCache.forEach(item => {
-                    const preco = parseFloat(item.preco_embalagem) || 0;
-                    const qtdEmb = parseFloat(item.quantidade_embalagem) || 1;
-                    const option = document.createElement('option');
-                    option.value = item.id;
-                    option.textContent = `${item.nome} (R$ ${preco.toFixed(2)} / ${qtdEmb} ${item.unidade})`;
-                    option.dataset.nome = item.nome;
-                    option.dataset.preco = preco;
-                    option.dataset.qtdEmb = qtdEmb;
-                    option.dataset.unidade = item.unidade;
-                    select.appendChild(option);
-                });
-            } catch (error) { console.error(error); }
+                const res = await fetch(`/api/receitas/${id}`, { method: 'DELETE' });
+                if (res.ok) carregarReceitas();
+            } catch (e) { console.error(e); }
+        }
+
+        // ---------- ORÇAMENTOS ----------
+        let itensPedidoAtual = [];
+
+        async function carregarSelectOrcamento() {
+            const select = document.getElementById('select-ingrediente');
+            select.innerHTML = '<option value="">Selecione um ingrediente do estoque...</option>';
+            if (ingredientesCache.length === 0) {
+                const res = await fetch('/api/ingredientes');
+                if (res.ok) ingredientesCache = await res.json();
+            }
+            ingredientesCache.forEach(ing => {
+                const opt = document.createElement('option');
+                opt.value = ing.id;
+                opt.textContent = `${ing.nome} (${ing.unidade})`;
+                select.appendChild(opt);
+            });
         }
 
         function adicionarInsumoPedido() {
             const select = document.getElementById('select-ingrediente');
-            const qtdInput = document.getElementById('input-qtd-ingrediente');
-            if (!select.value) { alert('Selecione um ingrediente.'); return; }
-            const qtd = parseFloat(qtdInput.value);
-            if (!qtd || qtd <= 0) { alert('Informe uma quantidade válida.'); return; }
+            const ingId = parseInt(select.value);
+            const qtd = parseFloat(document.getElementById('input-qtd-ingrediente').value);
 
-            const selectedOption = select.options[select.selectedIndex];
-            const nomeIngrediente = selectedOption.dataset.nome;
-            const precoTotal = parseFloat(selectedOption.dataset.preco) || 0;
-            const qtdEmb = parseFloat(selectedOption.dataset.qtdEmb) || 1;
-            const unidade = selectedOption.dataset.unidade;
-
-            const custoUnitario = precoTotal / qtdEmb;
-            const custoParcial = qtd * custoUnitario;
-
-            const tbody = document.getElementById('corpo-tabela-admin');
-            const nenhumMsg = document.getElementById('nenhum-item-msg');
-            if (nenhumMsg) nenhumMsg.remove();
-
-            const tr = document.createElement('tr');
-            tr.className = 'border-b border-stone-100 item-linha';
-            tr.dataset.custo = custoParcial;
-            tr.innerHTML = `
-                <td class="p-2.5 text-stone-800 font-medium item-nome">${nomeIngrediente}</td>
-                <td class="p-2.5 text-stone-600 text-center item-qtd">${qtd} ${unidade}</td>
-                <td class="p-2.5 text-stone-800 text-right font-semibold item-subtotal">R$ ${custoParcial.toFixed(2).replace('.', ',')}</td>
-                <td class="p-2.5 text-center"><button onclick="removerInsumo(this)" class="text-red-500 font-bold hover:text-red-700 text-lg">×</button></td>
-            `;
-            tbody.appendChild(tr);
-            qtdInput.value = '';
-            select.value = '';
-            recalcularTotais();
-        }
-
-        function removerInsumo(btn) {
-            btn.closest('tr').remove();
-            const tbody = document.getElementById('corpo-tabela-admin');
-            if (tbody.querySelectorAll('tr').length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-stone-400 text-xs italic" id="nenhum-item-msg">Nenhum ingrediente adicionado ao pedido.</td></tr>`;
+            if (!ingId || !qtd || qtd <= 0) {
+                alert('Selecione um ingrediente e informe a quantidade.');
+                return;
             }
-            recalcularTotais();
+
+            const ingData = ingredientesCache.find(x => x.id === ingId);
+            if (!ingData) return;
+
+            itensPedidoAtual.push({
+                ingrediente_id: ingId,
+                nome: ingData.nome,
+                unidade: ingData.unidade,
+                quantidade: qtd,
+                preco_embalagem: ingData.preco_embalagem,
+                quantidade_embalagem: ingData.quantidade_embalagem
+            });
+
+            document.getElementById('input-qtd-ingrediente').value = '';
+            select.value = '';
+            atualizarTabelaPedidoAdmin();
         }
 
-        function recalcularTotais() {
-            let somaInsumos = 0;
-            document.querySelectorAll('.item-linha').forEach(linha => {
-                somaInsumos += parseFloat(linha.dataset.custo) || 0;
+        function atualizarTabelaPedidoAdmin() {
+            const tbody = document.getElementById('corpo-tabela-admin');
+            if (itensPedidoAtual.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 text-xs italic">Nenhum ingrediente adicionado ao pedido.</td></tr>';
+                atualizarTotaisOrcamento(0);
+                return;
+            }
+
+            tbody.innerHTML = '';
+            let custoTotalInsumos = 0;
+
+            itensPedidoAtual.forEach((item, index) => {
+                const precoEmb = parseFloat(item.preco_embalagem) || 0;
+                const qtdEmb = parseFloat(item.quantidade_embalagem) || 1;
+                const custoParcial = (precoEmb / qtdEmb) * item.quantidade;
+                custoTotalInsumos += custoParcial;
+
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-stone-100';
+                tr.innerHTML = `
+                    <td class="p-2.5 font-medium text-stone-800">${item.nome}</td>
+                    <td class="p-2.5 text-center text-stone-600">${item.quantidade} ${item.unidade}</td>
+                    <td class="p-2.5 text-right text-stone-600">R$ ${custoParcial.toFixed(2)}</td>
+                    <td class="p-2.5 text-center"><button onclick="removerInsumoPedido(${index})" class="text-rose-600 font-bold hover:underline">X</button></td>
+                `;
+                tbody.appendChild(tr);
             });
+
+            atualizarTotaisOrcamento(custoTotalInsumos);
+        }
+
+        function removerInsumoPedido(index) {
+            itensPedidoAtual.splice(index, 1);
+            atualizarTabelaPedidoAdmin();
+        }
+
+        function atualizarTotaisOrcamento(custoInsumos) {
             const horas = parseFloat(document.getElementById('input-horas').value) || 0;
             const valorHora = parseFloat(document.getElementById('input-valor-hora').value) || 0;
-            const custosOpPercent = parseFloat(document.getElementById('input-custos-op').value) || 0;
-            const margemLucroPercent = parseFloat(document.getElementById('input-margem').value) || 0;
+            const custosOpPct = parseFloat(document.getElementById('input-custos-op').value) || 0;
+            const margemPct = parseFloat(document.getElementById('input-margem').value) || 0;
             const embalagem = parseFloat(document.getElementById('input-embalagem').value) || 0;
             const entrega = parseFloat(document.getElementById('input-entrega').value) || 0;
 
             const maoDeObra = horas * valorHora;
-            const custoBase = somaInsumos + maoDeObra + embalagem + entrega;
-            const valorComCustosOp = custoBase * (1 + (custosOpPercent / 100));
-            const precoSugerido = valorComCustosOp * (1 + (margemLucroPercent / 100));
+            const custoOperacional = (custoInsumos * custosOpPct) / 100;
+            const custoTotalProducao = custoInsumos + maoDeObra + custoOperacional + embalagem + entrega;
+            
+            let precoSugerido = custoTotalProducao;
+            if (margemPct > 0) {
+                precoSugerido = custoTotalProducao / (1 - (margemPct / 100));
+            }
 
-            document.getElementById('resumo-custo-insumos').innerText = somaInsumos.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('resumo-preco-sugerido').innerText = precoSugerido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('resumo-custo-insumos').textContent = `R$ ${custoInsumos.toFixed(2).replace('.', ',')}`;
+            document.getElementById('resumo-preco-sugerido').textContent = `R$ ${precoSugerido.toFixed(2).replace('.', ',')}`;
         }
 
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', recalcularTotais);
+        // Ouvintes para recalcular em tempo real ao alterar parâmetros
+        ['input-horas', 'input-valor-hora', 'input-custos-op', 'input-margem', 'input-embalagem', 'input-entrega'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', () => atualizarTabelaPedidoAdmin());
         });
 
+        // ---------- GERAR PDF ORÇAMENTO ----------
         function gerarPDFOrcamento() {
-    // 1. Pega o nome do cliente do input do formulário (confirme se o ID do seu input é 'cliente' ou 'nomeCliente')
-    const nomeClienteInput = document.getElementById('cliente') ? document.getElementById('cliente').value : 'orcamento';
-    
-    // Formata o nome para o arquivo (ex: "Maria Silva" vira "orcamento-maria-silvia.pdf")
-    const nomeFormatado = nomeClienteInput.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
-    const nomeArquivo = `${nomeFormatado || 'orcamento'}.pdf`;
+            const inputCliente = document.getElementById('input-cliente');
+            const nomeCliente = inputCliente && inputCliente.value.trim() !== '' ? inputCliente.value : 'cliente';
+            
+            const nomeFormatado = nomeCliente.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+            const nomeArquivo = `orcamento-${nomeFormatado}.pdf`;
 
-    const elemento = document.getElementById('pdf-orcamento'); // ID da div que contém o orçamento
+            const spanPdfCliente = document.getElementById('pdf-cliente');
+            const spanPdfDescricao = document.getElementById('pdf-descricao');
+            const spanPdfValorItem = document.getElementById('pdf-item-principal');
+            const spanPdfValorTotalItem = document.getElementById('pdf-valor-item-principal');
+            const spanPdfValorTotal = document.getElementById('pdf-valor-total');
+            const inputPedido = document.getElementById('input-pedido');
+            const resumoPrecoSugerido = document.getElementById('resumo-preco-sugerido');
 
-    // 2. Configurações para garantir 1 página e margens compactas
-    const opt = {
-        margin:       [2, 2, 2, 2], // Margens bem estreitas (em mm) para o rodapé não estourar
-        filename:     nomeArquivo,  // Nome dinâmico aplicado aqui!
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { 
-            scale: 2,         // Mantém a alta qualidade/nitidez
-            useCORS: true, 
-            letterRendering: true,
-            scrollY: 0
-        },
-        jsPDF:        { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'portrait' 
+            if (spanPdfCliente) spanPdfCliente.textContent = nomeCliente;
+            if (spanPdfDescricao) spanPdfDescricao.textContent = inputPedido ? inputPedido.value || 'Encomenda de Bolos e Doces' : '-';
+            if (spanPdfValorItem) spanPdfValorItem.textContent = inputPedido ? inputPedido.value || 'Produto Artesanal' : 'Produto Artesanal';
+            
+            const valorTotalTexto = resumoPrecoSugerido ? resumoPrecoSugerido.textContent : 'R$ 0,00';
+            if (spanPdfValorTotalItem) spanPdfValorTotalItem.textContent = valorTotalTexto;
+            if (spanPdfValorTotal) spanPdfValorTotal.textContent = valorTotalTexto;
+
+            const elemento = document.getElementById('conteudo-para-pdf');
+
+            if (!elemento) {
+                alert("Erro: Elemento do PDF não encontrado!");
+                return;
+            }
+
+            elemento.style.display = 'block';
+
+            const opt = {
+                margin:       [2, 2, 2, 2],
+                filename:     nomeArquivo,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    letterRendering: true,
+                    scrollY: 0
+                },
+                jsPDF:        { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
+            };
+
+            html2pdf().from(elemento).set(opt).save().then(() => {
+                elemento.style.display = 'none';
+            }).catch(err => {
+                console.error("Erro ao gerar PDF:", err);
+                elemento.style.display = 'none';
+            });
         }
-    };
 
-    // Executa a geração do PDF compactando o conteúdo para caber perfeitamente em 1 página
-    html2pdf().from(elemento).set(opt).save();
-}function gerarPDFOrcamento() {
-    // 1. Pega o nome do cliente do input do formulário (confirme se o ID do seu input é 'cliente' ou 'nomeCliente')
-    const nomeClienteInput = document.getElementById('cliente') ? document.getElementById('cliente').value : 'orcamento';
-    
-    // Formata o nome para o arquivo (ex: "Maria Silva" vira "orcamento-maria-silvia.pdf")
-    const nomeFormatado = nomeClienteInput.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
-    const nomeArquivo = `${nomeFormatado || 'orcamento'}.pdf`;
-
-    const elemento = document.getElementById('pdf-orcamento'); // ID da div que contém o orçamento
-
-    // 2. Configurações para garantir 1 página e margens compactas
-    const opt = {
-        margin:       [2, 2, 2, 2], // Margens bem estreitas (em mm) para o rodapé não estourar
-        filename:     nomeArquivo,  // Nome dinâmico aplicado aqui!
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { 
-            scale: 2,         // Mantém a alta qualidade/nitidez
-            useCORS: true, 
-            letterRendering: true,
-            scrollY: 0
-        },
-        jsPDF:        { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'portrait' 
-        }
-    };
-
-    // Executa a geração do PDF compactando o conteúdo para caber perfeitamente em 1 página
-    html2pdf().from(elemento).set(opt).save();
-}
-
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarTabelaEstoque();
-            carregarReceitas();
-        });
-        if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((reg) => console.log('Service Worker registrado com escopo:', reg.scope))
-            .catch((err) => console.log('Erro ao registrar Service Worker:', err));
-        });
-      }
+        // Iniciar carregando a primeira aba
+        carregarTabelaEstoque();
     </script>
 </body>
 </html>
