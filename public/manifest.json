@@ -1,0 +1,15 @@
+{
+  "name": "Silvia Iamassaki - Confeitaria",
+  "short_name": "Confeitaria",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#9f1239",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3076/3076897.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
