@@ -527,6 +527,22 @@ function alternarListaEstoque() {
             } catch (e) { console.error(e); }
         }
 
+        async function carregarSelectOrcamento() {
+            const select = document.getElementById('select-ingrediente');
+            select.innerHTML = '<option value="">Selecione um ingrediente do estoque...</option>';
+            if (ingredientesCache.length === 0) {
+                const res = await fetch('/api/ingredientes');
+                if (res.ok) ingredientesCache = await res.json();
+            }
+            ingredientesCache.forEach(ing => {
+                const opt = document.createElement('option');
+                opt.value = ing.id;
+                // Mudei de quantidade_atual para estoque_atual:
+                opt.textContent = `${ing.nome} (Estoque: ${parseFloat(ing.estoque_atual || 0).toFixed(2)} ${ing.unidade})`;
+                select.appendChild(opt);
+            });
+        }
+
         // ---------- RECEITAS ----------
         async function carregarReceitas() {
             const container = document.getElementById('container-lista-receitas');
@@ -750,20 +766,21 @@ function alternarListaEstoque() {
         // ---------- ORÇAMENTOS ----------
         let itensPedidoAtual = [];
 
-        async function carregarSelectOrcamento() {
+
+    async function carregarSelectOrcamento() {
             const select = document.getElementById('select-ingrediente');
             select.innerHTML = '<option value="">Selecione um ingrediente do estoque...</option>';
             if (ingredientesCache.length === 0) {
                 const res = await fetch('/api/ingredientes');
                 if (res.ok) ingredientesCache = await res.json();
             }
-           ingredientesCache.forEach(ing => {
-    const opt = document.createElement('option');
-    opt.value = ing.id;
-    // Exibe o nome e o estoque atual entre parênteses
-    opt.textContent = `${ing.nome} (Estoque: ${ing.quantidade_atual || 0} ${ing.unidade})`;
-    select.appendChild(opt);
-});
+            ingredientesCache.forEach(ing => {
+                const opt = document.createElement('option');
+                opt.value = ing.id;
+                // Mudei de quantidade_atual para estoque_atual:
+                opt.textContent = `${ing.nome} (Estoque: ${parseFloat(ing.estoque_atual || 0).toFixed(2)} ${ing.unidade})`;
+                select.appendChild(opt);
+            });
         }
 
         function adicionarInsumoPedido() {
