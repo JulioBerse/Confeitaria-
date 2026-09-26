@@ -270,56 +270,61 @@
     </footer>
 
 <!-- MÓDULO DO PDF -->
-    <div id="conteudo-para-pdf" style="display: none; width: 750px; height: 1050px; padding: 30px; font-family: 'Helvetica', 'Arial', sans-serif; color: #292524; background: #ffffff; box-sizing: border-box; position: relative; overflow: hidden;">
-        <div style="text-align: center; margin-bottom: 15px; border-bottom: 2px solid #f43f5e; padding-bottom: 10px;">
-            <h2 style="color: #9f1239; margin: 0; font-size: 24px; font-family: serif; font-weight: bold;">Silvia Iamassaki</h2>
-            <p style="color: #78716c; font-size: 9px; margin: 2px 0 6px 0; text-transform: uppercase; letter-spacing: 3px;">Bolos e Doces Artesanais</p>
-            <div style="display: inline-block; background: #ffe4e6; color: #9f1239; padding: 3px 15px; border-radius: 20px; font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Orçamento</div>
+    <div id="conteudo-para-pdf" style="display: none; width: 750px; height: 1050px; padding: 25px 30px; font-family: 'Helvetica', 'Arial', sans-serif; color: #4a3b32; background: #ffffff; box-sizing: border-box; position: relative; overflow: hidden;">
+        
+        <!-- TOPO COM A LOGO -->
+        <div style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid #f3d1dc; padding-bottom: 8px;">
+            <img src="logo.svg" alt="Silvia Tamassaki Bolos e Doces" style="max-height: 75px; width: auto; display: block; margin: 0 auto 4px auto;" crossorigin="anonymous">
+            <div style="display: inline-block; background: #fbe4ec; color: #8c5867; padding: 2px 12px; border-radius: 20px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; border: 1px solid #f3d1dc;">Orçamento</div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; background: #fafaf9; padding: 10px; border-radius: 6px; border: 1px solid #e7e5e4; font-size: 11px;">
+        <!-- DADOS DO CLIENTE E DESCRIÇÃO -->
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; background: #fcf8f9; padding: 8px 12px; border-radius: 6px; border: 1px solid #f3d1dc; font-size: 11px;">
             <div>
-                <span style="color: #78716c; text-transform: uppercase; font-size: 8px; font-weight: bold; display: block;">Cliente:</span>
-                <strong id="pdf-cliente" style="color: #1c1917; font-size: 13px;">-</strong>
+                <span style="color: #8c5867; text-transform: uppercase; font-size: 8px; font-weight: bold; display: block;">Cliente:</span>
+                <strong id="pdf-cliente" style="color: #4a3b32; font-size: 12px;">-</strong>
             </div>
             <div style="text-align: right;">
-                <span style="color: #78716c; text-transform: uppercase; font-size: 8px; font-weight: bold; display: block;">Descrição do Pedido:</span>
-                <strong id="pdf-descricao" style="color: #1c1917; font-size: 13px;">-</strong>
+                <span style="color: #8c5867; text-transform: uppercase; font-size: 8px; font-weight: bold; display: block;">Descrição do Pedido:</span>
+                <strong id="pdf-descricao" style="color: #4a3b32; font-size: 12px;">-</strong>
             </div>
         </div>
 
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11px;">
+        <!-- TABELA DE ITENS -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 11px;">
             <thead>
-                <tr style="background-color: #f5f5f4; color: #44403c; text-align: left;">
-                    <th style="padding: 6px 8px; border-bottom: 2px solid #d6d3d1; font-weight: bold;">DESCRIÇÃO DO PRODUTO / SERVIÇO</th>
-                    <th style="padding: 6px 8px; border-bottom: 2px solid #d6d3d1; font-weight: bold; text-align: center; width: 80px;">QTD</th>
-                    <th style="padding: 6px 8px; border-bottom: 2px solid #d6d3d1; font-weight: bold; text-align: right; width: 100px;">VALOR TOTAL</th>
+                <tr style="background-color: #fbe4ec; color: #6e424f; text-align: left;">
+                    <th style="padding: 6px 8px; border-bottom: 2px solid #f3d1dc; font-weight: bold;">DESCRIÇÃO DO PRODUTO / SERVIÇO</th>
+                    <th style="padding: 6px 8px; border-bottom: 2px solid #f3d1dc; font-weight: bold; text-align: center; width: 80px;">QTD</th>
+                    <th style="padding: 6px 8px; border-bottom: 2px solid #f3d1dc; font-weight: bold; text-align: right; width: 100px;">VALOR TOTAL</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td style="padding: 10px 8px; border-bottom: 1px solid #e7e5e4; color: #292524;" id="pdf-item-principal">-</td>
-                    <td style="padding: 10px 8px; border-bottom: 1px solid #e7e5e4; color: #292524; text-align: center;">1 Un</td>
-                    <td style="padding: 10px 8px; border-bottom: 1px solid #e7e5e4; color: #292524; text-align: right; font-weight: bold;" id="pdf-valor-item-principal">-</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #f3d1dc; color: #4a3b32;" id="pdf-item-principal">-</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #f3d1dc; color: #4a3b32; text-align: center;">1 Un</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #f3d1dc; color: #4a3b32; text-align: right; font-weight: bold;" id="pdf-valor-item-principal">-</td>
                 </tr>
             </tbody>
         </table>
 
-        <div style="background-color: #fff1f2; border: 1px solid #fecdd3; border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <!-- CONDIÇÕES E TOTAL -->
+        <div style="background-color: #fef6f8; border: 1px solid #f3d1dc; border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div>
-                <p style="font-size: 9px; text-transform: uppercase; color: #881337; margin: 0 0 2px 0; font-weight: bold; letter-spacing: 1px;">Condições:</p>
-                <p style="font-size: 10px; color: #44403c; margin: 0;">Validade da proposta: 7 dias úteis.</p>
+                <p style="font-size: 8px; text-transform: uppercase; color: #8c5867; margin: 0 0 2px 0; font-weight: bold; letter-spacing: 1px;">Condições:</p>
+                <p style="font-size: 10px; color: #4a3b32; margin: 0;">Validade da proposta: 7 dias úteis.</p>
             </div>
             <div style="text-align: right;">
-                <p style="font-size: 9px; text-transform: uppercase; color: #881337; margin: 0 0 2px 0; font-weight: bold; letter-spacing: 1px;">Valor Total da Proposta:</p>
-                <p style="font-size: 20px; font-weight: bold; color: #9f1239; margin: 0;" id="pdf-valor-total">R$ 0,00</p>
+                <p style="font-size: 8px; text-transform: uppercase; color: #8c5867; margin: 0 0 2px 0; font-weight: bold; letter-spacing: 1px;">Valor Total da Proposta:</p>
+                <p style="font-size: 18px; font-weight: bold; color: #8c5867; margin: 0;" id="pdf-valor-total">R$ 0,00</p>
             </div>
         </div>
 
-        <div style="position: absolute; bottom: 20px; left: 30px; right: 30px; text-align: center; border-top: 1px dashed #d6d3d1; padding-top: 10px;">
-            <p style="font-size: 10px; color: #44403c; margin: 0 0 2px 0; font-weight: 500;">Agradecemos por contar conosco!</p>
-            <p style="font-size: 11px; color: #9f1239; font-weight: bold; margin: 0 0 2px 0;">Silvia Iamassaki</p>
-            <p style="font-size: 8px; color: #78716c; margin: 0;">Telefone / WhatsApp: (66) 99671-8582</p>
+        <!-- RODAPÉ -->
+        <div style="position: absolute; bottom: 15px; left: 30px; right: 30px; text-align: center; border-top: 1px dashed #f3d1dc; padding-top: 8px;">
+            <p style="font-size: 9px; color: #4a3b32; margin: 0 0 2px 0; font-weight: 500;">Agradecemos por contar conosco!</p>
+            <p style="font-size: 10px; color: #8c5867; font-weight: bold; margin: 0 0 2px 0;">Silvia Tamassaki - Bolos e Doces</p>
+            <p style="font-size: 8px; color: #7a6a63; margin: 0;">Telefone / WhatsApp: (66) 99671-8582</p>
         </div>
     </div>
 
@@ -766,7 +771,7 @@
 
             elemento.style.display = 'block';
 
-         const opt = {
+       const opt = {
                 margin:       [5, 5, 5, 5],
                 filename:     nomeArquivo,
                 image:        { type: 'jpeg', quality: 0.98 },
