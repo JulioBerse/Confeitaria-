@@ -722,26 +722,66 @@
         });
 
         function gerarPDFOrcamento() {
-            const cliente = document.getElementById('input-cliente').value || 'Cliente';
-            const pedido = document.getElementById('input-pedido').value || 'Produto';
-            document.getElementById('pdf-cliente').innerText = cliente;
-            document.getElementById('pdf-descricao').innerText = pedido;
-            document.getElementById('pdf-item-principal').innerText = pedido;
-            const precoFinal = document.getElementById('resumo-preco-sugerido').innerText;
-            document.getElementById('pdf-valor-item-principal').innerText = precoFinal;
-            document.getElementById('pdf-valor-total').innerText = precoFinal;
+    // 1. Pega o nome do cliente do input do formulário (confirme se o ID do seu input é 'cliente' ou 'nomeCliente')
+    const nomeClienteInput = document.getElementById('cliente') ? document.getElementById('cliente').value : 'orcamento';
+    
+    // Formata o nome para o arquivo (ex: "Maria Silva" vira "orcamento-maria-silvia.pdf")
+    const nomeFormatado = nomeClienteInput.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+    const nomeArquivo = `${nomeFormatado || 'orcamento'}.pdf`;
 
-            const elemento = document.getElementById('conteudo-para-pdf');
-            elemento.style.display = 'block';
-            const opt = {
-                margin: 0,
-                filename: `Orcamento_${cliente.replace(/\s+/g, '_')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().from(elemento).save().then(() => { elemento.style.display = 'none'; });
+    const elemento = document.getElementById('pdf-orcamento'); // ID da div que contém o orçamento
+
+    // 2. Configurações para garantir 1 página e margens compactas
+    const opt = {
+        margin:       [2, 2, 2, 2], // Margens bem estreitas (em mm) para o rodapé não estourar
+        filename:     nomeArquivo,  // Nome dinâmico aplicado aqui!
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { 
+            scale: 2,         // Mantém a alta qualidade/nitidez
+            useCORS: true, 
+            letterRendering: true,
+            scrollY: 0
+        },
+        jsPDF:        { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
         }
+    };
+
+    // Executa a geração do PDF compactando o conteúdo para caber perfeitamente em 1 página
+    html2pdf().from(elemento).set(opt).save();
+}function gerarPDFOrcamento() {
+    // 1. Pega o nome do cliente do input do formulário (confirme se o ID do seu input é 'cliente' ou 'nomeCliente')
+    const nomeClienteInput = document.getElementById('cliente') ? document.getElementById('cliente').value : 'orcamento';
+    
+    // Formata o nome para o arquivo (ex: "Maria Silva" vira "orcamento-maria-silvia.pdf")
+    const nomeFormatado = nomeClienteInput.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+    const nomeArquivo = `${nomeFormatado || 'orcamento'}.pdf`;
+
+    const elemento = document.getElementById('pdf-orcamento'); // ID da div que contém o orçamento
+
+    // 2. Configurações para garantir 1 página e margens compactas
+    const opt = {
+        margin:       [2, 2, 2, 2], // Margens bem estreitas (em mm) para o rodapé não estourar
+        filename:     nomeArquivo,  // Nome dinâmico aplicado aqui!
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { 
+            scale: 2,         // Mantém a alta qualidade/nitidez
+            useCORS: true, 
+            letterRendering: true,
+            scrollY: 0
+        },
+        jsPDF:        { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
+        }
+    };
+
+    // Executa a geração do PDF compactando o conteúdo para caber perfeitamente em 1 página
+    html2pdf().from(elemento).set(opt).save();
+}
 
         document.addEventListener('DOMContentLoaded', () => {
             carregarTabelaEstoque();
