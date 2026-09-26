@@ -380,26 +380,37 @@
         let ingredientesCache = [];
         let itensReceitaAtual = [];
 
-        function mudarAba(aba) {
-            document.getElementById('secao-ingredientes').classList.add('hidden');
-            document.getElementById('secao-receitas').classList.add('hidden');
-            document.getElementById('secao-orcamento').classList.add('hidden');
+function mudarAba(aba) {
+            const secIng = document.getElementById('secao-ingredientes');
+            const secRec = document.getElementById('secao-receitas');
+            const secOrc = document.getElementById('secao-orcamento');
 
-            document.getElementById('btn-aba-ingredientes').className = "bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-full transition";
-            document.getElementById('btn-aba-receitas').className = "bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-full transition";
-            document.getElementById('btn-aba-orcamento').className = "bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-full transition";
+            if (secIng) secIng.classList.add('hidden');
+            if (secRec) secRec.classList.add('hidden');
+            if (secOrc) secOrc.classList.add('hidden');
+
+            const btnIng = document.getElementById('btn-aba-ingredientes');
+            const btnRec = document.getElementById('btn-aba-receitas');
+            const btnOrc = document.getElementById('btn-aba-orcamento');
+
+            const estiloInativo = "bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-full transition";
+            const estiloAtivo = "bg-rose-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition shadow-xs";
+
+            if (btnIng) btnIng.className = estiloInativo;
+            if (btnRec) btnRec.className = estiloInativo;
+            if (btnOrc) btnOrc.className = estiloInativo;
 
             if (aba === 'ingredientes') {
-                document.getElementById('secao-ingredientes').classList.remove('hidden');
-                document.getElementById('btn-aba-ingredientes').className = "bg-rose-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition shadow-xs";
+                if (secIng) secIng.classList.remove('hidden');
+                if (btnIng) btnIng.className = estiloAtivo;
                 carregarTabelaEstoque();
             } else if (aba === 'receitas') {
-                document.getElementById('secao-receitas').classList.remove('hidden');
-                document.getElementById('btn-aba-receitas').className = "bg-rose-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition shadow-xs";
+                if (secRec) secRec.classList.remove('hidden');
+                if (btnRec) btnRec.className = estiloAtivo;
                 carregarReceitas();
             } else if (aba === 'orcamento') {
-                document.getElementById('secao-orcamento').classList.remove('hidden');
-                document.getElementById('btn-aba-orcamento').className = "bg-rose-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition shadow-xs";
+                if (secOrc) secOrc.classList.remove('hidden');
+                if (btnOrc) btnOrc.className = estiloAtivo;
                 carregarSelectOrcamento();
             }
         }
