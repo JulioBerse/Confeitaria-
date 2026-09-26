@@ -28,12 +28,17 @@
 
         <!-- ================= MÓDULO 1: INGREDIENTES & ESTOQUE ================= -->
 
-        <!-- Exemplo de cabeçalho com o botão de expandir/recolher -->
-<div class="flex justify-between items-center mb-4 cursor-pointer" onclick="toggleSecaoEstoque()">
+ <!-- Cabeçalho da Seção de Estoque com o botão idêntico ao de receitas -->
+<div class="flex justify-between items-center mb-4">
     <h2 class="text-lg font-bold text-stone-800">Gestão de Ingredientes e Estoque</h2>
-    <button id="btn-toggle-estoque" class="text-stone-500 font-bold text-sm hover:text-stone-700">
-        [ - ] Recolher
+    <button onclick="toggleSecaoEstoque()" id="btn-toggle-estoque" class="px-3 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+        <span>▼</span> <span id="btn-texto-estoque">Expandir</span>
     </button>
+</div>
+
+<!-- Conteúdo que vai abrir e fechar (Formulário e Tabela de Ingredientes) -->
+<div id="conteudo-secao-estoque" class="hidden transition-all duration-300">
+    <!-- Cole todo o formulário de cadastro e a tabela de ingredientes aqui dentro -->
 </div>
 
 <!-- Envolva a tabela e o formulário dentro de uma div com um ID para controlar -->
@@ -409,6 +414,21 @@
         }
 
         // ---------- ESTOQUE ----------
+        function toggleSecaoEstoque() {
+    const conteudo = document.getElementById('conteudo-secao-estoque');
+    const btnTexto = document.getElementById('btn-texto-estoque');
+    const btnIcone = document.querySelector('#btn-toggle-estoque span:first-child');
+    
+    if (conteudo.classList.contains('hidden')) {
+        conteudo.classList.remove('hidden');
+        if (btnTexto) btnTexto.textContent = 'Recolher';
+        if (btnIcone) btnIcone.textContent = '▲';
+    } else {
+        conteudo.classList.add('hidden');
+        if (btnTexto) btnTexto.textContent = 'Expandir';
+        if (btnIcone) btnIcone.textContent = '▼';
+    }
+}
         function toggleSecaoEstoque() {
     const conteudo = document.getElementById('conteudo-secao-estoque');
     const btn = document.getElementById('btn-toggle-estoque');
