@@ -26,88 +26,73 @@
             </div>
         </div>
 
-         <!-- ================= MÓDULO 1: INGREDIENTES & ESTOQUE ================= -->
+<!-- ================= MÓDULO 1: INGREDIENTES & ESTOQUE ================= -->
+<div class="space-y-6">
+    <!-- Cabeçalho da Seção com o Botão Padronizado -->
+    <div class="flex justify-between items-center mb-2">
+        <div>
+            <h2 class="text-xl font-bold text-stone-800">Gestão de Ingredientes e Estoque</h2>
+            <p class="text-xs text-stone-500 mt-1">* Cadastre os insumos na menor unidade: g ou ml. Sincronizado diretamente com o Banco Neon.</p>
+        </div>
+        <button onclick="alternarListaEstoque()" id="btn-toggle-estoque" class="px-3 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+            ▲ Minimizar
+        </button>
+    </div>
 
- <!-- Cabeçalho da Seção de Estoque com o botão idêntico ao de receitas -->
-<div class="flex justify-between items-center mb-4">
-    <h2 class="text-lg font-bold text-stone-800">Gestão de Ingredientes e Estoque</h2>
-    <button onclick="alternarListaEstoque()" id="btn-toggle-estoque" class="px-3 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
-        ▼ Expandir
-    </button>
-</div>
-
-<!-- Container que engloba o formulário e a tabela de estoque -->
-<div id="container-lista-estoque" style="display: none;">
-    <!-- Cole seu formulário de ingredientes e a tabela aqui dentro -->
-</div>
-
-<!-- Conteúdo que vai abrir e fechar (Formulário e Tabela de Ingredientes) -->
-<div id="conteudo-secao-estoque" class="hidden transition-all duration-300">
-    <!-- Cole todo o formulário de cadastro e a tabela de ingredientes aqui dentro -->
-</div>
-
-<!-- Envolva a tabela e o formulário dentro de uma div com um ID para controlar -->
-<div id="conteudo-secao-estoque" class="transition-all duration-300">
-    <!-- Formulário de cadastro e a tabela de ingredientes continuam aqui dentro -->
-</div>
-        
-        
-        <div id="secao-ingredientes" class="space-y-6">
-            <div class="mb-4">
-                <h2 class="text-xl font-bold text-stone-800">Gestão de Ingredientes e Estoque</h2>
-                <p class="text-xs text-stone-500 mt-1">* Cadastre os insumos na menor unidade: g ou ml. Sincronizado diretamente com o Banco Neon.</p>
-            </div>
-
-            <div class="border border-rose-200 rounded-lg p-4 bg-rose-50/20">
-                <h3 class="text-xs font-bold text-rose-900 uppercase tracking-wider mb-3">Novo Ingrediente</h3>
-                <form id="form-cadastrar-ingrediente" onsubmit="cadastrarIngrediente(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
-                    <div>
-                        <label class="block text-xs font-bold text-stone-600 mb-1">Nome</label>
-                        <input type="text" id="cad-nome" placeholder="Ex: Farinha de trigo" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-stone-600 mb-1">Unidade</label>
-                        <select id="cad-unidade" class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
-                            <option value="g">g</option>
-                            <option value="ml">ml</option>
-                            <option value="unidade">unidade</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-stone-600 mb-1">Qtd. Embalagem</label>
-                        <input type="number" step="0.01" id="cad-qtd-emb" placeholder="1000" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-stone-600 mb-1">Preço Total (R$)</label>
-                        <input type="number" step="0.01" id="cad-preco" placeholder="10.00" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
-                    </div>
-                    <div>
-                        <button type="submit" class="w-full bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold py-2.5 rounded transition shadow-xs">Adicionar Ingrediente</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="border border-stone-200 rounded-lg p-4 bg-white shadow-xs">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead>
-                            <tr class="bg-stone-100 text-stone-700 text-xs uppercase">
-                                <th class="p-2.5">Ingrediente</th>
-                                <th class="p-2.5">Embalagem</th>
-                                <th class="p-2.5">Preço Total</th>
-                                <th class="p-2.5">Custo Unitário</th>
-                                <th class="p-2.5">Estoque Atual</th>
-                                <th class="p-2.5 text-center">Ações de Estoque</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-estoque-corpo">
-                            <tr><td colspan="6" class="p-4 text-center text-stone-400 text-xs italic">Carregando do Banco Neon...</td></tr>
-                        </tbody>
-                    </table>
+    <!-- Container Único que engloba o formulário e a tabela para o botão funcionar -->
+    <div id="container-lista-estoque" class="space-y-6 pt-2">
+        <!-- Formulário de Novo Ingrediente -->
+        <div class="border border-rose-200 rounded-lg p-4 bg-rose-50/20">
+            <h3 class="text-xs font-bold text-rose-900 uppercase tracking-wider mb-3">Novo Ingrediente</h3>
+            <form id="form-cadastrar-ingrediente" onsubmit="cadastrarIngrediente(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 mb-1">Nome</label>
+                    <input type="text" id="cad-nome" placeholder="Ex: Farinha de trigo" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
                 </div>
-            </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 mb-1">Unidade</label>
+                    <select id="cad-unidade" class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                        <option value="g">g</option>
+                        <option value="ml">ml</option>
+                        <option value="unidade">unidade</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 mb-1">Qtd. Embalagem</label>
+                    <input type="number" step="0.01" id="cad-qtd-emb" placeholder="1000" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 mb-1">Preço Total (R$)</label>
+                    <input type="number" step="0.01" id="cad-preco" placeholder="10.00" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                </div>
+                <div>
+                    <button type="submit" class="w-full bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold py-2.5 rounded transition shadow-xs">Adicionar Ingrediente</button>
+                </div>
+            </form>
         </div>
 
+        <!-- Tabela de Ingredientes -->
+        <div class="border border-stone-200 rounded-lg p-4 bg-white shadow-xs">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="bg-stone-100 text-stone-700 text-xs uppercase">
+                            <th class="p-2.5">Ingrediente</th>
+                            <th class="p-2.5">Embalagem</th>
+                            <th class="p-2.5">Preço Total</th>
+                            <th class="p-2.5">Custo Unitário</th>
+                            <th class="p-2.5">Estoque Atual</th>
+                            <th class="p-2.5 text-center">Ações de Estoque</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-estoque-corpo">
+                        <tr><td colspan="6" class="p-4 text-center text-stone-400 text-xs italic">Carregando do Banco Neon...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
       <!-- ================= MÓDULO 2: FICHAS TÉCNICAS (RECEITAS) ================= -->
 <div id="secao-receitas" class="hidden space-y-6">
@@ -420,22 +405,21 @@
         }
 
         // ---------- ESTOQUE ----------
- function alternarListaEstoque() {
+function alternarListaEstoque() {
     const container = document.getElementById('container-lista-estoque');
     const botao = document.getElementById('btn-toggle-estoque');
     
     if (!container) return;
 
-    // Se estiver visível, esconde e muda o botão para Expandir
-    if (container.style.display !== 'none') {
-        container.style.display = 'none';
-        botao.innerHTML = '▼ Expandir';
-    } else {
-        // Se estiver escondido, mostra e muda o botão para Minimizar
-        container.style.display = 'block';
+    if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
         botao.innerHTML = '▲ Minimizar';
+    } else {
+        container.classList.add('hidden');
+        botao.innerHTML = '▼ Expandir';
     }
 }
+
         function toggleSecaoEstoque() {
     const conteudo = document.getElementById('conteudo-secao-estoque');
     const btnTexto = document.getElementById('btn-texto-estoque');
@@ -762,12 +746,13 @@
                 const res = await fetch('/api/ingredientes');
                 if (res.ok) ingredientesCache = await res.json();
             }
-            ingredientesCache.forEach(ing => {
-                const opt = document.createElement('option');
-                opt.value = ing.id;
-                opt.textContent = `${ing.nome} (${ing.unidade})`;
-                select.appendChild(opt);
-            });
+           ingredientesCache.forEach(ing => {
+    const opt = document.createElement('option');
+    opt.value = ing.id;
+    // Exibe o nome e o estoque atual entre parênteses
+    opt.textContent = `${ing.nome} (Estoque: ${ing.quantidade_atual || 0} ${ing.unidade})`;
+    select.appendChild(opt);
+});
         }
 
         function adicionarInsumoPedido() {
