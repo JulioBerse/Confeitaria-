@@ -243,11 +243,11 @@
         </div>
     </div>
 
-    <!-- MODAL DE CADASTRO DE NOVA RECEITA -->
+    <!-- MODAL DE CADASTRO/EDIÇÃO DE RECEITA -->
     <div id="modal-receita" class="fixed inset-0 bg-stone-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-stone-800 text-base">Nova Ficha Técnica (Receita)</h3>
+                <h3 class="font-bold text-stone-800 text-base" id="modal-titulo-receita">Nova Ficha Técnica (Receita)</h3>
                 <button onclick="fecharModalNovaReceita()" class="text-stone-400 hover:text-stone-700 font-bold text-lg">×</button>
             </div>
 
@@ -426,8 +426,9 @@
     <script>
         let ingredientesCache = [];
         let receitasCache = [];
-        let itensPedidoAtual = []; // Armazena as Fichas Técnicas selecionadas no orçamento
+        let itensPedidoAtual = []; 
         let itensReceitaAtual = [];
+        let receitaEditandoId = null;
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -484,7 +485,6 @@
         function alternarListaEstoque() {
             const container = document.getElementById('container-lista-estoque');
             const botao = document.getElementById('btn-toggle-estoque');
-            
             if (!container) return;
 
             if (container.classList.contains('hidden')) {
@@ -579,9 +579,7 @@
                         carregarTabelaEstoque();
                     }
                 }
-            } catch (err) { 
-                console.error(err); 
-            }
+            } catch (err) { console.error(err); }
         }
 
         function atualizarDatalistSugestoes(dados) {
@@ -604,12 +602,10 @@
                 } else {
                     alert('Erro ao excluir o ingrediente.');
                 }
-            } catch (e) {
-                console.error('Erro ao excluir ingrediente:', e);
-            }
+            } catch (e) { console.error(e); }
         }
 
-        // ---------- RECEITAS ----------
+        // ---------- RECEITAS & FICHA TÉCNICA ----------
         async function carregarReceitas() {
             const container = document.getElementById('container-lista-receitas');
             if (!container) return;
@@ -667,7 +663,10 @@
                                     <h3 class="font-bold text-stone-800 text-base">${rec.nome}</h3>
                                     <p class="text-xs text-stone-500">Rendimento: ${rendimento} ${rec.unidade_rendimento || 'g'} | Custo Total: R$ ${custoTotal.toFixed(2)} | Custo Unitário: R$ ${custoUnitario.toFixed(4)} por ${rec.unidade_rendimento || 'g'}</p>
                                 </div>
-                                <button onclick="deletarReceita(${rec.id})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold px-2.5 py-1 bg-rose-50 rounded transition">Excluir</button>
+                                <div class="flex gap-2">
+                                    <button onclick='abrirModalEditarReceita(${JSON.stringify(rec)})' class="text-stone-700 hover:text-stone-900 text-xs font-semibold px-2.5 py-1 bg-stone-100 rounded transition">Editar</button>
+                                    <button onclick="deletarReceita(${rec.id})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold px-2.5 py-1 bg-rose-50 rounded transition">Excluir</button>
+                                </div>
                             </div>
                             <div class="bg-stone-50 p-3 rounded-lg border border-stone-100 mt-2">
                                 <span class="text-[10px] uppercase font-bold tracking-widest text-stone-400 block mb-1">Ingredientes da Receita:</span>
@@ -681,16 +680,46 @@
         }
 
         function abrirModalNovaReceita() {
+            receitaEditandoId = null;
+            document.getElementById('modal-titulo-receita').textContent = 'Nova Ficha Técnica (Receita)';
             document.getElementById('modal-receita').classList.remove('hidden');
             document.getElementById('rec-nome').value = '';
             document.getElementById('rec-rendimento').value = '';
+            document.getElementById('rec-unidade').value = 'g';
             itensReceitaAtual = [];
+            atualizarTabelaItensReceitaModal();
+            carregarSelectIngredientesModal();
+        }
+
+        function abrirModalEditarReceita(rec) {
+            receitaEditandoId = rec.id;
+            document.getElementById('modal-titulo-receita').textContent = 'Editar Ficha Técnica (Receita)';
+            document.getElementById('modal-receita').classList.remove('hidden');
+            document.getElementById('rec-nome').value = rec.nome;
+            document.getElementById('rec-rendimento').value = rec.rendimento;
+            document.getElementById('rec-unidade').value = rec.unidade_rendimento || 'g';
+            
+            itensReceitaAtual = [];
+            if (rec.itens && rec.itens.length > 0) {
+                rec.itens.forEach(i => {
+                    const ingData = ingredientesCache.find(x => x.id === i.ingrediente_id);
+                    itensReceitaAtual.push({
+                        ingrediente_id: i.ingrediente_id,
+                        nome: i.nome || (ingData ? ingData.nome : 'Ingrediente'),
+                        unidade: i.unidade || (ingData ? ingData.unidade : 'g'),
+                        quantidade: parseFloat(i.quantidade) || 0,
+                        preco_embalagem: ingData ? ingData.preco_embalagem : 0,
+                        quantidade_embalagem: ingData ? ingData.quantidade_embalagem : 1
+                    });
+                });
+            }
             atualizarTabelaItensReceitaModal();
             carregarSelectIngredientesModal();
         }
 
         function fecharModalNovaReceita() {
             document.getElementById('modal-receita').classList.add('hidden');
+            receitaEditandoId = null;
         }
 
         async function carregarSelectIngredientesModal() {
@@ -784,11 +813,20 @@
             };
 
             try {
-                const res = await fetch('/api/receitas', {
-                    method: 'POST',
+                let url = '/api/receitas';
+                let method = 'POST';
+
+                if (receitaEditandoId) {
+                    url = `/api/receitas/${receitaEditandoId}`;
+                    method = 'PUT';
+                }
+
+                const res = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+
                 if (res.ok) {
                     fecharModalNovaReceita();
                     carregarReceitas();
@@ -809,7 +847,6 @@
         function alternarListaReceitas() {
             const container = document.getElementById('container-lista-receitas');
             const botao = document.getElementById('btn-toggle-receitas');
-            
             if (!container) return;
 
             if (container.style.display === 'none') {
@@ -857,9 +894,7 @@
                     opt.dataset.custoTotal = custoTotalReceita;
                     select.appendChild(opt);
                 });
-            } catch (e) {
-                console.error('Erro ao carregar receitas para o orçamento:', e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         function adicionarReceitaPedido() {
@@ -986,9 +1021,7 @@
                     `;
                     tbody.appendChild(tr);
                 });
-            } catch (e) {
-                console.error('Erro de rede ao carregar orçamentos:', e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         async function concluirOrcamento(id) {
@@ -996,24 +1029,16 @@
                 const res = await fetch(`/api/orcamentos/${id}/concluir`, { method: 'PATCH' });
                 if (res.ok) {
                     carregarOrcamentosAbertos();
-                    if (typeof carregarDadosFinanceiros === 'function') {
-                        carregarDadosFinanceiros();
-                    }
+                    if (typeof carregarDadosFinanceiros === 'function') carregarDadosFinanceiros();
                 }
-            } catch (e) {
-                console.error('Erro ao concluir orçamento:', e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         async function removerOrcamento(id) {
             try {
                 const res = await fetch(`/api/orcamentos/${id}`, { method: 'DELETE' });
-                if (res.ok) {
-                    carregarOrcamentosAbertos();
-                }
-            } catch (e) {
-                console.error('Erro ao excluir orçamento:', e);
-            }
+                if (res.ok) carregarOrcamentosAbertos();
+            } catch (e) { console.error(e); }
         }
 
         // ---------- FINANCEIRO & LUCRO ----------
@@ -1096,21 +1121,15 @@
                 if (spanFaturamento) spanFaturamento.textContent = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 if (spanTotalPedidos) spanTotalPedidos.textContent = dados.length;
                 if (spanTotalHoras) spanTotalHoras.textContent = `${totalHorasMes.toFixed(1)}h`;
-            } catch (e) {
-                console.error('Erro ao carregar dados financeiros:', e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         async function removerOrcamentoFinanceiro(id) {
             if (!confirm('Deseja realmente remover este registo do histórico financeiro?')) return;
             try {
                 const res = await fetch(`/api/orcamentos/${id}`, { method: 'DELETE' });
-                if (res.ok) {
-                    carregarDadosFinanceiros();
-                }
-            } catch (e) {
-                console.error('Erro ao remover registo financeiro:', e);
-            }
+                if (res.ok) carregarDadosFinanceiros();
+            } catch (e) { console.error(e); }
         }
 
         // ---------- GERAR PDF ORÇAMENTO ----------
@@ -1138,7 +1157,6 @@
             if (spanPdfValorTotal) spanPdfValorTotal.textContent = valorTotalTexto;
 
             const elemento = document.getElementById('conteudo-para-pdf');
-
             if (!elemento) return;
 
             elemento.style.display = 'block';
@@ -1175,20 +1193,15 @@
                         })
                     });
 
-                    if (resposta.ok) {
-                        carregarOrcamentosAbertos();
-                    }
-                } catch (err) {
-                    console.error("Erro de conexão ao salvar orçamento no banco:", err);
-                }
+                    if (resposta.ok) carregarOrcamentosAbertos();
+                } catch (err) { console.error(err); }
 
             }).catch(err => {
-                console.error("Erro ao gerar PDF:", err);
+                console.error(err);
                 elemento.style.display = 'none';
             });
         }
 
-        // Inicialização ao carregar a página
         window.addEventListener('DOMContentLoaded', () => {
             carregarTabelaEstoque();
             carregarOrcamentosAbertos();
