@@ -42,6 +42,18 @@ app.post('/api/ingredientes', async (req, res) => {
   }
 });
 
+// --- ROTA DELETE PARA INGREDIENTES ---
+app.delete('/api/ingredientes/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM ingredientes WHERE id = $1', [id]);
+        res.status(200).json({ message: 'Ingrediente excluído com sucesso!' });
+    } catch (err) {
+        console.error('Erro ao excluir ingrediente:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Rota de Estoque (Atualizar rápido)
 app.patch('/api/ingredientes/:id/estoque', async (req, res) => {
   const { id } = req.params;
