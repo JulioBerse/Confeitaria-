@@ -459,14 +459,15 @@
                         tr.innerHTML = `
                             <td class="p-3 font-medium text-stone-800">${item.nome}</td>
                             <td class="p-3 text-stone-600">${qtdEmb.toFixed(2)} ${item.unidade}</td>
-                            <td class="p-3 text-stone-600">R$ ${precoTotal.toFixed(2).replace('.', ',')}</td>
+                             <td class="p-3 text-stone-600">R$ ${precoTotal.toFixed(2).replace('.', ',')}</td>
                             <td class="p-3 font-semibold text-rose-800">R$ ${custoUnit.toFixed(4).replace('.', ',')} / ${item.unidade}</td>
                             <td class="p-3 text-stone-700 font-medium">${estoqueAtual.toFixed(2)} ${item.unidade}</td>
-                            <td class="p-3 text-center space-x-1">
-                                <button onclick="ajustarEstoque(${item.id}, 500)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded transition">+500</button>
-                                <button onclick="ajustarEstoque(${item.id}, -500)" class="bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold px-2.5 py-1 rounded transition">-500</button>
-                            </td>
-                        `;
+                             <td class="p-3 text-center space-x-1">
+                                 <button onclick="ajustarEstoque(${item.id}, 500)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold px-2 py-1 rounded transition" title="Adicionar 500">+500</button>
+                                 <button onclick="ajustarEstoque(${item.id}, -500)" class="bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold px-2 py-1 rounded transition" title="Remover 500">-500</button>
+                                  <button onclick="deletarIngrediente(${item.id}, '${item.nome}')" class="bg-stone-200 hover:bg-rose-600 hover:text-white text-stone-700 text-xs font-bold px-2.5 py-1 rounded transition" title="Excluir ingrediente">Excluir</button>
+    </td>
+`;
                         tbody.appendChild(tr);
                     });
                 }
@@ -536,6 +537,20 @@
                 datalist.appendChild(option);
             });
         }
+
+        async function deletarIngrediente(id, nome) {
+    if (!confirm(`Deseja realmente remover o ingrediente "${nome}" do estoque?`)) return;
+    try {
+        const res = await fetch(`/api/ingredientes/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            carregarTabelaEstoque();
+        } else {
+            alert('Erro ao excluir o ingrediente.');
+        }
+    } catch (e) {
+        console.error('Erro ao excluir ingrediente:', e);
+    }
+}
 
         // ---------- RECEITAS ----------
         async function carregarReceitas() {
