@@ -394,7 +394,7 @@
             </div>
         </div>
 
-        <!-- Tabela de Pedidos Concluídos no Mês -->
+     <!-- Tabela de Pedidos Concluídos no Mês -->
         <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #f3d1dc;">
             <h3 style="color: #8c5867; margin-top: 0; font-size: 16px;" id="titulo-tabela-financeiro">Histórico de Vendas Concluídas</h3>
             <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px;">
@@ -403,10 +403,11 @@
                         <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Cliente</th>
                         <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Descrição</th>
                         <th style="padding: 8px; border-bottom: 2px solid #f3d1dc; text-align: right;">Valor Recebido</th>
+                        <th style="padding: 8px; border-bottom: 2px solid #f3d1dc; text-align: center;">Ações</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-financeiro-concluidos">
-                    <tr><td colspan="3" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Carregando dados financeiros...</td></tr>
+                    <tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Carregando dados financeiros...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -1073,6 +1074,84 @@
                 console.error('Erro ao carregar dados financeiros:', e);
             }
         }
+
+        async function carregarDadosFinanceiros() {
+            popularSeletorMeses();
+            const selectMes = document.getElementById('select-mes-financeiro');
+            const mesSelecionado = selectMes ? selectMes.value : '';
+
+            try {
+                const url = mesSelecionado ? `/api/orcamentos/concluidos?mes=${mesSelecionado}` : '/api/orcamentos/concluidos';
+                const res = await fetch(url);
+                if (!res.ok) return;
+                const dados = await res.json();
+                
+                const tbody = document.getElementById('tabela-financeiro-concluidos');
+                const spanFaturamento = document.getElementById('fin-faturamento-total');
+                const spanTotalPedidos = document.getElementById('fin-total-pedidos');
+                
+                if (!tbody) return;
+
+                tbody.innerHTML = '';
+                let faturamentoTotal = 0;
+
+                if (dados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Nenhum pedido concluído registado neste mês.</td></tr>';
+                    if (spanFaturamento) spanFaturamento.textContent = 'R$ 0,00';
+                    if (spanTotalPedidos) spanTotalPedidos.textContent = '0';
+                    return;
+                }
+
+                dados.forEach(orc => {
+                    const valorNum = parseFloat(orc.valor) || 0;
+                    faturamentoTotal += valorNum;
+                    const valorFormatado = valorNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #f3d1dc';
+                    tr.innerHTML = `
+                        <td style="padding: 8px; color: #333;">${orc.cliente}</td>
+                        <td style="padding: 8px; color: #555;">${orc.descricao}</td>
+                        <td style="padding: 8px; text-align: right; font-weight: bold; color: #047857;">${valorFormatado}</td>
+                        <td style="padding: 8px; text-align: center;">
+                            <button onclick="removerOrcamentoFinanceiro(${orc.id})" style="background: #be123c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Remover</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                if (spanFaturamento) spanFaturamento.textContent = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if (spanTotalPedidos) spanTotalPedidos.textContent = dados.length;
+            } catch (e) {
+                console.error('Erro ao carregar dados financeiros:', e);
+            }
+        }
+
+        async function removerOrcamentoFinanceiro(id) {
+            if (!confirm('Deseja realmente remover este registo do histórico financeiro?')) return;
+            try {
+                const res = await fetch(`/api/orcamentos/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    carregarDadosFinanceiros();
+                } else {
+                    alert('Erro ao remover o registo.');
+                }
+            } catch (e) {
+                console.error('Erro ao remover registo financeiro:', e);
+            }
+        }
+
+        const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #f3d1dc';
+                    tr.innerHTML = `
+                        <td style="padding: 8px; color: #333;">${orc.cliente}</td>
+                        <td style="padding: 8px; color: #555;">${orc.descricao}</td>
+                        <td style="padding: 8px; text-align: right; font-weight: bold; color: #047857;">${valorFormatado}</td>
+                        <td style="padding: 8px; text-align: center;">
+                            <button onclick="removerOrcamentoFinanceiro(${orc.id})" style="background: #be123c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Remover</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
         
         // ---------- GERAR PDF ORÇAMENTO ----------
         function gerarPDFOrcamento() {
