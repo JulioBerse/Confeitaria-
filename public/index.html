@@ -14,8 +14,16 @@
 
     <div class="max-w-5xl mx-auto p-6 w-full bg-white shadow-sm my-8 rounded-lg">
         
-        <!-- Cabeçalho com Abas / Navegação -->
+        <!-- Cabeçalho com Logo, Título e Navegação -->
         <div class="text-center border-b pb-6 mb-6">
+            <!-- LOGO NO TOPO DA PÁGINA -->
+            <div class="flex justify-center mb-4">
+                <img src="/logo.png" 
+                     onerror="this.onerror=null; this.src='logo.jpg';" 
+                     alt="Silvia Iamassaki Bolos e Doces" 
+                     class="h-28 w-auto object-contain rounded-xl shadow-xs border border-rose-100 p-1 bg-white">
+            </div>
+
             <h1 class="text-2xl font-serif text-rose-800 tracking-wide font-bold">Silvia Iamassaki</h1>
             <p class="text-xs text-stone-500 uppercase tracking-widest mt-1">Bolos e Doces Artesanais</p>
             
@@ -26,98 +34,93 @@
             </div>
         </div>
 
-<!-- ================= MÓDULO 1: INGREDIENTES & ESTOQUE ================= -->
-<div class="space-y-6">
-    <!-- Cabeçalho da Seção com o Botão Padronizado -->
-    <div class="flex justify-between items-center mb-2">
-        <div>
-            <h2 class="text-xl font-bold text-stone-800">Gestão de Ingredientes e Estoque</h2>
-            <p class="text-xs text-stone-500 mt-1">* Cadastre os insumos na menor unidade: g ou ml. Sincronizado diretamente com o Banco Neon.</p>
-        </div>
-        <button onclick="alternarListaEstoque()" id="btn-toggle-estoque" class="px-3 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
-            ▲ Minimizar
-        </button>
-    </div>
+        <!-- ================= MÓDULO 1: INGREDIENTES & ESTOQUE ================= -->
+        <div id="secao-ingredientes" class="space-y-6">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <h2 class="text-xl font-bold text-stone-800">Gestão de Ingredientes e Estoque</h2>
+                    <p class="text-xs text-stone-500 mt-1">Cadastre os insumos na menor unidade: g ou ml. Sincronizado diretamente com o Banco Neon.</p>
+                </div>
+                <button onclick="alternarListaEstoque()" id="btn-toggle-estoque" class="px-3 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+                    ▲ Minimizar
+                </button>
+            </div>
 
-    <!-- Container Único que engloba o formulário e a tabela para o botão funcionar -->
-    <div id="container-lista-estoque" class="space-y-6 pt-2">
-        <!-- Formulário de Novo Ingrediente -->
-        <div class="border border-rose-200 rounded-lg p-4 bg-rose-50/20">
-            <h3 class="text-xs font-bold text-rose-900 uppercase tracking-wider mb-3">Novo Ingrediente</h3>
-            <form id="form-cadastrar-ingrediente" onsubmit="cadastrarIngrediente(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
-                <div>
-                    <label class="block text-xs font-bold text-stone-600 mb-1">Nome</label>
-                    <input type="text" id="cad-nome" placeholder="Ex: Farinha de trigo" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+            <div id="container-lista-estoque" class="space-y-6 pt-2">
+                <!-- Formulário de Novo Ingrediente -->
+                <div class="border border-rose-200 rounded-lg p-4 bg-rose-50/20">
+                    <h3 class="text-xs font-bold text-rose-900 uppercase tracking-wider mb-3">Novo Ingrediente</h3>
+                    <form id="form-cadastrar-ingrediente" onsubmit="cadastrarIngrediente(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">Nome</label>
+                            <input type="text" id="cad-nome" placeholder="Ex: Farinha de trigo" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">Unidade</label>
+                            <select id="cad-unidade" class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                                <option value="g">g</option>
+                                <option value="ml">ml</option>
+                                <option value="unidade">unidade</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">Qtd. Embalagem</label>
+                            <input type="number" step="0.01" id="cad-qtd-emb" placeholder="1000" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">Preço Total (R$)</label>
+                            <input type="number" step="0.01" id="cad-preco" placeholder="10.00" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold py-2.5 rounded transition shadow-xs">Adicionar Ingrediente</button>
+                        </div>
+                    </form>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-stone-600 mb-1">Unidade</label>
-                    <select id="cad-unidade" class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
-                        <option value="g">g</option>
-                        <option value="ml">ml</option>
-                        <option value="unidade">unidade</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-stone-600 mb-1">Qtd. Embalagem</label>
-                    <input type="number" step="0.01" id="cad-qtd-emb" placeholder="1000" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-stone-600 mb-1">Preço Total (R$)</label>
-                    <input type="number" step="0.01" id="cad-preco" placeholder="10.00" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
-                </div>
-                <div>
-                    <button type="submit" class="w-full bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold py-2.5 rounded transition shadow-xs">Adicionar Ingrediente</button>
-                </div>
-            </form>
-        </div>
 
-        <!-- Tabela de Ingredientes -->
-        <div class="border border-stone-200 rounded-lg p-4 bg-white shadow-xs">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead>
-                        <tr class="bg-stone-100 text-stone-700 text-xs uppercase">
-                            <th class="p-2.5">Ingrediente</th>
-                            <th class="p-2.5">Embalagem</th>
-                            <th class="p-2.5">Preço Total</th>
-                            <th class="p-2.5">Custo Unitário</th>
-                            <th class="p-2.5">Estoque Atual</th>
-                            <th class="p-2.5 text-center">Ações de Estoque</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-estoque-corpo">
-                        <tr><td colspan="6" class="p-4 text-center text-stone-400 text-xs italic">Carregando do Banco Neon...</td></tr>
-                    </tbody>
-                </table>
+                <!-- Tabela de Ingredientes -->
+                <div class="border border-stone-200 rounded-lg p-4 bg-white shadow-xs">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="bg-stone-100 text-stone-700 text-xs uppercase">
+                                    <th class="p-2.5">Ingrediente</th>
+                                    <th class="p-2.5">Embalagem</th>
+                                    <th class="p-2.5">Preço Total</th>
+                                    <th class="p-2.5">Custo Unitário</th>
+                                    <th class="p-2.5">Estoque Atual</th>
+                                    <th class="p-2.5 text-center">Ações de Estoque</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-estoque-corpo">
+                                <tr><td colspan="6" class="p-4 text-center text-stone-400 text-xs italic">Carregando do Banco Neon...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-      <!-- ================= MÓDULO 2: FICHAS TÉCNICAS (RECEITAS) ================= -->
-<div id="secao-receitas" class="hidden space-y-6">
-    <div class="flex justify-between items-center mb-4">
-        <div>
-            <h2 class="text-xl font-bold text-stone-800">Fichas Técnicas & Receitas</h2>
-            <p class="text-xs text-stone-500 mt-1">Clique em uma receita para ver os detalhes ou cadastre uma nova.</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <!-- Botão para fechar/abrir a lista -->
-            <button onclick="alternarListaReceitas()" id="btn-toggle-receitas" class="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold px-3 py-2.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
-                ▲ Minimizar
-            </button>
-            <!-- Botão de Nova Receita -->
-            <button onclick="abrirModalNovaReceita()" class="bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
-                + Nova Ficha Técnica
-            </button>
-        </div>
-    </div>
+        <!-- ================= MÓDULO 2: FICHAS TÉCNICAS (RECEITAS) ================= -->
+        <div id="secao-receitas" class="hidden space-y-6">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-stone-800">Fichas Técnicas & Receitas</h2>
+                    <p class="text-xs text-stone-500 mt-1">Clique em uma receita para ver os detalhes ou cadastre uma nova.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="alternarListaReceitas()" id="btn-toggle-receitas" class="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold px-3 py-2.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
+                        ▲ Minimizar
+                    </button>
+                    <button onclick="abrirModalNovaReceita()" class="bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
+                        + Nova Ficha Técnica
+                    </button>
+                </div>
+            </div>
 
-    <!-- O contêiner que vai abrir e fechar -->
-    <div id="container-lista-receitas" class="space-y-3 transition-all duration-300">
-        <div class="p-6 text-center text-stone-400 text-xs italic">Carregando receitas do Banco Neon...</div>
-    </div>
-</div> 
+            <div id="container-lista-receitas" class="space-y-3 transition-all duration-300">
+                <div class="p-6 text-center text-stone-400 text-xs italic">Carregando receitas do Banco Neon...</div>
+            </div>
+        </div> 
 
         <!-- ================= MÓDULO 3: ORÇAMENTOS & CUSTOS ================= -->
         <div id="secao-orcamento" class="hidden space-y-6">
@@ -217,25 +220,26 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Tabela de Orçamentos em Aberto -->
+            <div style="margin-top: 30px; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #f3d1dc;">
+                <h3 style="color: #8c5867; margin-top: 0; font-size: 16px;">Orçamentos em Aberto</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="background-color: #fbe4ec; color: #6e424f; text-align: left;">
+                            <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Cliente</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Descrição</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Valor</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #f3d1dc; text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-orcamentos-abertos">
+                        <tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Carregando orçamentos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-
-    <div style="margin-top: 30px; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #f3d1dc;">
-    <h3 style="color: #8c5867; margin-top: 0; font-size: 16px;">Orçamentos em Aberto</h3>
-    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-        <thead>
-            <tr style="background-color: #fbe4ec; color: #6e424f; text-align: left;">
-                <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Cliente</th>
-                <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Descrição</th>
-                <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Valor</th>
-                <th style="padding: 8px; border-bottom: 2px solid #f3d1dc; text-align: center;">Ações</th>
-            </tr>
-        </thead>
-        <tbody id="tabela-orcamentos-abertos">
-            <tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Carregando orçamentos...</td></tr>
-        </tbody>
-    </table>
-</div>
 
     <!-- MODAL DE CADASTRO DE NOVA RECEITA -->
     <div id="modal-receita" class="fixed inset-0 bg-stone-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
@@ -305,11 +309,15 @@
         Contato WhatsApp: (66) 99671-8582
     </footer>
 
-<!-- MÓDULO DO PDF -->
+    <!-- MÓDULO DO PDF -->
     <div id="conteudo-para-pdf" style="display: none; width: 750px; height: 1050px; padding: 25px 30px; font-family: 'Helvetica', 'Arial', sans-serif; color: #4a3b32; background: #ffffff; box-sizing: border-box; position: relative; overflow: hidden;">
         
-      <!-- TOPO COM TEXTO ESTILIZADO (GARANTIDO QUE NUNCA SOME) -->
+        <!-- TOPO DO PDF COM LOGO E TEXTO -->
         <div style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid #f3d1dc; padding-bottom: 10px;">
+            <img src="/logo.png" 
+                 onerror="this.onerror=null; this.src='logo.jpg';" 
+                 style="height: 80px; width: auto; object-fit: contain; margin: 0 auto 8px auto; border-radius: 8px;" 
+                 alt="Silvia Iamassaki Bolos e Doces">
             <h1 style="color: #8c5867; margin: 0 0 2px 0; font-size: 22px; font-family: serif; font-weight: bold; letter-spacing: 1px;">Silvia Iamassaki</h1>
             <p style="color: #7a6a63; font-size: 8px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 3px; font-weight: bold;">Bolos e Doces Artesanais</p>
             <div style="display: inline-block; background: #fbe4ec; color: #8c5867; padding: 2px 12px; border-radius: 20px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; border: 1px solid #f3d1dc;">Orçamento</div>
@@ -365,10 +373,8 @@
         </div>
     </div>
 
-
     <!-- SCRIPTS -->
     <script>
-        // Registro do Service Worker para o PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
@@ -380,7 +386,7 @@
         let ingredientesCache = [];
         let itensReceitaAtual = [];
 
-function mudarAba(aba) {
+        function mudarAba(aba) {
             const secIng = document.getElementById('secao-ingredientes');
             const secRec = document.getElementById('secao-receitas');
             const secOrc = document.getElementById('secao-orcamento');
@@ -416,48 +422,21 @@ function mudarAba(aba) {
         }
 
         // ---------- ESTOQUE ----------
-function alternarListaEstoque() {
-    const container = document.getElementById('container-lista-estoque');
-    const botao = document.getElementById('btn-toggle-estoque');
-    
-    if (!container) return;
+        function alternarListaEstoque() {
+            const container = document.getElementById('container-lista-estoque');
+            const botao = document.getElementById('btn-toggle-estoque');
+            
+            if (!container) return;
 
-    if (container.classList.contains('hidden')) {
-        container.classList.remove('hidden');
-        botao.innerHTML = '▲ Minimizar';
-    } else {
-        container.classList.add('hidden');
-        botao.innerHTML = '▼ Expandir';
-    }
-}
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                botao.innerHTML = '▲ Minimizar';
+            } else {
+                container.classList.add('hidden');
+                botao.innerHTML = '▼ Expandir';
+            }
+        }
 
-        function toggleSecaoEstoque() {
-    const conteudo = document.getElementById('conteudo-secao-estoque');
-    const btnTexto = document.getElementById('btn-texto-estoque');
-    const btnIcone = document.querySelector('#btn-toggle-estoque span:first-child');
-    
-    if (conteudo.classList.contains('hidden')) {
-        conteudo.classList.remove('hidden');
-        if (btnTexto) btnTexto.textContent = 'Recolher';
-        if (btnIcone) btnIcone.textContent = '▲';
-    } else {
-        conteudo.classList.add('hidden');
-        if (btnTexto) btnTexto.textContent = 'Expandir';
-        if (btnIcone) btnIcone.textContent = '▼';
-    }
-}
-        function toggleSecaoEstoque() {
-    const conteudo = document.getElementById('conteudo-secao-estoque');
-    const btn = document.getElementById('btn-toggle-estoque');
-    
-    if (conteudo.style.display === 'none') {
-        conteudo.style.display = 'block';
-        if (btn) btn.textContent = '[ - ] Recolher';
-    } else {
-        conteudo.style.display = 'none';
-        if (btn) btn.textContent = '[ + ] Expandir';
-    }
-}
         async function carregarTabelaEstoque() {
             const tbody = document.getElementById('tabela-estoque-corpo');
             tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-stone-400 text-xs italic">Carregando do Banco Neon...</td></tr>';
@@ -525,22 +504,6 @@ function alternarListaEstoque() {
                 });
                 if (res.ok) carregarTabelaEstoque();
             } catch (e) { console.error(e); }
-        }
-
-        async function carregarSelectOrcamento() {
-            const select = document.getElementById('select-ingrediente');
-            select.innerHTML = '<option value="">Selecione um ingrediente do estoque...</option>';
-            if (ingredientesCache.length === 0) {
-                const res = await fetch('/api/ingredientes');
-                if (res.ok) ingredientesCache = await res.json();
-            }
-            ingredientesCache.forEach(ing => {
-                const opt = document.createElement('option');
-                opt.value = ing.id;
-                // Mudei de quantidade_atual para estoque_atual:
-                opt.textContent = `${ing.nome} (Estoque: ${parseFloat(ing.estoque_atual || 0).toFixed(2)} ${ing.unidade})`;
-                select.appendChild(opt);
-            });
         }
 
         // ---------- RECEITAS ----------
@@ -697,17 +660,6 @@ function alternarListaEstoque() {
             atualizarTabelaItensReceitaModal();
         }
 
-        function alternarVisibilidadeFicha() {
-            const container = document.getElementById('container-ficha-tecnica'); // Substitua pelo ID real da div da sua ficha técnica
-            if (!container) return;
-            
-            if (container.style.display === 'none') {
-                container.style.display = 'block';
-            } else {
-                container.style.display = 'none';
-            }
-        }
-
         async function salvarReceitaCompleta() {
             const nome = document.getElementById('rec-nome').value.trim();
             const rendimento = parseFloat(document.getElementById('rec-rendimento').value);
@@ -766,8 +718,7 @@ function alternarListaEstoque() {
         // ---------- ORÇAMENTOS ----------
         let itensPedidoAtual = [];
 
-
-    async function carregarSelectOrcamento() {
+        async function carregarSelectOrcamento() {
             const select = document.getElementById('select-ingrediente');
             select.innerHTML = '<option value="">Selecione um ingrediente do estoque...</option>';
             if (ingredientesCache.length === 0) {
@@ -777,7 +728,6 @@ function alternarListaEstoque() {
             ingredientesCache.forEach(ing => {
                 const opt = document.createElement('option');
                 opt.value = ing.id;
-                // Mudei de quantidade_atual para estoque_atual:
                 opt.textContent = `${ing.nome} (Estoque: ${parseFloat(ing.estoque_atual || 0).toFixed(2)} ${ing.unidade})`;
                 select.appendChild(opt);
             });
@@ -867,12 +817,12 @@ function alternarListaEstoque() {
             document.getElementById('resumo-preco-sugerido').textContent = `R$ ${precoSugerido.toFixed(2).replace('.', ',')}`;
         }
 
-        // Ouvintes para recalcular em tempo real ao alterar parâmetros
+        // Recalcular ao alterar parâmetros
         ['input-horas', 'input-valor-hora', 'input-custos-op', 'input-margem', 'input-embalagem', 'input-entrega'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', () => atualizarTabelaPedidoAdmin());
         });
-        // ---------- ORÇAMENTOS EM ABERTO ----------
+
         // ---------- ORÇAMENTOS EM ABERTO ----------
         async function carregarOrcamentosAbertos() {
             try {
@@ -972,12 +922,10 @@ function alternarListaEstoque() {
                 }
             };
 
-            // Dispara a geração do PDF e, assim que termina, salva no Banco Neon e atualiza a tela
             html2pdf().from(elemento).set(opt).save().then(async () => {
                 elemento.style.display = 'none';
 
                 try {
-                    // Pega o valor numérico limpo (ex: "R$ 150,50" vira 150.50)
                     const valorTexto = resumoPrecoSugerido ? resumoPrecoSugerido.textContent : '0';
                     const valorLimpo = parseFloat(
                         valorTexto.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()
@@ -985,7 +933,6 @@ function alternarListaEstoque() {
 
                     const descricaoTexto = inputPedido ? (inputPedido.value || 'Encomenda de Bolos e Doces') : 'Encomenda';
 
-                    // Envia para o backend salvar no Neon
                     const resposta = await fetch('/api/orcamentos', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -997,8 +944,7 @@ function alternarListaEstoque() {
                     });
 
                     if (resposta.ok) {
-                        console.log('Orçamento salvo no Neon com sucesso!');
-                        carregarOrcamentosAbertos(); // Atualiza a tabela na tela imediatamente
+                        carregarOrcamentosAbertos();
                     } else {
                         console.error('Erro do servidor ao salvar orçamento.');
                     }
@@ -1012,8 +958,972 @@ function alternarListaEstoque() {
             });
         }
 
+        // Inicialização
+        carregarTabelaEstoque();
+        carregarOrcamentosAbertos();
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silvia Iamassaki - Bolos e Doces Artesanais</title>
+    <!-- Link para o Manifesto do PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#9f1239">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body class="bg-stone-50 min-h-screen flex flex-col justify-between text-stone-800">
+
+    <div class="max-w-5xl mx-auto p-6 w-full bg-white shadow-sm my-8 rounded-lg">
         
-      // Inicialização
+        <!-- Cabeçalho com Logo, Título e Navegação -->
+        <div class="text-center border-b pb-6 mb-6">
+            <!-- LOGO NO TOPO DA PÁGINA -->
+            <div class="flex justify-center mb-4">
+                <img src="/logo.png" 
+                     onerror="this.onerror=null; this.src='logo.jpg';" 
+                     alt="Silvia Iamassaki Bolos e Doces" 
+                     class="h-28 w-auto object-contain rounded-xl shadow-xs border border-rose-100 p-1 bg-white">
+            </div>
+
+            <h1 class="text-2xl font-serif text-rose-800 tracking-wide font-bold">Silvia Iamassaki</h1>
+            <p class="text-xs text-stone-500 uppercase tracking-widest mt-1">Bolos e Doces Artesanais</p>
+            
+            <div class="flex justify-center gap-3 mt-4">
+                <button onclick="mudarAba('ingredientes')" id="btn-aba-ingredientes" class="bg-rose-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition shadow-xs">📦 Ingredientes & Estoque</button>
+                <button onclick="mudarAba('receitas')" id="btn-aba-receitas" class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-full transition">📖 Fichas Técnicas (Receitas)</button>
+                <button onclick="mudarAba('orcamento')" id="btn-aba-orcamento" class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-full transition">💰 Orçamentos & Custos</button>
+            </div>
+        </div>
+
+        <!-- ================= MÓDULO 1: INGREDIENTES & ESTOQUE ================= -->
+        <div id="secao-ingredientes" class="space-y-6">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <h2 class="text-xl font-bold text-stone-800">Gestão de Ingredientes e Estoque</h2>
+                    <p class="text-xs text-stone-500 mt-1">Cadastre os insumos na menor unidade: g ou ml. Sincronizado diretamente com o Banco Neon.</p>
+                </div>
+                <button onclick="alternarListaEstoque()" id="btn-toggle-estoque" class="px-3 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+                    ▲ Minimizar
+                </button>
+            </div>
+
+            <div id="container-lista-estoque" class="space-y-6 pt-2">
+                <!-- Formulário de Novo Ingrediente -->
+                <div class="border border-rose-200 rounded-lg p-4 bg-rose-50/20">
+                    <h3 class="text-xs font-bold text-rose-900 uppercase tracking-wider mb-3">Novo Ingrediente</h3>
+                    <form id="form-cadastrar-ingrediente" onsubmit="cadastrarIngrediente(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">Nome</label>
+                            <input type="text" id="cad-nome" placeholder="Ex: Farinha de trigo" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">Unidade</label>
+                            <select id="cad-unidade" class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                                <option value="g">g</option>
+                                <option value="ml">ml</option>
+                                <option value="unidade">unidade</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">Qtd. Embalagem</label>
+                            <input type="number" step="0.01" id="cad-qtd-emb" placeholder="1000" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">Preço Total (R$)</label>
+                            <input type="number" step="0.01" id="cad-preco" placeholder="10.00" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold py-2.5 rounded transition shadow-xs">Adicionar Ingrediente</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabela de Ingredientes -->
+                <div class="border border-stone-200 rounded-lg p-4 bg-white shadow-xs">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="bg-stone-100 text-stone-700 text-xs uppercase">
+                                    <th class="p-2.5">Ingrediente</th>
+                                    <th class="p-2.5">Embalagem</th>
+                                    <th class="p-2.5">Preço Total</th>
+                                    <th class="p-2.5">Custo Unitário</th>
+                                    <th class="p-2.5">Estoque Atual</th>
+                                    <th class="p-2.5 text-center">Ações de Estoque</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-estoque-corpo">
+                                <tr><td colspan="6" class="p-4 text-center text-stone-400 text-xs italic">Carregando do Banco Neon...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= MÓDULO 2: FICHAS TÉCNICAS (RECEITAS) ================= -->
+        <div id="secao-receitas" class="hidden space-y-6">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-stone-800">Fichas Técnicas & Receitas</h2>
+                    <p class="text-xs text-stone-500 mt-1">Clique em uma receita para ver os detalhes ou cadastre uma nova.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="alternarListaReceitas()" id="btn-toggle-receitas" class="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold px-3 py-2.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
+                        ▲ Minimizar
+                    </button>
+                    <button onclick="abrirModalNovaReceita()" class="bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
+                        + Nova Ficha Técnica
+                    </button>
+                </div>
+            </div>
+
+            <div id="container-lista-receitas" class="space-y-3 transition-all duration-300">
+                <div class="p-6 text-center text-stone-400 text-xs italic">Carregando receitas do Banco Neon...</div>
+            </div>
+        </div> 
+
+        <!-- ================= MÓDULO 3: ORÇAMENTOS & CUSTOS ================= -->
+        <div id="secao-orcamento" class="hidden space-y-6">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-stone-800">Calculadora de Orçamento e Custos</h2>
+                <p class="text-xs text-stone-500 mt-1">Monte o pedido, calcule a mão de obra, custos operacionais e margem de lucro com precisão.</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nome do Cliente</label>
+                        <input type="text" id="input-cliente" placeholder="Ex: Ana Souza" class="w-full border border-stone-300 rounded p-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Descrição do Pedido (Bolo / Doce)</label>
+                        <input type="text" id="input-pedido" placeholder="Ex: Bolo decorado 2kg" class="w-full border border-stone-300 rounded p-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-800">
+                    </div>
+                </div>
+
+                <div class="border border-rose-200 rounded-lg p-4 bg-rose-50/20">
+                    <h3 class="text-xs font-bold text-rose-900 uppercase tracking-wider mb-3">Parâmetros de Custos e Margens</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs text-stone-600 mb-1">Horas de Trabalho (h)</label>
+                            <input type="number" id="input-horas" value="0" class="w-full border border-stone-300 rounded p-1.5 text-sm bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-stone-600 mb-1">Valor da Hora (R$)</label>
+                            <input type="number" id="input-valor-hora" value="25.00" class="w-full border border-stone-300 rounded p-1.5 text-sm bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-stone-600 mb-1">Custos Operacionais (%)</label>
+                            <input type="number" id="input-custos-op" value="0" class="w-full border border-stone-300 rounded p-1.5 text-sm bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-stone-600 mb-1">Margem de Lucro (%)</label>
+                            <input type="number" id="input-margem" value="0" class="w-full border border-stone-300 rounded p-1.5 text-sm bg-white">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-stone-600 mb-1">Embalagem (R$)</label>
+                            <input type="number" id="input-embalagem" value="0.00" class="w-full border border-stone-300 rounded p-1.5 text-sm bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-stone-600 mb-1">Taxa de Entrega (R$)</label>
+                            <input type="number" id="input-entrega" value="0.00" class="w-full border border-stone-300 rounded p-1.5 text-sm bg-white">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border border-stone-200 rounded-lg p-4 bg-white shadow-xs">
+                    <h3 class="text-xs font-bold text-stone-700 uppercase tracking-wider mb-3">Insumos Utilizados no Pedido</h3>
+                    
+                    <div class="flex flex-col sm:flex-row gap-3 mb-4 items-center">
+                        <select id="select-ingrediente" class="flex-1 border border-stone-300 rounded p-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-rose-800">
+                            <option value="">Carregando ingredientes do Banco Neon...</option>
+                        </select>
+                        <input type="number" id="input-qtd-ingrediente" placeholder="Qtd (g ou ml)" class="w-full sm:w-40 border border-stone-300 rounded p-2 text-sm text-center">
+                        <button onclick="adicionarInsumoPedido()" class="w-full sm:w-auto bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold px-5 py-2.5 rounded transition shadow-xs">+ Adicionar Item</button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm" id="tabela-itens-admin">
+                            <thead>
+                                <tr class="bg-stone-100 text-stone-700 text-xs uppercase">
+                                    <th class="p-2.5">Ingrediente</th>
+                                    <th class="p-2.5 w-32 text-center">Quantidade</th>
+                                    <th class="p-2.5 w-32 text-right">Custo Parcial</th>
+                                    <th class="p-2.5 w-20 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpo-tabela-admin">
+                                <tr>
+                                    <td colspan="4" class="p-4 text-center text-stone-400 text-xs italic" id="nenhum-item-msg">Nenhum ingrediente adicionado ao pedido.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-stone-900 text-white p-5 rounded-xl shadow-md">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-stone-400 block mb-1">Resumo de Custos dos Insumos:</span>
+                        <span id="resumo-custo-insumos" class="text-2xl font-bold">R$ 0,00</span>
+                    </div>
+                    <div class="md:text-right">
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-rose-300 block mb-1">Preço Sugerido para o Cliente:</span>
+                        <span id="resumo-preco-sugerido" class="text-3xl font-extrabold text-rose-400">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-end">
+                    <button onclick="gerarPDFOrcamento()" class="bg-rose-800 hover:bg-rose-900 text-white font-bold px-6 py-3 rounded-lg text-sm transition shadow flex items-center gap-2">
+                        📄 Gerar Orçamento Profissional em PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabela de Orçamentos em Aberto -->
+            <div style="margin-top: 30px; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #f3d1dc;">
+                <h3 style="color: #8c5867; margin-top: 0; font-size: 16px;">Orçamentos em Aberto</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="background-color: #fbe4ec; color: #6e424f; text-align: left;">
+                            <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Cliente</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Descrição</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Valor</th>
+                            <th style="padding: 8px; border-bottom: 2px solid #f3d1dc; text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-orcamentos-abertos">
+                        <tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Carregando orçamentos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CADASTRO DE NOVA RECEITA -->
+    <div id="modal-receita" class="fixed inset-0 bg-stone-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-stone-800 text-base">Nova Ficha Técnica (Receita)</h3>
+                <button onclick="fecharModalNovaReceita()" class="text-stone-400 hover:text-stone-700 font-bold text-lg">×</button>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-stone-600 mb-1">Nome da Receita</label>
+                    <input type="text" id="rec-nome" placeholder="Ex: Bolo de Chocolate" class="w-full border border-stone-300 rounded p-2 text-sm focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-stone-600 mb-1">Rendimento</label>
+                        <input type="number" step="0.01" id="rec-rendimento" placeholder="1200" class="w-full border border-stone-300 rounded p-2 text-sm focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-600 mb-1">Unidade de Rendimento</label>
+                        <select id="rec-unidade" class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                            <option value="g">g</option>
+                            <option value="ml">ml</option>
+                            <option value="unidade">unidade</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="border-t pt-3">
+                    <h4 class="text-xs font-bold text-stone-700 uppercase mb-2">Adicionar Ingredientes à Receita</h4>
+                    <div class="flex gap-2 mb-3">
+                        <select id="rec-select-ingrediente" class="flex-1 border border-stone-300 rounded p-2 text-sm bg-white">
+                            <option value="">Carregando ingredientes...</option>
+                        </select>
+                        <input type="number" step="0.01" id="rec-qtd-ingrediente" placeholder="Qtd" class="w-28 border border-stone-300 rounded p-2 text-sm text-center">
+                        <button type="button" onclick="adicionarIngredienteReceitaForm()" class="bg-stone-800 hover:bg-stone-900 text-white text-xs px-4 rounded font-semibold">+ Inserir</button>
+                    </div>
+
+                    <div class="border rounded-lg overflow-hidden">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-stone-100 text-stone-700">
+                                <tr>
+                                    <th class="p-2">Ingrediente</th>
+                                    <th class="p-2 text-center">Qtd</th>
+                                    <th class="p-2 text-right">Custo Parcial</th>
+                                    <th class="p-2 text-center">Remover</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rec-tabela-itens">
+                                <tr><td colspan="4" class="p-3 text-center text-stone-400 italic">Nenhum ingrediente adicionado.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-3 border-t">
+                <button onclick="fecharModalNovaReceita()" class="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold px-4 py-2 rounded transition">Cancelar</button>
+                <button onclick="salvarReceitaCompleta()" class="bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold px-5 py-2 rounded transition shadow-xs">Salvar Ficha Técnica</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé -->
+    <footer class="text-center py-4 bg-rose-100 text-xs text-rose-900 font-medium">
+        Contato WhatsApp: (66) 99671-8582
+    </footer>
+
+    <!-- MÓDULO DO PDF -->
+    <div id="conteudo-para-pdf" style="display: none; width: 750px; height: 1050px; padding: 25px 30px; font-family: 'Helvetica', 'Arial', sans-serif; color: #4a3b32; background: #ffffff; box-sizing: border-box; position: relative; overflow: hidden;">
+        
+        <!-- TOPO DO PDF COM LOGO E TEXTO -->
+        <div style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid #f3d1dc; padding-bottom: 10px;">
+            <img src="/logo.png" 
+                 onerror="this.onerror=null; this.src='logo.jpg';" 
+                 style="height: 80px; width: auto; object-fit: contain; margin: 0 auto 8px auto; border-radius: 8px;" 
+                 alt="Silvia Iamassaki Bolos e Doces">
+            <h1 style="color: #8c5867; margin: 0 0 2px 0; font-size: 22px; font-family: serif; font-weight: bold; letter-spacing: 1px;">Silvia Iamassaki</h1>
+            <p style="color: #7a6a63; font-size: 8px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 3px; font-weight: bold;">Bolos e Doces Artesanais</p>
+            <div style="display: inline-block; background: #fbe4ec; color: #8c5867; padding: 2px 12px; border-radius: 20px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; border: 1px solid #f3d1dc;">Orçamento</div>
+        </div>
+
+        <!-- DADOS DO CLIENTE E DESCRIÇÃO -->
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; background: #fcf8f9; padding: 8px 12px; border-radius: 6px; border: 1px solid #f3d1dc; font-size: 11px;">
+            <div>
+                <span style="color: #8c5867; text-transform: uppercase; font-size: 8px; font-weight: bold; display: block;">Cliente:</span>
+                <strong id="pdf-cliente" style="color: #4a3b32; font-size: 12px;">-</strong>
+            </div>
+            <div style="text-align: right;">
+                <span style="color: #8c5867; text-transform: uppercase; font-size: 8px; font-weight: bold; display: block;">Descrição do Pedido:</span>
+                <strong id="pdf-descricao" style="color: #4a3b32; font-size: 12px;">-</strong>
+            </div>
+        </div>
+
+        <!-- TABELA DE ITENS -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 11px;">
+            <thead>
+                <tr style="background-color: #fbe4ec; color: #6e424f; text-align: left;">
+                    <th style="padding: 6px 8px; border-bottom: 2px solid #f3d1dc; font-weight: bold;">DESCRIÇÃO DO PRODUTO / SERVIÇO</th>
+                    <th style="padding: 6px 8px; border-bottom: 2px solid #f3d1dc; font-weight: bold; text-align: center; width: 80px;">QTD</th>
+                    <th style="padding: 6px 8px; border-bottom: 2px solid #f3d1dc; font-weight: bold; text-align: right; width: 100px;">VALOR TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 8px; border-bottom: 1px solid #f3d1dc; color: #4a3b32;" id="pdf-item-principal">-</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #f3d1dc; color: #4a3b32; text-align: center;">1 Un</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #f3d1dc; color: #4a3b32; text-align: right; font-weight: bold;" id="pdf-valor-item-principal">-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- CONDIÇÕES E TOTAL -->
+        <div style="background-color: #fef6f8; border: 1px solid #f3d1dc; border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div>
+                <p style="font-size: 8px; text-transform: uppercase; color: #8c5867; margin: 0 0 2px 0; font-weight: bold; letter-spacing: 1px;">Condições:</p>
+                <p style="font-size: 10px; color: #4a3b32; margin: 0;">Validade da proposta: 7 dias úteis.</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="font-size: 8px; text-transform: uppercase; color: #8c5867; margin: 0 0 2px 0; font-weight: bold; letter-spacing: 1px;">Valor Total da Proposta:</p>
+                <p style="font-size: 18px; font-weight: bold; color: #8c5867; margin: 0;" id="pdf-valor-total">R$ 0,00</p>
+            </div>
+        </div>
+
+        <!-- RODAPÉ -->
+        <div style="position: absolute; bottom: 15px; left: 30px; right: 30px; text-align: center; border-top: 1px dashed #f3d1dc; padding-top: 8px;">
+            <p style="font-size: 9px; color: #4a3b32; margin: 0 0 2px 0; font-weight: 500;">Agradecemos por contar conosco!</p>
+            <p style="font-size: 10px; color: #8c5867; font-weight: bold; margin: 0 0 2px 0;">Silvia Iamassaki - Bolos e Doces</p>
+            <p style="font-size: 8px; color: #7a6a63; margin: 0;">Telefone / WhatsApp: (66) 99671-8582</p>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((reg) => console.log('Service Worker registrado com escopo:', reg.scope))
+                    .catch((err) => console.log('Erro ao registrar Service Worker:', err));
+            });
+        }
+
+        let ingredientesCache = [];
+        let itensReceitaAtual = [];
+
+        function mudarAba(aba) {
+            const secIng = document.getElementById('secao-ingredientes');
+            const secRec = document.getElementById('secao-receitas');
+            const secOrc = document.getElementById('secao-orcamento');
+
+            if (secIng) secIng.classList.add('hidden');
+            if (secRec) secRec.classList.add('hidden');
+            if (secOrc) secOrc.classList.add('hidden');
+
+            const btnIng = document.getElementById('btn-aba-ingredientes');
+            const btnRec = document.getElementById('btn-aba-receitas');
+            const btnOrc = document.getElementById('btn-aba-orcamento');
+
+            const estiloInativo = "bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-full transition";
+            const estiloAtivo = "bg-rose-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition shadow-xs";
+
+            if (btnIng) btnIng.className = estiloInativo;
+            if (btnRec) btnRec.className = estiloInativo;
+            if (btnOrc) btnOrc.className = estiloInativo;
+
+            if (aba === 'ingredientes') {
+                if (secIng) secIng.classList.remove('hidden');
+                if (btnIng) btnIng.className = estiloAtivo;
+                carregarTabelaEstoque();
+            } else if (aba === 'receitas') {
+                if (secRec) secRec.classList.remove('hidden');
+                if (btnRec) btnRec.className = estiloAtivo;
+                carregarReceitas();
+            } else if (aba === 'orcamento') {
+                if (secOrc) secOrc.classList.remove('hidden');
+                if (btnOrc) btnOrc.className = estiloAtivo;
+                carregarSelectOrcamento();
+            }
+        }
+
+        // ---------- ESTOQUE ----------
+        function alternarListaEstoque() {
+            const container = document.getElementById('container-lista-estoque');
+            const botao = document.getElementById('btn-toggle-estoque');
+            
+            if (!container) return;
+
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                botao.innerHTML = '▲ Minimizar';
+            } else {
+                container.classList.add('hidden');
+                botao.innerHTML = '▼ Expandir';
+            }
+        }
+
+        async function carregarTabelaEstoque() {
+            const tbody = document.getElementById('tabela-estoque-corpo');
+            tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-stone-400 text-xs italic">Carregando do Banco Neon...</td></tr>';
+            try {
+                const response = await fetch('/api/ingredientes');
+                if (response.ok) {
+                    const dados = await response.json();
+                    ingredientesCache = dados;
+                    if (dados.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-stone-400 text-xs italic">Nenhum ingrediente cadastrado.</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = '';
+                    dados.forEach(item => {
+                        const qtdEmb = parseFloat(item.quantidade_embalagem) || 1;
+                        const precoTotal = parseFloat(item.preco_embalagem) || 0;
+                        const custoUnit = precoTotal / qtdEmb;
+                        const estoqueAtual = parseFloat(item.estoque_atual) || 0;
+
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-stone-100 hover:bg-stone-50/50';
+                        tr.innerHTML = `
+                            <td class="p-3 font-medium text-stone-800">${item.nome}</td>
+                            <td class="p-3 text-stone-600">${qtdEmb.toFixed(2)} ${item.unidade}</td>
+                            <td class="p-3 text-stone-600">R$ ${precoTotal.toFixed(2).replace('.', ',')}</td>
+                            <td class="p-3 font-semibold text-rose-800">R$ ${custoUnit.toFixed(4).replace('.', ',')} / ${item.unidade}</td>
+                            <td class="p-3 text-stone-700 font-medium">${estoqueAtual.toFixed(2)} ${item.unidade}</td>
+                            <td class="p-3 text-center space-x-1">
+                                <button onclick="ajustarEstoque(${item.id}, 500)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded transition">+500</button>
+                                <button onclick="ajustarEstoque(${item.id}, -500)" class="bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold px-2.5 py-1 rounded transition">-500</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function cadastrarIngrediente(event) {
+            event.preventDefault();
+            const nome = document.getElementById('cad-nome').value.trim();
+            const unidade = document.getElementById('cad-unidade').value;
+            const quantidade_embalagem = parseFloat(document.getElementById('cad-qtd-emb').value);
+            const preco_embalagem = parseFloat(document.getElementById('cad-preco').value);
+
+            try {
+                const response = await fetch('/api/ingredientes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, unidade, quantidade_embalagem, preco_embalagem, estoque_atual: quantidade_embalagem })
+                });
+                if (response.ok) {
+                    document.getElementById('form-cadastrar-ingrediente').reset();
+                    carregarTabelaEstoque();
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function ajustarEstoque(id, qtdDelta) {
+            try {
+                const res = await fetch(`/api/ingredientes/${id}/estoque`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quantidade: qtdDelta })
+                });
+                if (res.ok) carregarTabelaEstoque();
+            } catch (e) { console.error(e); }
+        }
+
+        // ---------- RECEITAS ----------
+        async function carregarReceitas() {
+            const container = document.getElementById('container-lista-receitas');
+            container.innerHTML = '<div class="p-6 text-center text-stone-400 text-xs italic">Carregando receitas do Banco Neon...</div>';
+            
+            try {
+                if (ingredientesCache.length === 0) {
+                    const resIng = await fetch('/api/ingredientes');
+                    if (resIng.ok) ingredientesCache = await resIng.json();
+                }
+
+                const response = await fetch('/api/receitas');
+                if (response.ok) {
+                    const receitas = await response.json();
+                    if (receitas.length === 0) {
+                        container.innerHTML = '<div class="p-8 text-center text-stone-400 text-xs italic bg-white rounded-lg border border-stone-200">Nenhuma receita cadastrada. Clique em "+ Nova Ficha Técnica" acima.</div>';
+                        return;
+                    }
+                    container.innerHTML = '';
+                    
+                    receitas.forEach(rec => {
+                        let custoTotal = 0;
+                        let itensHtml = '';
+                        
+                        if (rec.itens && rec.itens.length > 0) {
+                            rec.itens.forEach(i => {
+                                const ingData = ingredientesCache.find(x => x.id === i.ingrediente_id);
+                                let custoItem = 0;
+                                if (ingData) {
+                                    const precoEmb = parseFloat(ingData.preco_embalagem) || 0;
+                                    const qtdEmb = parseFloat(ingData.quantidade_embalagem) || 1;
+                                    custoItem = (precoEmb / qtdEmb) * parseFloat(i.quantidade);
+                                }
+                                custoTotal += custoItem;
+                                
+                                itensHtml += `
+                                    <div class="flex justify-between text-xs py-1 border-b border-stone-100 last:border-0">
+                                        <span class="text-stone-700">${i.nome || (ingData ? ingData.nome : 'Ingrediente')}</span>
+                                        <span class="text-stone-500">${i.quantidade} ${i.unidade || ''} (R$ ${custoItem.toFixed(2)})</span>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            itensHtml = '<span class="text-xs text-stone-400 italic">Nenhum ingrediente vinculado.</span>';
+                        }
+
+                        const rendimento = parseFloat(rec.rendimento) || 1;
+                        const custoUnitario = custoTotal / rendimento;
+
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'bg-white p-4 rounded-xl shadow-xs border border-stone-200 space-y-2';
+                        itemDiv.innerHTML = `
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="font-bold text-stone-800 text-base">${rec.nome}</h3>
+                                    <p class="text-xs text-stone-500">Rendimento: ${rendimento} ${rec.unidade_rendimento || 'g'} | Custo Total: R$ ${custoTotal.toFixed(2)} | Custo Unitário: R$ ${custoUnitario.toFixed(4)} por ${rec.unidade_rendimento || 'g'}</p>
+                                </div>
+                                <button onclick="deletarReceita(${rec.id})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold px-2.5 py-1 bg-rose-50 rounded transition">Excluir</button>
+                            </div>
+                            <div class="bg-stone-50 p-3 rounded-lg border border-stone-100 mt-2">
+                                <span class="text-[10px] uppercase font-bold tracking-widest text-stone-400 block mb-1">Ingredientes da Receita:</span>
+                                ${itensHtml}
+                            </div>
+                        `;
+                        container.appendChild(itemDiv);
+                    });
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function abrirModalNovaReceita() {
+            document.getElementById('modal-receita').classList.remove('hidden');
+            document.getElementById('rec-nome').value = '';
+            document.getElementById('rec-rendimento').value = '';
+            itensReceitaAtual = [];
+            atualizarTabelaItensReceitaModal();
+            carregarSelectIngredientesModal();
+        }
+
+        function fecharModalNovaReceita() {
+            document.getElementById('modal-receita').classList.add('hidden');
+        }
+
+        async function carregarSelectIngredientesModal() {
+            const select = document.getElementById('rec-select-ingrediente');
+            select.innerHTML = '<option value="">Selecione um ingrediente...</option>';
+            if (ingredientesCache.length === 0) {
+                const res = await fetch('/api/ingredientes');
+                if (res.ok) ingredientesCache = await res.json();
+            }
+            ingredientesCache.forEach(ing => {
+                const opt = document.createElement('option');
+                opt.value = ing.id;
+                opt.textContent = `${ing.nome} (${ing.unidade})`;
+                select.appendChild(opt);
+            });
+        }
+
+        function adicionarIngredienteReceitaForm() {
+            const select = document.getElementById('rec-select-ingrediente');
+            const ingId = parseInt(select.value);
+            const qtd = parseFloat(document.getElementById('rec-qtd-ingrediente').value);
+
+            if (!ingId || !qtd || qtd <= 0) {
+                alert('Selecione um ingrediente e informe uma quantidade válida.');
+                return;
+            }
+
+            const ingData = ingredientesCache.find(x => x.id === ingId);
+            if (!ingData) return;
+
+            itensReceitaAtual.push({
+                ingrediente_id: ingId,
+                nome: ingData.nome,
+                unidade: ingData.unidade,
+                quantidade: qtd,
+                preco_embalagem: ingData.preco_embalagem,
+                quantidade_embalagem: ingData.quantidade_embalagem
+            });
+
+            document.getElementById('rec-qtd-ingrediente').value = '';
+            select.value = '';
+            atualizarTabelaItensReceitaModal();
+        }
+
+        function atualizarTabelaItensReceitaModal() {
+            const tbody = document.getElementById('rec-tabela-itens');
+            if (itensReceitaAtual.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-stone-400 italic">Nenhum ingrediente adicionado.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            itensReceitaAtual.forEach((item, index) => {
+                const precoEmb = parseFloat(item.preco_embalagem) || 0;
+                const qtdEmb = parseFloat(item.quantidade_embalagem) || 1;
+                const custoParcial = (precoEmb / qtdEmb) * item.quantidade;
+
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-stone-100';
+                tr.innerHTML = `
+                    <td class="p-2 font-medium text-stone-800">${item.nome}</td>
+                    <td class="p-2 text-center text-stone-600">${item.quantidade} ${item.unidade}</td>
+                    <td class="p-2 text-right text-stone-600">R$ ${custoParcial.toFixed(2)}</td>
+                    <td class="p-2 text-center"><button type="button" onclick="removerItemReceitaModal(${index})" class="text-rose-600 font-bold hover:underline">X</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function removerItemReceitaModal(index) {
+            itensReceitaAtual.splice(index, 1);
+            atualizarTabelaItensReceitaModal();
+        }
+
+        async function salvarReceitaCompleta() {
+            const nome = document.getElementById('rec-nome').value.trim();
+            const rendimento = parseFloat(document.getElementById('rec-rendimento').value);
+            const unidade_rendimento = document.getElementById('rec-unidade').value;
+
+            if (!nome || !rendimento || itensReceitaAtual.length === 0) {
+                alert('Preencha o nome, rendimento e adicione pelo menos um ingrediente.');
+                return;
+            }
+
+            const payload = {
+                nome,
+                rendimento,
+                unidade_rendimento,
+                itens: itensReceitaAtual.map(i => ({ ingrediente_id: i.ingrediente_id, quantidade: i.quantidade }))
+            };
+
+            try {
+                const res = await fetch('/api/receitas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    fecharModalNovaReceita();
+                    carregarReceitas();
+                } else {
+                    alert('Erro ao salvar receita.');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function deletarReceita(id) {
+            if (!confirm('Deseja realmente excluir esta ficha técnica?')) return;
+            try {
+                const res = await fetch(`/api/receitas/${id}`, { method: 'DELETE' });
+                if (res.ok) carregarReceitas();
+            } catch (e) { console.error(e); }
+        }
+
+        function alternarListaReceitas() {
+            const container = document.getElementById('container-lista-receitas');
+            const botao = document.getElementById('btn-toggle-receitas');
+            
+            if (!container) return;
+
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                botao.innerHTML = '▲ Minimizar';
+            } else {
+                container.style.display = 'none';
+                botao.innerHTML = '▼ Expandir';
+            }
+        }
+
+        // ---------- ORÇAMENTOS ----------
+        let itensPedidoAtual = [];
+
+        async function carregarSelectOrcamento() {
+            const select = document.getElementById('select-ingrediente');
+            select.innerHTML = '<option value="">Selecione um ingrediente do estoque...</option>';
+            if (ingredientesCache.length === 0) {
+                const res = await fetch('/api/ingredientes');
+                if (res.ok) ingredientesCache = await res.json();
+            }
+            ingredientesCache.forEach(ing => {
+                const opt = document.createElement('option');
+                opt.value = ing.id;
+                opt.textContent = `${ing.nome} (Estoque: ${parseFloat(ing.estoque_atual || 0).toFixed(2)} ${ing.unidade})`;
+                select.appendChild(opt);
+            });
+        }
+
+        function adicionarInsumoPedido() {
+            const select = document.getElementById('select-ingrediente');
+            const ingId = parseInt(select.value);
+            const qtd = parseFloat(document.getElementById('input-qtd-ingrediente').value);
+
+            if (!ingId || !qtd || qtd <= 0) {
+                alert('Selecione um ingrediente e informe a quantidade.');
+                return;
+            }
+
+            const ingData = ingredientesCache.find(x => x.id === ingId);
+            if (!ingData) return;
+
+            itensPedidoAtual.push({
+                ingrediente_id: ingId,
+                nome: ingData.nome,
+                unidade: ingData.unidade,
+                quantidade: qtd,
+                preco_embalagem: ingData.preco_embalagem,
+                quantidade_embalagem: ingData.quantidade_embalagem
+            });
+
+            document.getElementById('input-qtd-ingrediente').value = '';
+            select.value = '';
+            atualizarTabelaPedidoAdmin();
+        }
+
+        function atualizarTabelaPedidoAdmin() {
+            const tbody = document.getElementById('corpo-tabela-admin');
+            if (itensPedidoAtual.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 text-xs italic">Nenhum ingrediente adicionado ao pedido.</td></tr>';
+                atualizarTotaisOrcamento(0);
+                return;
+            }
+
+            tbody.innerHTML = '';
+            let custoTotalInsumos = 0;
+
+            itensPedidoAtual.forEach((item, index) => {
+                const precoEmb = parseFloat(item.preco_embalagem) || 0;
+                const qtdEmb = parseFloat(item.quantidade_embalagem) || 1;
+                const custoParcial = (precoEmb / qtdEmb) * item.quantidade;
+                custoTotalInsumos += custoParcial;
+
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-stone-100';
+                tr.innerHTML = `
+                    <td class="p-2.5 font-medium text-stone-800">${item.nome}</td>
+                    <td class="p-2.5 text-center text-stone-600">${item.quantidade} ${item.unidade}</td>
+                    <td class="p-2.5 text-right text-stone-600">R$ ${custoParcial.toFixed(2)}</td>
+                    <td class="p-2.5 text-center"><button onclick="removerInsumoPedido(${index})" class="text-rose-600 font-bold hover:underline">X</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            atualizarTotaisOrcamento(custoTotalInsumos);
+        }
+
+        function removerInsumoPedido(index) {
+            itensPedidoAtual.splice(index, 1);
+            atualizarTabelaPedidoAdmin();
+        }
+
+        function atualizarTotaisOrcamento(custoInsumos) {
+            const horas = parseFloat(document.getElementById('input-horas').value) || 0;
+            const valorHora = parseFloat(document.getElementById('input-valor-hora').value) || 0;
+            const custosOpPct = parseFloat(document.getElementById('input-custos-op').value) || 0;
+            const margemPct = parseFloat(document.getElementById('input-margem').value) || 0;
+            const embalagem = parseFloat(document.getElementById('input-embalagem').value) || 0;
+            const entrega = parseFloat(document.getElementById('input-entrega').value) || 0;
+
+            const maoDeObra = horas * valorHora;
+            const custoOperacional = (custoInsumos * custosOpPct) / 100;
+            const custoTotalProducao = custoInsumos + maoDeObra + custoOperacional + embalagem + entrega;
+            
+            let precoSugerido = custoTotalProducao;
+            if (margemPct > 0) {
+                precoSugerido = custoTotalProducao / (1 - (margemPct / 100));
+            }
+
+            document.getElementById('resumo-custo-insumos').textContent = `R$ ${custoInsumos.toFixed(2).replace('.', ',')}`;
+            document.getElementById('resumo-preco-sugerido').textContent = `R$ ${precoSugerido.toFixed(2).replace('.', ',')}`;
+        }
+
+        // Recalcular ao alterar parâmetros
+        ['input-horas', 'input-valor-hora', 'input-custos-op', 'input-margem', 'input-embalagem', 'input-entrega'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', () => atualizarTabelaPedidoAdmin());
+        });
+
+        // ---------- ORÇAMENTOS EM ABERTO ----------
+        async function carregarOrcamentosAbertos() {
+            try {
+                const res = await fetch('/api/orcamentos');
+                if (!res.ok) return;
+                const dados = await res.json();
+                const tbody = document.getElementById('tabela-orcamentos-abertos');
+                if (!tbody) return;
+
+                tbody.innerHTML = '';
+                if (dados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Nenhum orçamento em aberto.</td></tr>';
+                    return;
+                }
+
+                dados.forEach(orc => {
+                    const valorFormatado = parseFloat(orc.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #f3d1dc';
+                    tr.innerHTML = `
+                        <td style="padding: 8px; color: #333;">${orc.cliente}</td>
+                        <td style="padding: 8px; color: #555;">${orc.descricao}</td>
+                        <td style="padding: 8px; text-align: right; font-weight: bold; color: #333;">${valorFormatado}</td>
+                        <td style="padding: 8px; text-align: center;">
+                            <button onclick="concluirOrcamento(${orc.id})" style="background: #8c5867; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Concluir / Apagar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error('Erro ao carregar orçamentos:', e);
+            }
+        }
+
+        async function concluirOrcamento(id) {
+            if (confirm('Deseja realmente concluir e remover este orçamento da lista?')) {
+                try {
+                    const res = await fetch(`/api/orcamentos/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        carregarOrcamentosAbertos();
+                    } else {
+                        alert('Erro ao apagar orçamento.');
+                    }
+                } catch (e) {
+                    console.error('Erro ao excluir:', e);
+                }
+            }
+        }
+       
+        // ---------- GERAR PDF ORÇAMENTO ----------
+        function gerarPDFOrcamento() {
+            const inputCliente = document.getElementById('input-cliente');
+            const nomeCliente = inputCliente && inputCliente.value.trim() !== '' ? inputCliente.value : 'cliente';
+            
+            const nomeFormatado = nomeCliente.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+            const nomeArquivo = `orcamento-${nomeFormatado}.pdf`;
+
+            const spanPdfCliente = document.getElementById('pdf-cliente');
+            const spanPdfDescricao = document.getElementById('pdf-descricao');
+            const spanPdfValorItem = document.getElementById('pdf-item-principal');
+            const spanPdfValorTotalItem = document.getElementById('pdf-valor-item-principal');
+            const spanPdfValorTotal = document.getElementById('pdf-valor-total');
+            const inputPedido = document.getElementById('input-pedido');
+            const resumoPrecoSugerido = document.getElementById('resumo-preco-sugerido');
+
+            if (spanPdfCliente) spanPdfCliente.textContent = nomeCliente;
+            if (spanPdfDescricao) spanPdfDescricao.textContent = inputPedido ? inputPedido.value || 'Encomenda de Bolos e Doces' : '-';
+            if (spanPdfValorItem) spanPdfValorItem.textContent = inputPedido ? inputPedido.value || 'Produto Artesanal' : 'Produto Artesanal';
+            
+            const valorTotalTexto = resumoPrecoSugerido ? resumoPrecoSugerido.textContent : 'R$ 0,00';
+            if (spanPdfValorTotalItem) spanPdfValorTotalItem.textContent = valorTotalTexto;
+            if (spanPdfValorTotal) spanPdfValorTotal.textContent = valorTotalTexto;
+
+            const elemento = document.getElementById('conteudo-para-pdf');
+
+            if (!elemento) {
+                alert("Erro: Elemento do PDF não encontrado!");
+                return;
+            }
+
+            elemento.style.display = 'block';
+
+            const opt = {
+                margin:       [5, 5, 5, 5],
+                filename:     nomeArquivo,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    letterRendering: true,
+                    scrollY: 0
+                },
+                jsPDF:        { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
+            };
+
+            html2pdf().from(elemento).set(opt).save().then(async () => {
+                elemento.style.display = 'none';
+
+                try {
+                    const valorTexto = resumoPrecoSugerido ? resumoPrecoSugerido.textContent : '0';
+                    const valorLimpo = parseFloat(
+                        valorTexto.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()
+                    ) || 0;
+
+                    const descricaoTexto = inputPedido ? (inputPedido.value || 'Encomenda de Bolos e Doces') : 'Encomenda';
+
+                    const resposta = await fetch('/api/orcamentos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            cliente: nomeCliente,
+                            descricao: descricaoTexto,
+                            valor: valorLimpo
+                        })
+                    });
+
+                    if (resposta.ok) {
+                        carregarOrcamentosAbertos();
+                    } else {
+                        console.error('Erro do servidor ao salvar orçamento.');
+                    }
+                } catch (err) {
+                    console.error("Erro de conexão ao salvar orçamento no banco:", err);
+                }
+
+            }).catch(err => {
+                console.error("Erro ao gerar PDF:", err);
+                elemento.style.display = 'none';
+            });
+        }
+
+        // Inicialização
         carregarTabelaEstoque();
         carregarOrcamentosAbertos();
     </script>
