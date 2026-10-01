@@ -128,6 +128,46 @@ app.post('/api/receitas', async (req, res) => {
   }
 });
 
+// Rota de Receitas (Atualizar / Editar)
+app.put('/api/receitas/:id', async (req, res) => {
+  const { id } = req.params;
+  const { nome, rendimento, unidade_rendimento, itens } = req.body;
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
+    
+    // Atualiza os dados principais da receita
+    const receitaQuery = `
+      UPDATE receitas 
+      SET nome = $1, rendimento = $2, unidade_rendimento = $3 
+      WHERE id = $4;
+    `;
+    await client.query(receitaQuery, [nome, rendimento, unidade_rendimento, id]);
+
+    // Remove os itens antigos para inserir os novos atualizados
+    await client.query('DELETE FROM receita_itens WHERE receita_id = $1', [id]);
+
+    // Insere os novos itens da receita
+    for (let item of itens) {
+      const itemQuery = `
+        INSERT INTO receita_itens (receita_id, ingrediente_id, quantidade) 
+        VALUES ($1, $2, $3);
+      `;
+      await client.query(itemQuery, [id, item.ingrediente_id, item.quantidade]);
+    }
+
+    await client.query('COMMIT');
+    res.status(200).json({ message: 'Receita atualizada com sucesso!' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error("Erro ao atualizar receita:", err.message);
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
 // Rota para salvar um novo orçamento
 app.post('/api/orcamentos', async (req, res) => {
     try {
@@ -161,7 +201,6 @@ app.get('/api/orcamentos/concluidos', async (req, res) => {
         let params = [];
 
         if (mes) {
-            // Filtra com base na data de criação/conclusão do registo no banco
             query += " AND TO_CHAR(criado_em, 'YYYY-MM') = $1";
             params.push(mes);
         }
