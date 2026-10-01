@@ -50,7 +50,10 @@
                     <form id="form-cadastrar-ingrediente" onsubmit="cadastrarIngrediente(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
                         <div>
                             <label class="block text-xs font-bold text-stone-600 mb-1">Nome</label>
-                            <input type="text" id="cad-nome" placeholder="Ex: Farinha de trigo" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                            <input type="text" id="cad-nome" list="sugestoes-ingredientes" placeholder="Ex: Açúcar Cristal" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none" autocomplete="off">
+                            <datalist id="sugestoes-ingredientes">
+                                
+                            </datalist>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-stone-600 mb-1">Unidade</label>
@@ -499,6 +502,21 @@
                 if (res.ok) carregarTabelaEstoque();
             } catch (e) { console.error(e); }
         }
+
+        function atualizarDatalistSugestoes(dados) {
+    const datalist = document.getElementById('sugestoes-ingredientes');
+    if (!datalist) return;
+    datalist.innerHTML = '';
+    
+    // Filtra nomes únicos para evitar sugestões duplicadas no autocompletar
+    const nomesUnicos = [...new Set(dados.map(item => item.nome))];
+    
+    nomesUnicos.forEach(nome => {
+        const option = document.createElement('option');
+        option.value = nome;
+        datalist.appendChild(option);
+    });
+}
 
         // ---------- RECEITAS ----------
         async function carregarReceitas() {
