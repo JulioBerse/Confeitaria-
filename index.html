@@ -1043,29 +1043,83 @@
                 const tbody = document.getElementById('tabela-financeiro-concluidos');
                 const spanFaturamento = document.getElementById('fin-faturamento-total');
                 const spanTotalPedidos = document.getElementById('fin-total-pedidos');
+                const spanTotalHoras = document.getElementById('fin-total-horas');
                 
                 if (!tbody) return;
 
                 tbody.innerHTML = '';
                 let faturamentoTotal = 0;
+                let totalHorasMes = 0;
 
                 if (dados.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Nenhum pedido concluído registado neste mês.</td></tr>';
                     if (spanFaturamento) spanFaturamento.textContent = 'R$ 0,00';
                     if (spanTotalPedidos) spanTotalPedidos.textContent = '0';
+                    if (spanTotalHoras) spanTotalHoras.textContent = '0h';
                     return;
                 }
 
                 dados.forEach(orc => {
                     const valorNum = parseFloat(orc.valor) || 0;
+                    const horasNum = parseFloat(orc.horas) || 0;
                     faturamentoTotal += valorNum;
+                    totalHorasMes += horasNum;
+
                     const valorFormatado = valorNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                     
                     const tr = document.createElement('tr');
                     tr.style.borderBottom = '1px solid #f3d1dc';
                     tr.innerHTML = `
                         <td style="padding: 8px; color: #333;">${orc.cliente}</td>
-                        <td style="padding: 8px; color: #555;">${orc.descricao}</td>
+                        <td style="padding: 8px; color: #555;">${orc.descricao} ${horasNum > 0 ? `(${horasNum}h)` : ''}</td>
+                        <td style="padding: 8px; text-align: right; font-weight: bold; color: #047857;">${valorFormatado}</td>
+                        <td style="padding: 8px; text-align: center;">
+                            <button onclick="removerOrcamentoFinanceiro(${orc.id})" style="background: #be123c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Remover</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);async function carregarDadosFinanceiros() {
+            popularSeletorMeses();
+            const selectMes = document.getElementById('select-mes-financeiro');
+            const mesSelecionado = selectMes ? selectMes.value : '';
+
+            try {
+                const url = mesSelecionado ? `/api/orcamentos/concluidos?mes=${mesSelecionado}` : '/api/orcamentos/concluidos';
+                const res = await fetch(url);
+                if (!res.ok) return;
+                const dados = await res.json();
+                
+                const tbody = document.getElementById('tabela-financeiro-concluidos');
+                const spanFaturamento = document.getElementById('fin-faturamento-total');
+                const spanTotalPedidos = document.getElementById('fin-total-pedidos');
+                const spanTotalHoras = document.getElementById('fin-total-horas');
+                
+                if (!tbody) return;
+
+                tbody.innerHTML = '';
+                let faturamentoTotal = 0;
+                let totalHorasMes = 0;
+
+                if (dados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Nenhum pedido concluído registado neste mês.</td></tr>';
+                    if (spanFaturamento) spanFaturamento.textContent = 'R$ 0,00';
+                    if (spanTotalPedidos) spanTotalPedidos.textContent = '0';
+                    if (spanTotalHoras) spanTotalHoras.textContent = '0h';
+                    return;
+                }
+
+                dados.forEach(orc => {
+                    const valorNum = parseFloat(orc.valor) || 0;
+                    const horasNum = parseFloat(orc.horas) || 0;
+                    faturamentoTotal += valorNum;
+                    totalHorasMes += horasNum;
+
+                    const valorFormatado = valorNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #f3d1dc';
+                    tr.innerHTML = `
+                        <td style="padding: 8px; color: #333;">${orc.cliente}</td>
+                        <td style="padding: 8px; color: #555;">${orc.descricao} ${horasNum > 0 ? `(${horasNum}h)` : ''}</td>
                         <td style="padding: 8px; text-align: right; font-weight: bold; color: #047857;">${valorFormatado}</td>
                         <td style="padding: 8px; text-align: center;">
                             <button onclick="removerOrcamentoFinanceiro(${orc.id})" style="background: #be123c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Remover</button>
@@ -1076,6 +1130,16 @@
 
                 if (spanFaturamento) spanFaturamento.textContent = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 if (spanTotalPedidos) spanTotalPedidos.textContent = dados.length;
+                if (spanTotalHoras) spanTotalHoras.textContent = `${totalHorasMes.toFixed(1)}h`;
+            } catch (e) {
+                console.error('Erro ao carregar dados financeiros:', e);
+            }
+        }
+                });
+
+                if (spanFaturamento) spanFaturamento.textContent = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if (spanTotalPedidos) spanTotalPedidos.textContent = dados.length;
+                if (spanTotalHoras) spanTotalHoras.textContent = `${totalHorasMes.toFixed(1)}h`;
             } catch (e) {
                 console.error('Erro ao carregar dados financeiros:', e);
             }
