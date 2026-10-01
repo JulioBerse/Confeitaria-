@@ -152,13 +152,26 @@ app.get('/api/orcamentos', async (req, res) => {
     }
 });
 
-// Rota para listar apenas os orçamentos concluídos (para o Financeiro)
+// Rota para buscar orçamentos concluídos (com suporte a filtro mensal opcional)
 app.get('/api/orcamentos/concluidos', async (req, res) => {
+    const { mes } = req.query; // Espera formato 'YYYY-MM', ex: '2026-10'
     try {
-        const lista = await pool.query("SELECT * FROM orcamentos WHERE status = 'concluido' ORDER BY id DESC");
-        res.json(lista.rows);
+        let query = "SELECT * FROM orcamentos WHERE status = 'concluido'";
+        let params = [];
+
+        if (mes) {
+            // Filtra com base na data de criação/conclusão do registo no banco
+            query += " AND TO_CHAR(criado_em, 'YYYY-MM') = $1";
+            params.push(mes);
+        }
+
+        query += " ORDER BY criado_em DESC";
+        
+        const resultado = await pool.query(query, params);
+        res.status(200).json(resultado.rows);
     } catch (err) {
-        res.status(500).send('Erro ao buscar orçamentos concluídos');
+        console.error('Erro ao buscar orçamentos concluídos:', err);
+        res.status(500).json({ error: err.message });
     }
 });
 
