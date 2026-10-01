@@ -475,33 +475,60 @@
 
         async function cadastrarIngrediente(event) {
             event.preventDefault();
-            const nome = document.getElementById('cad-nome').value.trim();
+            const nomeInput = document.getElementById('cad-nome').value.trim();
             const unidade = document.getElementById('cad-unidade').value;
             const quantidade_embalagem = parseFloat(document.getElementById('cad-qtd-emb').value);
             const preco_embalagem = parseFloat(document.getElementById('cad-preco').value);
 
-            try {
-                const response = await fetch('/api/ingredientes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nome, unidade, quantidade_embalagem, preco_embalagem, estoque_atual: quantidade_embalagem })
-                });
-                if (response.ok) {
-                    document.getElementById('form-cadastrar-ingrediente').reset();
-                    carregarTabelaEstoque();
-                }
-            } catch (err) { console.error(err); }
-        }
+            // Verifica se o ingrediente já existe no cache (ignorando maiúsculas/minúsculas)
+            const ingredienteExistente = ingredientesCache.find(
+                item => item.nome.toLowerCase() === nomeInput.toLowerCase()
+            );
 
-        async function ajustarEstoque(id, qtdDelta) {
             try {
-                const res = await fetch(`/api/ingredientes/${id}/estoque`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ quantidade: qtdDelta })
-                });
-                if (res.ok) carregarTabelaEstoque();
-            } catch (e) { console.error(e); }
+                if (ingredienteExistente) {
+                    // Se já existe, atualiza os dados e soma ao estoque atual
+                    const novoEstoque = parseFloat(ingredienteExistente.estoque_atual || 0) + quantidade_embalagem;
+                    
+                    const response = await fetch(`/api/ingredientes/${ingredienteExistente.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nome: nomeInput,
+                            unidade: unidade,
+                            quantidade_embalagem: quantidade_embalagem,
+                            preco_embalagem: preco_embalagem,
+                            estoque_atual: novoEstoque
+                        })
+                    });
+
+                    if (response.ok) {
+                        document.getElementById('form-cadastrar-ingrediente').reset();
+                        carregarTabelaEstoque();
+                    } else {
+                        alert('Erro ao atualizar o ingrediente existente.');
+                    }
+                } else {
+                    // Se não existe, cria um novo registo via POST normalmente
+                    const response = await fetch('/api/ingredientes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            nome: nomeInput, 
+                            unidade, 
+                            quantidade_embalagem, 
+                            preco_embalagem, 
+                            estoque_atual: quantidade_embalagem 
+                        })
+                    });
+                    if (response.ok) {
+                        document.getElementById('form-cadastrar-ingrediente').reset();
+                        carregarTabelaEstoque();
+                    }
+                }
+            } catch (err) { 
+                console.error(err); 
+            }
         }
 
         function atualizarDatalistSugestoes(dados) {
