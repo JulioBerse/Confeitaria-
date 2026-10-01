@@ -538,8 +538,7 @@
             });
         }
 
-        async function deletarIngrediente(id, nome) {
-    if (!confirm(`Deseja realmente remover o ingrediente "${nome}" do estoque?`)) return;
+async function deletarIngrediente(id, nome) {
     try {
         const res = await fetch(`/api/ingredientes/${id}`, { method: 'DELETE' });
         if (res.ok) {
@@ -551,6 +550,7 @@
         console.error('Erro ao excluir ingrediente:', e);
     }
 }
+
         // Rota para excluir um ingrediente pelo ID no Banco Neon
 app.delete('/api/ingredientes/:id', async (req, res) => {
     const { id } = req.params;
