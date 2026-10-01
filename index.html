@@ -28,6 +28,7 @@
                 <button onclick="mudarAba('ingredientes')" id="btn-aba-ingredientes" class="bg-rose-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition shadow-xs">📦 Ingredientes & Estoque</button>
                 <button onclick="mudarAba('receitas')" id="btn-aba-receitas" class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-full transition">📖 Fichas Técnicas (Receitas)</button>
                 <button onclick="mudarAba('orcamento')" id="btn-aba-orcamento" class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-full transition">💰 Orçamentos & Custos</button>
+                <button onclick="mudarAba('financeiro')" id="btn-aba-financeiro" class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-full transition">📈 Financeiro & Lucro</button>
             </div>
         </div>
 
@@ -369,6 +370,43 @@
             <p style="font-size: 8px; color: #7a6a63; margin: 0;">Telefone / WhatsApp: (66) 99671-8582</p>
         </div>
     </div>
+
+    <!-- ================= MÓDULO 4: FINANCEIRO & LUCRO MENSAL ================= -->
+<div id="secao-financeiro" class="hidden space-y-6">
+    <div class="mb-6">
+        <h2 class="text-xl font-bold text-stone-800">Coração Financeiro - Faturamento & Lucro</h2>
+        <p class="text-xs text-stone-500 mt-1">Acompanhe o desempenho de vendas, pedidos concluídos e o retorno financeiro da confeitaria.</p>
+    </div>
+
+    <!-- Cards de Resumo Mensal -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-emerald-900 text-white p-5 rounded-xl shadow-md">
+            <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-300 block mb-1">Faturamento Total Concluído (Mês):</span>
+            <span id="fin-faturamento-total" class="text-3xl font-extrabold">R$ 0,00</span>
+        </div>
+        <div class="bg-rose-900 text-white p-5 rounded-xl shadow-md">
+            <span class="text-[10px] uppercase font-bold tracking-widest text-rose-300 block mb-1">Total de Pedidos Concluídos:</span>
+            <span id="fin-total-pedidos" class="text-3xl font-extrabold">0</span>
+        </div>
+    </div>
+
+    <!-- Tabela de Pedidos Concluídos -->
+    <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #f3d1dc;">
+        <h3 style="color: #8c5867; margin-top: 0; font-size: 16px;">Histórico de Vendas Concluídas</h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px;">
+            <thead>
+                <tr style="background-color: #fbe4ec; color: #6e424f; text-align: left;">
+                    <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Cliente</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #f3d1dc;">Descrição</th>
+                    <th style="padding: 8px; border-bottom: 2px solid #f3d1dc; text-align: right;">Valor Recebido</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-financeiro-concluidos">
+                <tr><td colspan="3" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Carregando dados financeiros...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
     <!-- SCRIPTS -->
     <script>
@@ -881,7 +919,7 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
             if (el) el.addEventListener('input', () => atualizarTabelaPedidoAdmin());
         });
 
-        // ---------- ORÇAMENTOS EM ABERTO ----------
+       // ---------- ORÇAMENTOS EM ABERTO ----------
         async function carregarOrcamentosAbertos() {
             try {
                 const res = await fetch('/api/orcamentos');
@@ -904,8 +942,9 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
                         <td style="padding: 8px; color: #333;">${orc.cliente}</td>
                         <td style="padding: 8px; color: #555;">${orc.descricao}</td>
                         <td style="padding: 8px; text-align: right; font-weight: bold; color: #333;">${valorFormatado}</td>
-                        <td style="padding: 8px; text-align: center;">
-                            <button onclick="concluirOrcamento(${orc.id})" style="background: #8c5867; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Concluir / Apagar</button>
+                        <td style="padding: 8px; text-align: center; display: flex; gap: 5px; justify-content: center;">
+                            <button onclick="concluirOrcamento(${orc.id})" style="background: #047857; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Concluir</button>
+                            <button onclick="removerOrcamento(${orc.id})" style="background: #be123c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Remover</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -916,17 +955,76 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
         }
 
         async function concluirOrcamento(id) {
-            if (confirm('Deseja realmente concluir e remover este orçamento da lista?')) {
-                try {
-                    const res = await fetch(`/api/orcamentos/${id}`, { method: 'DELETE' });
-                    if (res.ok) {
-                        carregarOrcamentosAbertos();
-                    } else {
-                        alert('Erro ao apagar orçamento.');
+            try {
+                const res = await fetch(`/api/orcamentos/${id}/concluir`, { method: 'PATCH' });
+                if (res.ok) {
+                    carregarOrcamentosAbertos();
+                    // Se a aba financeira estiver aberta, atualiza-a também
+                    if (typeof carregarDadosFinanceiros === 'function') {
+                        carregarDadosFinanceiros();
                     }
-                } catch (e) {
-                    console.error('Erro ao excluir:', e);
+                } else {
+                    alert('Erro ao concluir orçamento.');
                 }
+            } catch (e) {
+                console.error('Erro ao concluir:', e);
+            }
+        }
+
+        async function removerOrcamento(id) {
+            try {
+                const res = await fetch(`/api/orcamentos/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    carregarOrcamentosAbertos();
+                } else {
+                    alert('Erro ao apagar orçamento.');
+                }
+            } catch (e) {
+                console.error('Erro ao excluir:', e);
+            }
+        }
+
+        // ---------- FINANCEIRO & LUCRO ----------
+        async function carregarDadosFinanceiros() {
+            try {
+                const res = await fetch('/api/orcamentos/concluidos');
+                if (!res.ok) return;
+                const dados = await res.json();
+                const tbody = document.getElementById('tabela-financeiro-concluidos');
+                const spanFaturamento = document.getElementById('fin-faturamento-total');
+                const spanTotalPedidos = document.getElementById('fin-total-pedidos');
+                
+                if (!tbody) return;
+
+                tbody.innerHTML = '';
+                let faturamentoTotal = 0;
+
+                if (dados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Nenhum pedido concluído registado.</td></tr>';
+                    if (spanFaturamento) spanFaturamento.textContent = 'R$ 0,00';
+                    if (spanTotalPedidos) spanTotalPedidos.textContent = '0';
+                    return;
+                }
+
+                dados.forEach(orc => {
+                    const valorNum = parseFloat(orc.valor) || 0;
+                    faturamentoTotal += valorNum;
+                    const valorFormatado = valorNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #f3d1dc';
+                    tr.innerHTML = `
+                        <td style="padding: 8px; color: #333;">${orc.cliente}</td>
+                        <td style="padding: 8px; color: #555;">${orc.descricao}</td>
+                        <td style="padding: 8px; text-align: right; font-weight: bold; color: #047857;">${valorFormatado}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                if (spanFaturamento) spanFaturamento.textContent = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if (spanTotalPedidos) spanTotalPedidos.textContent = dados.length;
+            } catch (e) {
+                console.error('Erro ao carregar dados financeiros:', e);
             }
         }
         

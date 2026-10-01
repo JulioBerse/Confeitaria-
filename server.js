@@ -152,6 +152,27 @@ app.get('/api/orcamentos', async (req, res) => {
     }
 });
 
+// Rota para listar apenas os orçamentos concluídos (para o Financeiro)
+app.get('/api/orcamentos/concluidos', async (req, res) => {
+    try {
+        const lista = await pool.query("SELECT * FROM orcamentos WHERE status = 'concluido' ORDER BY id DESC");
+        res.json(lista.rows);
+    } catch (err) {
+        res.status(500).send('Erro ao buscar orçamentos concluídos');
+    }
+});
+
+// Rota para concluir um orçamento
+app.patch('/api/orcamentos/:id/concluir', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query("UPDATE orcamentos SET status = 'concluido' WHERE id = $1", [id]);
+        res.json({ mensagem: 'Orçamento concluído com sucesso!' });
+    } catch (err) {
+        res.status(500).send('Erro ao concluir orçamento');
+    }
+});
+
 // Rota para apagar orçamento
 app.delete('/api/orcamentos/:id', async (req, res) => {
     try {
