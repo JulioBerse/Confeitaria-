@@ -127,7 +127,7 @@
         <div id="secao-orcamento" class="hidden space-y-6">
             <div class="mb-6">
                 <h2 class="text-xl font-bold text-stone-800">Calculadora de Orçamento e Custos</h2>
-                <p class="text-xs text-stone-500 mt-1">Monte o pedido, calcule a mão de obra, custos operacionais e margem de lucro com precisão.</p>
+                <p class="text-xs text-stone-500 mt-1">Monte o pedido com base nas Fichas Técnicas, calcule a mão de obra e a margem de lucro.</p>
             </div>
 
             <div class="space-y-6">
@@ -138,7 +138,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Descrição do Pedido (Bolo / Doce)</label>
-                        <input type="text" id="input-pedido" placeholder="Ex: Bolo decorado 2kg" class="w-full border border-stone-300 rounded p-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-800">
+                        <input type="text" id="input-pedido" placeholder="Ex: Bolo de Casamento 3 andares" class="w-full border border-stone-300 rounded p-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-800">
                     </div>
                 </div>
 
@@ -174,22 +174,23 @@
                     </div>
                 </div>
 
+                <!-- SEÇÃO ATUALIZADA: FICHAS TÉCNICAS NO ORÇAMENTO -->
                 <div class="border border-stone-200 rounded-lg p-4 bg-white shadow-xs">
-                    <h3 class="text-xs font-bold text-stone-700 uppercase tracking-wider mb-3">Insumos Utilizados no Pedido</h3>
+                    <h3 class="text-xs font-bold text-stone-700 uppercase tracking-wider mb-3">Receitas / Fichas Técnicas Utilizadas no Pedido</h3>
                     
                     <div class="flex flex-col sm:flex-row gap-3 mb-4 items-center">
-                        <select id="select-ingrediente" class="flex-1 border border-stone-300 rounded p-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-rose-800">
-                            <option value="">Carregando ingredientes do Banco Neon...</option>
+                        <select id="select-receita-orcamento" class="flex-1 border border-stone-300 rounded p-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-rose-800">
+                            <option value="">Carregando fichas técnicas do Banco Neon...</option>
                         </select>
-                        <input type="number" id="input-qtd-ingrediente" placeholder="Qtd (g ou ml)" class="w-full sm:w-40 border border-stone-300 rounded p-2 text-sm text-center">
-                        <button onclick="adicionarInsumoPedido()" class="w-full sm:w-auto bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold px-5 py-2.5 rounded transition shadow-xs">+ Adicionar Item</button>
+                        <input type="number" step="0.01" id="input-qtd-receita-orcamento" placeholder="Qtd (Ex: 1, 3...)" class="w-full sm:w-40 border border-stone-300 rounded p-2 text-sm text-center">
+                        <button type="button" onclick="adicionarReceitaPedido()" class="w-full sm:w-auto bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold px-5 py-2.5 rounded transition shadow-xs">+ Adicionar Receita</button>
                     </div>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm" id="tabela-itens-admin">
                             <thead>
                                 <tr class="bg-stone-100 text-stone-700 text-xs uppercase">
-                                    <th class="p-2.5">Ingrediente</th>
+                                    <th class="p-2.5">Ficha Técnica / Receita</th>
                                     <th class="p-2.5 w-32 text-center">Quantidade</th>
                                     <th class="p-2.5 w-32 text-right">Custo Parcial</th>
                                     <th class="p-2.5 w-20 text-center">Ações</th>
@@ -197,7 +198,7 @@
                             </thead>
                             <tbody id="corpo-tabela-admin">
                                 <tr>
-                                    <td colspan="4" class="p-4 text-center text-stone-400 text-xs italic" id="nenhum-item-msg">Nenhum ingrediente adicionado ao pedido.</td>
+                                    <td colspan="4" class="p-4 text-center text-stone-400 text-xs italic" id="nenhum-item-msg">Nenhuma receita adicionada ao pedido.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -206,7 +207,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-stone-900 text-white p-5 rounded-xl shadow-md">
                     <div>
-                        <span class="text-[10px] uppercase font-bold tracking-widest text-stone-400 block mb-1">Resumo de Custos dos Insumos:</span>
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-stone-400 block mb-1">Resumo de Custos das Receitas:</span>
                         <span id="resumo-custo-insumos" class="text-2xl font-bold">R$ 0,00</span>
                     </div>
                     <div class="md:text-right">
@@ -382,7 +383,7 @@
             </div>
         </div>
 
-     <!-- Cards de Resumo Mensal -->
+        <!-- Cards de Resumo Mensal -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-emerald-900 text-white p-5 rounded-xl shadow-md">
                 <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-300 block mb-1" id="label-faturamento-mes">Faturamento Total:</span>
@@ -424,7 +425,8 @@
 
     <script>
         let ingredientesCache = [];
-        let itensPedidoAtual = [];
+        let receitasCache = [];
+        let itensPedidoAtual = []; // Armazena as Fichas Técnicas selecionadas no orçamento
         let itensReceitaAtual = [];
 
         if ('serviceWorker' in navigator) {
@@ -819,51 +821,72 @@
             }
         }
 
-        // ---------- ORÇAMENTOS ----------
+        // ---------- ORÇAMENTOS (COM FICHAS TÉCNICAS) ----------
         async function carregarSelectOrcamento() {
-            const select = document.getElementById('select-ingrediente');
+            const select = document.getElementById('select-receita-orcamento');
             if (!select) return;
-            select.innerHTML = '<option value="">Selecione um ingrediente do estoque...</option>';
-            if (ingredientesCache.length === 0) {
-                try {
-                    const res = await fetch('/api/ingredientes');
-                    if (res.ok) ingredientesCache = await res.json();
-                } catch (e) {
-                    console.error('Erro ao carregar ingredientes para o orçamento:', e);
+            select.innerHTML = '<option value="">Selecione uma ficha técnica...</option>';
+            
+            try {
+                if (ingredientesCache.length === 0) {
+                    const resIng = await fetch('/api/ingredientes');
+                    if (resIng.ok) ingredientesCache = await resIng.json();
                 }
+                const resRec = await fetch('/api/receitas');
+                if (resRec.ok) {
+                    receitasCache = await resRec.json();
+                }
+
+                receitasCache.forEach(rec => {
+                    let custoTotalReceita = 0;
+                    if (rec.itens && rec.itens.length > 0) {
+                        rec.itens.forEach(i => {
+                            const ingData = ingredientesCache.find(x => x.id === i.ingrediente_id);
+                            if (ingData) {
+                                const precoEmb = parseFloat(ingData.preco_embalagem) || 0;
+                                const qtdEmb = parseFloat(ingData.quantidade_embalagem) || 1;
+                                custoTotalReceita += (precoEmb / qtdEmb) * parseFloat(i.quantidade);
+                            }
+                        });
+                    }
+                    const rendimento = parseFloat(rec.rendimento) || 1;
+
+                    const opt = document.createElement('option');
+                    opt.value = rec.id;
+                    opt.textContent = `${rec.nome} (Custo Base: R$ ${custoTotalReceita.toFixed(2)})`;
+                    opt.dataset.custoTotal = custoTotalReceita;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                console.error('Erro ao carregar receitas para o orçamento:', e);
             }
-            ingredientesCache.forEach(ing => {
-                const opt = document.createElement('option');
-                opt.value = ing.id;
-                opt.textContent = `${ing.nome} (Estoque: ${parseFloat(ing.estoque_atual || 0).toFixed(2)} ${ing.unidade})`;
-                select.appendChild(opt);
-            });
         }
 
-        function adicionarInsumoPedido() {
-            const select = document.getElementById('select-ingrediente');
+        function adicionarReceitaPedido() {
+            const select = document.getElementById('select-receita-orcamento');
             if (!select) return;
-            const ingId = parseInt(select.value);
-            const qtd = parseFloat(document.getElementById('input-qtd-ingrediente').value);
+            const recId = parseInt(select.value);
+            const qtd = parseFloat(document.getElementById('input-qtd-receita-orcamento').value);
 
-            if (!ingId || !qtd || qtd <= 0) {
-                alert('Selecione um ingrediente e informe a quantidade.');
+            if (!recId || !qtd || qtd <= 0) {
+                alert('Selecione uma ficha técnica e informe a quantidade.');
                 return;
             }
 
-            const ingData = ingredientesCache.find(x => x.id === ingId);
-            if (!ingData) return;
+            const recData = receitasCache.find(x => x.id === recId);
+            const optionSelecionada = select.options[select.selectedIndex];
+            const custoTotalBase = parseFloat(optionSelecionada.dataset.custoTotal) || 0;
+
+            if (!recData) return;
 
             itensPedidoAtual.push({
-                ingrediente_id: ingId,
-                nome: ingData.nome,
-                unidade: ingData.unidade,
+                receita_id: recId,
+                nome: recData.nome,
                 quantidade: qtd,
-                preco_embalagem: ingData.preco_embalagem,
-                quantidade_embalagem: ingData.quantidade_embalagem
+                custo_total_receita: custoTotalBase
             });
 
-            document.getElementById('input-qtd-ingrediente').value = '';
+            document.getElementById('input-qtd-receita-orcamento').value = '';
             select.value = '';
             atualizarTabelaPedidoAdmin();
         }
@@ -873,7 +896,7 @@
             if (!tbody) return;
 
             if (itensPedidoAtual.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 text-xs italic">Nenhum ingrediente adicionado ao pedido.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 text-xs italic">Nenhuma receita adicionada ao pedido.</td></tr>';
                 atualizarTotaisOrcamento(0);
                 return;
             }
@@ -882,18 +905,16 @@
             let custoTotalInsumos = 0;
 
             itensPedidoAtual.forEach((item, index) => {
-                const precoEmb = parseFloat(item.preco_embalagem) || 0;
-                const qtdEmb = parseFloat(item.quantidade_embalagem) || 1;
-                const custoParcial = (precoEmb / qtdEmb) * item.quantidade;
+                const custoParcial = item.custo_total_receita * item.quantidade;
                 custoTotalInsumos += custoParcial;
 
                 const tr = document.createElement('tr');
                 tr.className = 'border-b border-stone-100';
                 tr.innerHTML = `
                     <td class="p-2.5 font-medium text-stone-800">${item.nome}</td>
-                    <td class="p-2.5 text-center text-stone-600">${item.quantidade} ${item.unidade}</td>
+                    <td class="p-2.5 text-center text-stone-600">${item.quantidade} un</td>
                     <td class="p-2.5 text-right text-stone-600">R$ ${custoParcial.toFixed(2)}</td>
-                    <td class="p-2.5 text-center"><button onclick="removerInsumoPedido(${index})" class="text-rose-600 font-bold hover:underline">X</button></td>
+                    <td class="p-2.5 text-center"><button type="button" onclick="removerInsumoPedido(${index})" class="text-rose-600 font-bold hover:underline">X</button></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -918,7 +939,6 @@
             const custoOperacional = (custoInsumos * custosOpPct) / 100;
             const custoTotalProducao = custoInsumos + maoDeObra + custoOperacional + embalagem + entrega;
             
-            // Cálculo direto e equilibrado: Custo Total + Percentual de Lucro
             let precoSugerido = custoTotalProducao;
             if (margemPct > 0) {
                 precoSugerido = custoTotalProducao * (1 + (margemPct / 100));
@@ -939,10 +959,7 @@
         async function carregarOrcamentosAbertos() {
             try {
                 const res = await fetch('/api/orcamentos');
-                if (!res.ok) {
-                    console.error('Erro ao buscar orçamentos abertos. Status:', res.status);
-                    return;
-                }
+                if (!res.ok) return;
                 const dados = await res.json();
                 const tbody = document.getElementById('tabela-orcamentos-abertos');
                 if (!tbody) return;
@@ -982,8 +999,6 @@
                     if (typeof carregarDadosFinanceiros === 'function') {
                         carregarDadosFinanceiros();
                     }
-                } else {
-                    alert('Erro ao concluir orçamento.');
                 }
             } catch (e) {
                 console.error('Erro ao concluir orçamento:', e);
@@ -995,8 +1010,6 @@
                 const res = await fetch(`/api/orcamentos/${id}`, { method: 'DELETE' });
                 if (res.ok) {
                     carregarOrcamentosAbertos();
-                } else {
-                    alert('Erro ao apagar orçamento.');
                 }
             } catch (e) {
                 console.error('Erro ao excluir orçamento:', e);
@@ -1077,64 +1090,7 @@
                             <button onclick="removerOrcamentoFinanceiro(${orc.id})" style="background: #be123c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Remover</button>
                         </td>
                     `;
-                    tbody.appendChild(tr);async function carregarDadosFinanceiros() {
-            popularSeletorMeses();
-            const selectMes = document.getElementById('select-mes-financeiro');
-            const mesSelecionado = selectMes ? selectMes.value : '';
-
-            try {
-                const url = mesSelecionado ? `/api/orcamentos/concluidos?mes=${mesSelecionado}` : '/api/orcamentos/concluidos';
-                const res = await fetch(url);
-                if (!res.ok) return;
-                const dados = await res.json();
-                
-                const tbody = document.getElementById('tabela-financeiro-concluidos');
-                const spanFaturamento = document.getElementById('fin-faturamento-total');
-                const spanTotalPedidos = document.getElementById('fin-total-pedidos');
-                const spanTotalHoras = document.getElementById('fin-total-horas');
-                
-                if (!tbody) return;
-
-                tbody.innerHTML = '';
-                let faturamentoTotal = 0;
-                let totalHorasMes = 0;
-
-                if (dados.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Nenhum pedido concluído registado neste mês.</td></tr>';
-                    if (spanFaturamento) spanFaturamento.textContent = 'R$ 0,00';
-                    if (spanTotalPedidos) spanTotalPedidos.textContent = '0';
-                    if (spanTotalHoras) spanTotalHoras.textContent = '0h';
-                    return;
-                }
-
-                dados.forEach(orc => {
-                    const valorNum = parseFloat(orc.valor) || 0;
-                    const horasNum = parseFloat(orc.horas) || 0;
-                    faturamentoTotal += valorNum;
-                    totalHorasMes += horasNum;
-
-                    const valorFormatado = valorNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                    
-                    const tr = document.createElement('tr');
-                    tr.style.borderBottom = '1px solid #f3d1dc';
-                    tr.innerHTML = `
-                        <td style="padding: 8px; color: #333;">${orc.cliente}</td>
-                        <td style="padding: 8px; color: #555;">${orc.descricao} ${horasNum > 0 ? `(${horasNum}h)` : ''}</td>
-                        <td style="padding: 8px; text-align: right; font-weight: bold; color: #047857;">${valorFormatado}</td>
-                        <td style="padding: 8px; text-align: center;">
-                            <button onclick="removerOrcamentoFinanceiro(${orc.id})" style="background: #be123c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Remover</button>
-                        </td>
-                    `;
                     tbody.appendChild(tr);
-                });
-
-                if (spanFaturamento) spanFaturamento.textContent = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                if (spanTotalPedidos) spanTotalPedidos.textContent = dados.length;
-                if (spanTotalHoras) spanTotalHoras.textContent = `${totalHorasMes.toFixed(1)}h`;
-            } catch (e) {
-                console.error('Erro ao carregar dados financeiros:', e);
-            }
-        }
                 });
 
                 if (spanFaturamento) spanFaturamento.textContent = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -1151,8 +1107,6 @@
                 const res = await fetch(`/api/orcamentos/${id}`, { method: 'DELETE' });
                 if (res.ok) {
                     carregarDadosFinanceiros();
-                } else {
-                    alert('Erro ao remover o registo.');
                 }
             } catch (e) {
                 console.error('Erro ao remover registo financeiro:', e);
@@ -1185,10 +1139,7 @@
 
             const elemento = document.getElementById('conteudo-para-pdf');
 
-            if (!elemento) {
-                alert("Erro: Elemento do PDF não encontrado!");
-                return;
-            }
+            if (!elemento) return;
 
             elemento.style.display = 'block';
 
@@ -1196,17 +1147,8 @@
                 margin:       [5, 5, 5, 5],
                 filename:     nomeArquivo,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { 
-                    scale: 2, 
-                    useCORS: true, 
-                    letterRendering: true,
-                    scrollY: 0
-                },
-                jsPDF:        { 
-                    unit: 'mm', 
-                    format: 'a4', 
-                    orientation: 'portrait' 
-                }
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             html2pdf().from(elemento).set(opt).save().then(async () => {
@@ -1235,8 +1177,6 @@
 
                     if (resposta.ok) {
                         carregarOrcamentosAbertos();
-                    } else {
-                        console.error('Erro do servidor ao salvar orçamento.');
                     }
                 } catch (err) {
                     console.error("Erro de conexão ao salvar orçamento no banco:", err);
