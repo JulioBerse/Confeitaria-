@@ -409,6 +409,14 @@
 </div>
 
     <!-- SCRIPTS -->
+        // ---------- VARIÁVEIS GLOBAIS ----------
+            let ingredientesCache = [];
+            let itensPedidoAtual = [];
+            let itensReceitaAtual = [];
+
+
+
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -418,8 +426,7 @@
             });
         }
 
-        let ingredientesCache = [];
-        let itensReceitaAtual = [];
+  
 
         function mudarAba(aba) {
             const secIng = document.getElementById('secao-ingredientes');
