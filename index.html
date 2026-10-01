@@ -16,9 +16,9 @@
         
         <!-- Cabeçalho com Logo, Título e Navegação -->
         <div class="text-center border-b pb-6 mb-6">
-            <!-- LOGO NO TOPO DA PÁGINA (EMBUTIDA VIA BASE64 PARA GARANTIR 100% DE CARREGAMENTO) -->
+            <!-- LOGO NO TOPO DA PÁGINA -->
             <div class="flex justify-center mb-4">
-                 <img src="/Menu.jpg" alt="Silvia Iamassaki - Bolos e Doces Artesanais" class="h-28 w-auto object-contain rounded-xl shadow-xs border border-rose-100 p-1 bg-white" id="logo-principal"> 
+                 <img src="Menu.jpg" alt="Silvia Iamassaki - Bolos e Doces Artesanais" class="h-28 w-auto object-contain rounded-xl shadow-xs border border-rose-100 p-1 bg-white" id="logo-principal"> 
             </div>
 
             <h1 class="text-2xl font-serif text-rose-800 tracking-wide font-bold">Silvia Iamassaki</h1>
@@ -314,7 +314,7 @@
         
         <!-- TOPO DO PDF COM LOGO E TEXTO -->
         <div style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid #f3d1dc; padding-bottom: 10px;">
-            <img src="/Menu.jpg" alt="Silvia Iamassaki - Bolos e Doces Artesanais" class="h-28 w-auto object-contain rounded-xl shadow-xs border border-rose-100 p-1 bg-white" id="logo-principal">
+            <img src="Menu.jpg" alt="Silvia Iamassaki - Bolos e Doces Artesanais" class="h-28 w-auto object-contain rounded-xl shadow-xs border border-rose-100 p-1 bg-white" id="logo-principal">
             <h1 style="color: #8c5867; margin: 0 0 2px 0; font-size: 22px; font-family: serif; font-weight: bold; letter-spacing: 1px;">Silvia Iamassaki</h1>
             <p style="color: #7a6a63; font-size: 8px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 3px; font-weight: bold;">Bolos e Doces Artesanais</p>
             <div style="display: inline-block; background: #fbe4ec; color: #8c5867; padding: 2px 12px; border-radius: 20px; font-size: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; border: 1px solid #f3d1dc;">Orçamento</div>
@@ -487,26 +487,18 @@
 
             try {
                 if (ingredienteExistente) {
-                    // Se já existe, atualiza os dados e soma ao estoque atual
-                    const novoEstoque = parseFloat(ingredienteExistente.estoque_atual || 0) + quantidade_embalagem;
-                    
-                    const response = await fetch(`/api/ingredientes/${ingredienteExistente.id}`, {
-                        method: 'PUT',
+                    // Se já existe, atualiza o stock somando a nova quantidade através da rota PATCH existente
+                    const response = await fetch(`/api/ingredientes/${ingredienteExistente.id}/estoque`, {
+                        method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            nome: nomeInput,
-                            unidade: unidade,
-                            quantidade_embalagem: quantidade_embalagem,
-                            preco_embalagem: preco_embalagem,
-                            estoque_atual: novoEstoque
-                        })
+                        body: JSON.stringify({ quantidade: quantidade_embalagem })
                     });
 
                     if (response.ok) {
                         document.getElementById('form-cadastrar-ingrediente').reset();
                         carregarTabelaEstoque();
                     } else {
-                        alert('Erro ao atualizar o ingrediente existente.');
+                        alert('Erro ao atualizar o estoque do ingrediente existente.');
                     }
                 } else {
                     // Se não existe, cria um novo registo via POST normalmente
@@ -532,19 +524,18 @@
         }
 
         function atualizarDatalistSugestoes(dados) {
-    const datalist = document.getElementById('sugestoes-ingredientes');
-    if (!datalist) return;
-    datalist.innerHTML = '';
-    
-    // Filtra nomes únicos para evitar sugestões duplicadas no autocompletar
-    const nomesUnicos = [...new Set(dados.map(item => item.nome))];
-    
-    nomesUnicos.forEach(nome => {
-        const option = document.createElement('option');
-        option.value = nome;
-        datalist.appendChild(option);
-    });
-}
+            const datalist = document.getElementById('sugestoes-ingredientes');
+            if (!datalist) return;
+            datalist.innerHTML = '';
+            
+            const nomesUnicos = [...new Set(dados.map(item => item.nome))];
+            
+            nomesUnicos.forEach(nome => {
+                const option = document.createElement('option');
+                option.value = nome;
+                datalist.appendChild(option);
+            });
+        }
 
         // ---------- RECEITAS ----------
         async function carregarReceitas() {
