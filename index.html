@@ -902,7 +902,7 @@
             atualizarTabelaPedidoAdmin();
         }
 
-        function atualizarTotaisOrcamento(custoInsumos) {
+            function atualizarTotaisOrcamento(custoInsumos) {
             const horas = parseFloat(document.getElementById('input-horas')?.value) || 0;
             const valorHora = parseFloat(document.getElementById('input-valor-hora')?.value) || 0;
             const custosOpPct = parseFloat(document.getElementById('input-custos-op')?.value) || 0;
@@ -914,9 +914,10 @@
             const custoOperacional = (custoInsumos * custosOpPct) / 100;
             const custoTotalProducao = custoInsumos + maoDeObra + custoOperacional + embalagem + entrega;
             
+            // Cálculo direto e equilibrado: Custo Total + Percentual de Lucro
             let precoSugerido = custoTotalProducao;
             if (margemPct > 0) {
-                precoSugerido = custoTotalProducao / (1 - (margemPct / 100));
+                precoSugerido = custoTotalProducao * (1 + (margemPct / 100));
             }
 
             const elCusto = document.getElementById('resumo-custo-insumos');
