@@ -429,6 +429,7 @@
         let itensPedidoAtual = []; 
         let itensReceitaAtual = [];
         let receitaEditandoId = null;
+        let orcamentoEditandoId = null; // ID para controlar edição de orçamentos em aberto
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -1015,6 +1016,7 @@
                         <td style="padding: 8px; color: #555;">${orc.descricao}</td>
                         <td style="padding: 8px; text-align: right; font-weight: bold; color: #333;">${valorFormatado}</td>
                         <td style="padding: 8px; text-align: center; display: flex; gap: 5px; justify-content: center;">
+                            <button onclick='carregarOrcamentoParaEdicao(${JSON.stringify(orc)})' style="background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Editar</button>
                             <button onclick="concluirOrcamento(${orc.id})" style="background: #047857; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Concluir</button>
                             <button onclick="removerOrcamento(${orc.id})" style="background: #be123c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Remover</button>
                         </td>
@@ -1022,6 +1024,25 @@
                     tbody.appendChild(tr);
                 });
             } catch (e) { console.error(e); }
+        }
+
+        function carregarOrcamentoParaEdicao(orc) {
+            orcamentoEditandoId = orc.id;
+            
+            document.getElementById('input-cliente').value = orc.cliente || '';
+            document.getElementById('input-pedido').value = orc.descricao || '';
+            if (document.getElementById('input-horas')) {
+                document.getElementById('input-horas').value = orc.horas || 0;
+            }
+
+            document.getElementById('secao-orcamento').scrollIntoView({ behavior: 'smooth' });
+            
+            const btnGerar = document.querySelector("button[onclick='gerarPDFOrcamento()']");
+            if (btnGerar) {
+                btnGerar.textContent = '📄 Atualizar Orçamento em PDF';
+                btnGerar.classList.remove('bg-rose-800', 'hover:bg-rose-900');
+                btnGerar.classList.add('bg-blue-700', 'hover:bg-blue-800');
+            }
         }
 
         async function concluirOrcamento(id) {
@@ -1132,7 +1153,7 @@
             } catch (e) { console.error(e); }
         }
 
-        // ---------- GERAR PDF ORÇAMENTO ----------
+        // ---------- GERAR / ATUALIZAR PDF ORÇAMENTO ----------
         async function gerarPDFOrcamento() {
             const inputCliente = document.getElementById('input-cliente');
             const nomeCliente = inputCliente && inputCliente.value.trim() !== '' ? inputCliente.value : 'cliente';
@@ -1182,8 +1203,11 @@
                     const inputHoras = document.getElementById('input-horas');
                     const horasTrabalhadas = parseFloat(inputHoras ? inputHoras.value : 0) || 0;
 
-                    const resposta = await fetch('/api/orcamentos', {
-                        method: 'POST',
+                    const metodo = orcamentoEditandoId ? 'PUT' : 'POST';
+                    const rota = orcamentoEditandoId ? `/api/orcamentos/${orcamentoEditandoId}` : '/api/orcamentos';
+
+                    const resposta = await fetch(rota, {
+                        method: metodo,
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             cliente: nomeCliente,
@@ -1193,7 +1217,16 @@
                         })
                     });
 
-                    if (resposta.ok) carregarOrcamentosAbertos();
+                    if (resposta.ok) {
+                        orcamentoEditandoId = null; 
+                        const btnGerar = document.querySelector("button[onclick='gerarPDFOrcamento()']");
+                        if (btnGerar) {
+                            btnGerar.textContent = '📄 Gerar Orçamento Profissional em PDF';
+                            btnGerar.classList.remove('bg-blue-700', 'hover:bg-blue-800');
+                            btnGerar.classList.add('bg-rose-800', 'hover:bg-rose-900');
+                        }
+                        carregarOrcamentosAbertos();
+                    }
                 } catch (err) { console.error(err); }
 
             }).catch(err => {

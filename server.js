@@ -137,7 +137,6 @@ app.put('/api/receitas/:id', async (req, res) => {
   try {
     await client.query('BEGIN');
     
-    // Atualiza os dados principais da receita
     const receitaQuery = `
       UPDATE receitas 
       SET nome = $1, rendimento = $2, unidade_rendimento = $3 
@@ -145,10 +144,8 @@ app.put('/api/receitas/:id', async (req, res) => {
     `;
     await client.query(receitaQuery, [nome, rendimento, unidade_rendimento, id]);
 
-    // Remove os itens antigos para inserir os novos atualizados
     await client.query('DELETE FROM receita_itens WHERE receita_id = $1', [id]);
 
-    // Insere os novos itens da receita
     for (let item of itens) {
       const itemQuery = `
         INSERT INTO receita_itens (receita_id, ingrediente_id, quantidade) 
@@ -183,6 +180,22 @@ app.post('/api/orcamentos', async (req, res) => {
     }
 });
 
+// Rota para atualizar um orçamento existente (EDITAR)
+app.put('/api/orcamentos/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { cliente, descricao, valor, horas } = req.body;
+        const atualizado = await pool.query(
+            'UPDATE orcamentos SET cliente = $1, descricao = $2, valor = $3, horas = $4 WHERE id = $5 RETURNING *',
+            [cliente, descricao, valor, horas || 0, id]
+        );
+        res.json(atualizado.rows[0]);
+    } catch (err) {
+        console.error('Erro ao atualizar orçamento:', err);
+        res.status(500).send('Erro ao atualizar orçamento');
+    }
+});
+
 // Rota para listar apenas os orçamentos em aberto
 app.get('/api/orcamentos', async (req, res) => {
     try {
@@ -195,7 +208,7 @@ app.get('/api/orcamentos', async (req, res) => {
 
 // Rota para buscar orçamentos concluídos (com suporte a filtro mensal opcional)
 app.get('/api/orcamentos/concluidos', async (req, res) => {
-    const { mes } = req.query; // Espera formato 'YYYY-MM', ex: '2026-10'
+    const { mes } = req.query; 
     try {
         let query = "SELECT * FROM orcamentos WHERE status = 'concluido'";
         let params = [];
