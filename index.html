@@ -407,28 +407,10 @@
         </table>
     </div>
 </div>
-
-    <!-- SCRIPTS -->
-        // VARIÁVEIS GLOBAIS - Devem estar no topo absoluto do script
-let ingredientesCache = [];
-let itensPedidoAtual = [];
-let itensReceitaAtual = [];
-
-    
-
-
-
-
-    <script>
-
-                let ingredientesCache = [];
-                let itensPedidoAtual = [];
-                let itensReceitaAtual = [];
-
-
-
-
-
+        <script>
+        let ingredientesCache = [];
+        let itensPedidoAtual = [];
+        let itensReceitaAtual = [];
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -438,20 +420,21 @@ let itensReceitaAtual = [];
             });
         }
 
-  
-
         function mudarAba(aba) {
             const secIng = document.getElementById('secao-ingredientes');
             const secRec = document.getElementById('secao-receitas');
             const secOrc = document.getElementById('secao-orcamento');
+            const secFin = document.getElementById('secao-financeiro');
 
             if (secIng) secIng.classList.add('hidden');
             if (secRec) secRec.classList.add('hidden');
             if (secOrc) secOrc.classList.add('hidden');
+            if (secFin) secFin.classList.add('hidden');
 
             const btnIng = document.getElementById('btn-aba-ingredientes');
             const btnRec = document.getElementById('btn-aba-receitas');
             const btnOrc = document.getElementById('btn-aba-orcamento');
+            const btnFin = document.getElementById('btn-aba-financeiro');
 
             const estiloInativo = "bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold px-4 py-2 rounded-full transition";
             const estiloAtivo = "bg-rose-800 text-white text-xs font-semibold px-4 py-2 rounded-full transition shadow-xs";
@@ -459,6 +442,7 @@ let itensReceitaAtual = [];
             if (btnIng) btnIng.className = estiloInativo;
             if (btnRec) btnRec.className = estiloInativo;
             if (btnOrc) btnOrc.className = estiloInativo;
+            if (btnFin) btnFin.className = estiloInativo;
 
             if (aba === 'ingredientes') {
                 if (secIng) secIng.classList.remove('hidden');
@@ -472,6 +456,10 @@ let itensReceitaAtual = [];
                 if (secOrc) secOrc.classList.remove('hidden');
                 if (btnOrc) btnOrc.className = estiloAtivo;
                 carregarSelectOrcamento();
+            } else if (aba === 'financeiro') {
+                if (secFin) secFin.classList.remove('hidden');
+                if (btnFin) btnFin.className = estiloAtivo;
+                carregarDadosFinanceiros();
             }
         }
 
@@ -493,6 +481,7 @@ let itensReceitaAtual = [];
 
         async function carregarTabelaEstoque() {
             const tbody = document.getElementById('tabela-estoque-corpo');
+            if (!tbody) return;
             tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-stone-400 text-xs italic">Carregando do Banco Neon...</td></tr>';
             try {
                 const response = await fetch('/api/ingredientes');
@@ -516,15 +505,15 @@ let itensReceitaAtual = [];
                         tr.innerHTML = `
                             <td class="p-3 font-medium text-stone-800">${item.nome}</td>
                             <td class="p-3 text-stone-600">${qtdEmb.toFixed(2)} ${item.unidade}</td>
-                             <td class="p-3 text-stone-600">R$ ${precoTotal.toFixed(2).replace('.', ',')}</td>
+                            <td class="p-3 text-stone-600">R$ ${precoTotal.toFixed(2).replace('.', ',')}</td>
                             <td class="p-3 font-semibold text-rose-800">R$ ${custoUnit.toFixed(4).replace('.', ',')} / ${item.unidade}</td>
                             <td class="p-3 text-stone-700 font-medium">${estoqueAtual.toFixed(2)} ${item.unidade}</td>
-                             <td class="p-3 text-center space-x-1">
-                                 <button onclick="ajustarEstoque(${item.id}, 500)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold px-2 py-1 rounded transition" title="Adicionar 500">+500</button>
-                                 <button onclick="ajustarEstoque(${item.id}, -500)" class="bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold px-2 py-1 rounded transition" title="Remover 500">-500</button>
-                                  <button onclick="deletarIngrediente(${item.id}, '${item.nome}')" class="bg-stone-200 hover:bg-rose-600 hover:text-white text-stone-700 text-xs font-bold px-2.5 py-1 rounded transition" title="Excluir ingrediente">Excluir</button>
-    </td>
-`;
+                            <td class="p-3 text-center space-x-1">
+                                <button onclick="ajustarEstoque(${item.id}, 500)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold px-2 py-1 rounded transition" title="Adicionar 500">+500</button>
+                                <button onclick="ajustarEstoque(${item.id}, -500)" class="bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold px-2 py-1 rounded transition" title="Remover 500">-500</button>
+                                <button onclick="deletarIngrediente(${item.id}, '${item.nome}')" class="bg-stone-200 hover:bg-rose-600 hover:text-white text-stone-700 text-xs font-bold px-2.5 py-1 rounded transition" title="Excluir ingrediente">Excluir</button>
+                            </td>
+                        `;
                         tbody.appendChild(tr);
                     });
                 }
@@ -538,14 +527,12 @@ let itensReceitaAtual = [];
             const quantidade_embalagem = parseFloat(document.getElementById('cad-qtd-emb').value);
             const preco_embalagem = parseFloat(document.getElementById('cad-preco').value);
 
-            // Verifica se o ingrediente já existe no cache (ignorando maiúsculas/minúsculas)
             const ingredienteExistente = ingredientesCache.find(
                 item => item.nome.toLowerCase() === nomeInput.toLowerCase()
             );
 
             try {
                 if (ingredienteExistente) {
-                    // Se já existe, atualiza o stock somando a nova quantidade através da rota PATCH existente
                     const response = await fetch(`/api/ingredientes/${ingredienteExistente.id}/estoque`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
@@ -559,7 +546,6 @@ let itensReceitaAtual = [];
                         alert('Erro ao atualizar o estoque do ingrediente existente.');
                     }
                 } else {
-                    // Se não existe, cria um novo registo via POST normalmente
                     const response = await fetch('/api/ingredientes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -585,9 +571,7 @@ let itensReceitaAtual = [];
             const datalist = document.getElementById('sugestoes-ingredientes');
             if (!datalist) return;
             datalist.innerHTML = '';
-            
             const nomesUnicos = [...new Set(dados.map(item => item.nome))];
-            
             nomesUnicos.forEach(nome => {
                 const option = document.createElement('option');
                 option.value = nome;
@@ -595,35 +579,23 @@ let itensReceitaAtual = [];
             });
         }
 
-async function deletarIngrediente(id, nome) {
-    try {
-        const res = await fetch(`/api/ingredientes/${id}`, { method: 'DELETE' });
-        if (res.ok) {
-            carregarTabelaEstoque();
-        } else {
-            alert('Erro ao excluir o ingrediente.');
+        async function deletarIngrediente(id, nome) {
+            try {
+                const res = await fetch(`/api/ingredientes/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    carregarTabelaEstoque();
+                } else {
+                    alert('Erro ao excluir o ingrediente.');
+                }
+            } catch (e) {
+                console.error('Erro ao excluir ingrediente:', e);
+            }
         }
-    } catch (e) {
-        console.error('Erro ao excluir ingrediente:', e);
-    }
-}
-
-        // Rota para excluir um ingrediente pelo ID no Banco Neon
-app.delete('/api/ingredientes/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        // Ajuste o nome da tabela e da coluna se necessário (ex: 'ingredientes')
-        await pool.query('DELETE FROM ingredientes WHERE id = $1', [id]);
-        res.status(200).json({ message: 'Ingrediente excluído com sucesso!' });
-    } catch (err) {
-        console.error('Erro ao excluir ingrediente:', err);
-        res.status(500).json({ error: err.message });
-    }
-});
 
         // ---------- RECEITAS ----------
         async function carregarReceitas() {
             const container = document.getElementById('container-lista-receitas');
+            if (!container) return;
             container.innerHTML = '<div class="p-6 text-center text-stone-400 text-xs italic">Carregando receitas do Banco Neon...</div>';
             
             try {
@@ -706,6 +678,7 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
 
         async function carregarSelectIngredientesModal() {
             const select = document.getElementById('rec-select-ingrediente');
+            if (!select) return;
             select.innerHTML = '<option value="">Selecione um ingrediente...</option>';
             if (ingredientesCache.length === 0) {
                 const res = await fetch('/api/ingredientes');
@@ -748,6 +721,7 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
 
         function atualizarTabelaItensReceitaModal() {
             const tbody = document.getElementById('rec-tabela-itens');
+            if (!tbody) return;
             if (itensReceitaAtual.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-stone-400 italic">Nenhum ingrediente adicionado.</td></tr>';
                 return;
@@ -830,9 +804,7 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
             }
         }
 
-  // ---------- ORÇAMENTOS ----------
-        let itensPedidoAtual = [];
-
+        // ---------- ORÇAMENTOS ----------
         async function carregarSelectOrcamento() {
             const select = document.getElementById('select-ingrediente');
             if (!select) return;
@@ -855,6 +827,7 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
 
         function adicionarInsumoPedido() {
             const select = document.getElementById('select-ingrediente');
+            if (!select) return;
             const ingId = parseInt(select.value);
             const qtd = parseFloat(document.getElementById('input-qtd-ingrediente').value);
 
@@ -941,7 +914,6 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
             if (elPreco) elPreco.textContent = `R$ ${precoSugerido.toFixed(2).replace('.', ',')}`;
         }
 
-        // Recalcular ao alterar parâmetros
         ['input-horas', 'input-valor-hora', 'input-custos-op', 'input-margem', 'input-embalagem', 'input-entrega'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', () => atualizarTabelaPedidoAdmin());
@@ -1014,12 +986,6 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
                 console.error('Erro ao excluir orçamento:', e);
             }
         }
-
-        // Executar carregamento inicial ao abrir a página
-        window.addEventListener('DOMContentLoaded', () => {
-            carregarOrcamentosAbertos();
-            carregarSelectOrcamento();
-        });
 
         // ---------- FINANCEIRO & LUCRO ----------
         async function carregarDadosFinanceiros() {
@@ -1151,9 +1117,11 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
             });
         }
 
-        // Inicialização
-        carregarTabelaEstoque();
-        carregarOrcamentosAbertos();
-    </script>
+        // Inicialização ao carregar a página
+        window.addEventListener('DOMContentLoaded', () => {
+            carregarTabelaEstoque();
+            carregarOrcamentosAbertos();
+        });
+    </script>    
 </body>
 </html>
