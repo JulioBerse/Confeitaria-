@@ -50,7 +50,7 @@
                     <form id="form-cadastrar-ingrediente" onsubmit="cadastrarIngrediente(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
                         <div>
                             <label class="block text-xs font-bold text-stone-600 mb-1">Nome</label>
-                            <input type="text" id="cad-nome" list="sugestoes-ingredientes" placeholder="Ex: Açúcar Cristal" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none" autocomplete="off">
+                            <input type="text" id="cad-nome" list="sugestoes-ingredientes" placeholder="Ex: Açúcar Cristal" required class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none" autocomplete="on">
                             <datalist id="sugestoes-ingredientes">
                                 
                             </datalist>
@@ -442,6 +442,7 @@
                 if (response.ok) {
                     const dados = await response.json();
                     ingredientesCache = dados;
+                    atualizarDatalistSugestoes(dados);
                     if (dados.length === 0) {
                         tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-stone-400 text-xs italic">Nenhum ingrediente cadastrado.</td></tr>';
                         return;
