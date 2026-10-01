@@ -932,7 +932,7 @@
             if (!tbody) return;
 
             if (itensPedidoAtual.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 text-xs italic">Nenhuma receita adicionada ao pedido.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 text-xs italic" id="nenhum-item-msg">Nenhuma receita adicionada ao pedido.</td></tr>';
                 atualizarTotaisOrcamento(0);
                 return;
             }
@@ -1029,11 +1029,22 @@
         function carregarOrcamentoParaEdicao(orc) {
             orcamentoEditandoId = orc.id;
             
+            // Preenche os campos principais
             document.getElementById('input-cliente').value = orc.cliente || '';
             document.getElementById('input-pedido').value = orc.descricao || '';
             if (document.getElementById('input-horas')) {
                 document.getElementById('input-horas').value = orc.horas || 0;
             }
+
+            // CORREÇÃO: Como o orçamento armazena o resumo e não os itens individualizados detalhados,
+            // limpa os itens antigos da tabela e adiciona um item genérico baseado na descrição para que a Silvia possa ajustar.
+            itensPedidoAtual = [{
+                receita_id: 0,
+                nome: orc.descricao || 'Item Personalizado',
+                quantidade: 1,
+                custo_total_receita: parseFloat(orc.valor) || 0
+            }];
+            atualizarTabelaPedidoAdmin();
 
             document.getElementById('secao-orcamento').scrollIntoView({ behavior: 'smooth' });
             
@@ -1218,7 +1229,17 @@
                     });
 
                     if (resposta.ok) {
-                        orcamentoEditandoId = null; 
+                        // CORREÇÃO: Limpa a tela e reseta o formulário após gerar/atualizar o orçamento com sucesso
+                        orcamentoEditandoId = null;
+                        if (inputCliente) inputCliente.value = '';
+                        if (inputPedido) inputPedido.value = '';
+                        if (inputHoras) inputHoras.value = '0';
+                        document.getElementById('input-embalagem').value = '0.00';
+                        document.getElementById('input-entrega').value = '0.00';
+                        
+                        itensPedidoAtual = [];
+                        atualizarTabelaPedidoAdmin();
+
                         const btnGerar = document.querySelector("button[onclick='gerarPDFOrcamento()']");
                         if (btnGerar) {
                             btnGerar.textContent = '📄 Gerar Orçamento Profissional em PDF';
