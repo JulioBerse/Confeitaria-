@@ -1170,6 +1170,20 @@
             const inputPedido = document.getElementById('input-pedido');
             const resumoPrecoSugerido = document.getElementById('resumo-preco-sugerido');
 
+            const inputHoras = document.getElementById('input-horas');
+            const horasTrabalhadas = parseFloat(inputHoras ? inputHoras.value : 0) || 0;
+
+            const resposta = await fetch('/api/orcamentos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+             cliente: nomeCliente,
+             descricao: descricaoTexto,
+              valor: valorLimpo,
+              horas: horasTrabalhadas
+    })
+});
+
             if (spanPdfCliente) spanPdfCliente.textContent = nomeCliente;
             if (spanPdfDescricao) spanPdfDescricao.textContent = inputPedido ? inputPedido.value || 'Encomenda de Bolos e Doces' : '-';
             if (spanPdfValorItem) spanPdfValorItem.textContent = inputPedido ? inputPedido.value || 'Produto Artesanal' : 'Produto Artesanal';

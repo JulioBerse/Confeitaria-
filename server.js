@@ -131,13 +131,14 @@ app.post('/api/receitas', async (req, res) => {
 // Rota para salvar um novo orçamento
 app.post('/api/orcamentos', async (req, res) => {
     try {
-        const { cliente, descricao, valor } = req.body;
+        const { cliente, descricao, valor, horas } = req.body;
         const novo = await pool.query(
-            'INSERT INTO orcamentos (cliente, descricao, valor, status) VALUES ($1, $2, $3, $4) RETURNING *',
-            [cliente, descricao, valor, 'aberto']
+            'INSERT INTO orcamentos (cliente, descricao, valor, horas, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [cliente, descricao, valor, horas || 0, 'aberto']
         );
         res.json(novo.rows[0]);
     } catch (err) {
+        console.error('Erro ao salvar orçamento:', err);
         res.status(500).send('Erro ao salvar orçamento');
     }
 });
