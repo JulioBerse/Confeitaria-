@@ -811,15 +811,20 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
             }
         }
 
-        // ---------- ORÇAMENTOS ----------
+  // ---------- ORÇAMENTOS ----------
         let itensPedidoAtual = [];
 
         async function carregarSelectOrcamento() {
             const select = document.getElementById('select-ingrediente');
+            if (!select) return;
             select.innerHTML = '<option value="">Selecione um ingrediente do estoque...</option>';
             if (ingredientesCache.length === 0) {
-                const res = await fetch('/api/ingredientes');
-                if (res.ok) ingredientesCache = await res.json();
+                try {
+                    const res = await fetch('/api/ingredientes');
+                    if (res.ok) ingredientesCache = await res.json();
+                } catch (e) {
+                    console.error('Erro ao carregar ingredientes para o orçamento:', e);
+                }
             }
             ingredientesCache.forEach(ing => {
                 const opt = document.createElement('option');
@@ -858,6 +863,8 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
 
         function atualizarTabelaPedidoAdmin() {
             const tbody = document.getElementById('corpo-tabela-admin');
+            if (!tbody) return;
+
             if (itensPedidoAtual.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone-400 text-xs italic">Nenhum ingrediente adicionado ao pedido.</td></tr>';
                 atualizarTotaisOrcamento(0);
@@ -893,12 +900,12 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
         }
 
         function atualizarTotaisOrcamento(custoInsumos) {
-            const horas = parseFloat(document.getElementById('input-horas').value) || 0;
-            const valorHora = parseFloat(document.getElementById('input-valor-hora').value) || 0;
-            const custosOpPct = parseFloat(document.getElementById('input-custos-op').value) || 0;
-            const margemPct = parseFloat(document.getElementById('input-margem').value) || 0;
-            const embalagem = parseFloat(document.getElementById('input-embalagem').value) || 0;
-            const entrega = parseFloat(document.getElementById('input-entrega').value) || 0;
+            const horas = parseFloat(document.getElementById('input-horas')?.value) || 0;
+            const valorHora = parseFloat(document.getElementById('input-valor-hora')?.value) || 0;
+            const custosOpPct = parseFloat(document.getElementById('input-custos-op')?.value) || 0;
+            const margemPct = parseFloat(document.getElementById('input-margem')?.value) || 0;
+            const embalagem = parseFloat(document.getElementById('input-embalagem')?.value) || 0;
+            const entrega = parseFloat(document.getElementById('input-entrega')?.value) || 0;
 
             const maoDeObra = horas * valorHora;
             const custoOperacional = (custoInsumos * custosOpPct) / 100;
@@ -909,8 +916,10 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
                 precoSugerido = custoTotalProducao / (1 - (margemPct / 100));
             }
 
-            document.getElementById('resumo-custo-insumos').textContent = `R$ ${custoInsumos.toFixed(2).replace('.', ',')}`;
-            document.getElementById('resumo-preco-sugerido').textContent = `R$ ${precoSugerido.toFixed(2).replace('.', ',')}`;
+            const elCusto = document.getElementById('resumo-custo-insumos');
+            const elPreco = document.getElementById('resumo-preco-sugerido');
+            if (elCusto) elCusto.textContent = `R$ ${custoInsumos.toFixed(2).replace('.', ',')}`;
+            if (elPreco) elPreco.textContent = `R$ ${precoSugerido.toFixed(2).replace('.', ',')}`;
         }
 
         // Recalcular ao alterar parâmetros
@@ -919,11 +928,14 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
             if (el) el.addEventListener('input', () => atualizarTabelaPedidoAdmin());
         });
 
-       // ---------- ORÇAMENTOS EM ABERTO ----------
+        // ---------- ORÇAMENTOS EM ABERTO ----------
         async function carregarOrcamentosAbertos() {
             try {
                 const res = await fetch('/api/orcamentos');
-                if (!res.ok) return;
+                if (!res.ok) {
+                    console.error('Erro ao buscar orçamentos abertos. Status:', res.status);
+                    return;
+                }
                 const dados = await res.json();
                 const tbody = document.getElementById('tabela-orcamentos-abertos');
                 if (!tbody) return;
@@ -935,7 +947,8 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
                 }
 
                 dados.forEach(orc => {
-                    const valorFormatado = parseFloat(orc.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const valorNum = parseFloat(orc.valor) || 0;
+                    const valorFormatado = valorNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                     const tr = document.createElement('tr');
                     tr.style.borderBottom = '1px solid #f3d1dc';
                     tr.innerHTML = `
@@ -950,7 +963,7 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
                     tbody.appendChild(tr);
                 });
             } catch (e) {
-                console.error('Erro ao carregar orçamentos:', e);
+                console.error('Erro de rede ao carregar orçamentos:', e);
             }
         }
 
@@ -959,7 +972,6 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
                 const res = await fetch(`/api/orcamentos/${id}/concluir`, { method: 'PATCH' });
                 if (res.ok) {
                     carregarOrcamentosAbertos();
-                    // Se a aba financeira estiver aberta, atualiza-a também
                     if (typeof carregarDadosFinanceiros === 'function') {
                         carregarDadosFinanceiros();
                     }
@@ -967,7 +979,7 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
                     alert('Erro ao concluir orçamento.');
                 }
             } catch (e) {
-                console.error('Erro ao concluir:', e);
+                console.error('Erro ao concluir orçamento:', e);
             }
         }
 
@@ -980,9 +992,15 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
                     alert('Erro ao apagar orçamento.');
                 }
             } catch (e) {
-                console.error('Erro ao excluir:', e);
+                console.error('Erro ao excluir orçamento:', e);
             }
         }
+
+        // Executar carregamento inicial ao abrir a página
+        window.addEventListener('DOMContentLoaded', () => {
+            carregarOrcamentosAbertos();
+            carregarSelectOrcamento();
+        });
 
         // ---------- FINANCEIRO & LUCRO ----------
         async function carregarDadosFinanceiros() {
