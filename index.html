@@ -409,15 +409,27 @@
 </div>
 
     <!-- SCRIPTS -->
-        // ---------- VARIÁVEIS GLOBAIS ----------
-            let ingredientesCache = [];
-            let itensPedidoAtual = [];
-            let itensReceitaAtual = [];
+        // VARIÁVEIS GLOBAIS - Devem estar no topo absoluto do script
+let ingredientesCache = [];
+let itensPedidoAtual = [];
+let itensReceitaAtual = [];
+
+    
 
 
 
 
     <script>
+
+                let ingredientesCache = [];
+                let itensPedidoAtual = [];
+                let itensReceitaAtual = [];
+
+
+
+
+
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
