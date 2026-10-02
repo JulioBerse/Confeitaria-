@@ -54,25 +54,22 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
     }
 });
 
-// Rota de Estoque e Atualização de Ingrediente (Atualizar rápido ou com novo preço/embalagem)
+// Rota de Estoque e Atualização de Ingrediente (Soma ao estoque atual e atualiza o preço, mantendo o tamanho base da embalagem)
 app.patch('/api/ingredientes/:id/estoque', async (req, res) => {
   const { id } = req.params;
-  const { quantidade, preco_embalagem, quantidade_embalagem } = req.body;
+  const { quantidade, preco_embalagem } = req.body;
   try {
     let query, values;
     
-    // Se foram enviados novos preços e tamanhos de embalagem, atualizamos tudo junto somando o estoque
-    if (preco_embalagem !== undefined && quantidade_embalagem !== undefined) {
+    if (preco_embalagem !== undefined) {
       query = `
         UPDATE ingredientes 
         SET estoque_atual = GREATEST(0, estoque_atual + $1),
-            preco_embalagem = $2,
-            quantidade_embalagem = $3
-        WHERE id = $4 RETURNING *;
+            preco_embalagem = $2
+        WHERE id = $3 RETURNING *;
       `;
-      values = [quantidade, preco_embalagem, quantidade_embalagem, id];
+      values = [quantidade, preco_embalagem, id];
     } else {
-      // Caso contrário, apenas atualiza o estoque somando/subtraindo
       query = `
         UPDATE ingredientes 
         SET estoque_atual = GREATEST(0, estoque_atual + $1) 

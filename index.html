@@ -544,57 +544,44 @@
             } catch (e) { console.error(e); }
         }
 
-  async function cadastrarIngrediente(event) {
+        async function cadastrarIngrediente(event) {
             event.preventDefault();
             const nomeInput = document.getElementById('cad-nome').value.trim();
             const unidade = document.getElementById('cad-unidade').value;
             const quantidade_embalagem = parseFloat(document.getElementById('cad-qtd-emb').value);
             const preco_embalagem = parseFloat(document.getElementById('cad-preco').value);
 
-            // Procura o ingrediente ignorando maiúsculas/minúsculas
             const ingredienteExistente = ingredientesCache.find(item => item.nome.toLowerCase() === nomeInput.toLowerCase());
 
             try {
                 if (ingredienteExistente) {
-                    // SE JÁ EXISTE: Atualiza o estoque somando a nova quantidade E atualiza o preço/embalagem nova!
+                    // Atualiza o estoque somando a quantidade e definindo o novo preço da embalagem comprada
                     await fetch(`/api/ingredientes/${ingredienteExistente.id}/estoque`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
                             quantidade: quantidade_embalagem,
-                            preco_embalagem: preco_embalagem,
-                            quantidade_embalagem: quantidade_embalagem
+                            preco_embalagem: preco_embalagem
                         })
                     });
                 } else {
-                    // SE NÃO EXISTE: Cria um novo ingrediente do zero
                     await fetch('/api/ingredientes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            nome: nomeInput, 
-                            unidade, 
-                            quantidade_embalagem, 
-                            preco_embalagem, 
-                            estoque_atual: quantidade_embalagem 
-                        })
+                        body: JSON.stringify({ nome: nomeInput, unidade, quantidade_embalagem, preco_embalagem, estoque_atual: quantidade_embalagem })
                     });
                 }
                 document.getElementById('form-cadastrar-ingrediente').reset();
                 carregarTabelaEstoque();
-            } catch (err) { 
-                console.error("Erro ao salvar ingrediente:", err); 
-            }
+            } catch (err) { console.error(err); }
         }
 
         async function ajustarEstoque(id, qtd) {
             const novoPreco = prompt("Deseja atualizar o preço total desta embalagem? (Deixe em branco para manter o preço atual):");
-            const novaQtdEmb = prompt("Deseja atualizar o tamanho da embalagem em gramas/ml? (Deixe em branco para manter):");
 
             let payload = { quantidade: qtd };
-            if (novoPreco && !isNaN(parseFloat(novoPreco)) && novaQtdEmb && !isNaN(parseFloat(novaQtdEmb))) {
+            if (novoPreco && !isNaN(parseFloat(novoPreco))) {
                 payload.preco_embalagem = parseFloat(novoPreco);
-                payload.quantidade_embalagem = parseFloat(novaQtdEmb);
             }
 
             try {
