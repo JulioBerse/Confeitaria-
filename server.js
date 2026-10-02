@@ -251,31 +251,38 @@ app.patch('/api/orcamentos/:id/concluir', async (req, res) => {
         if (orc.itens_json) {
             let itensPedido = [];
             try {
-                itensPedido = typeof orc.itens_json === 'string' ? JSON.parse(orc.itens_json) : orc.itens_json;
+                if (typeof orc.itens_json === 'string') {
+                    itensPedido = JSON.parse(orc.itens_json);
+                } else {
+                    itensPedido = orc.itens_json;
+                }
             } catch (e) {
-                console.error("Erro ao processar itens_json do orçamento:", e);
+                console.error("Erro ao parsear itens_json do orçamento:", e);
             }
 
-            for (let item of itensPedido) {
-                if (item.tipo === 'avulso') {
-                    // Desconta diretamente o ingrediente extra do estoque
-                    await client.query(
-                        "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
-                        [item.quantidade, item.ingrediente_id]
-                    );
-                } else if (item.receita_id && item.receita_id > 0) {
-                    // Busca os ingredientes da ficha técnica/recheio e desconta proporcionalmente
-                    const recItensRes = await client.query(
-                        "SELECT ingrediente_id, quantidade FROM receita_itens WHERE receita_id = $1",
-                        [item.receita_id]
-                    );
-                    
-                    for (let recItem of recItensRes.rows) {
-                        const qtdConsumida = recItem.quantidade * item.quantidade;
+            if (Array.isArray(itensPedido)) {
+                for (let item of itensPedido) {
+                    if (item.tipo === 'avulso' && item.ingrediente_id) {
+                        // Desconta diretamente o ingrediente extra do estoque
                         await client.query(
                             "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
-                            [qtdConsumida, recItem.ingrediente_id]
+                            [parseFloat(item.quantidade) || 0, item.ingrediente_id]
                         );
+                    } else if (item.receita_id && item.receita_id > 0) {
+                        // Busca os ingredientes da ficha técnica/recheio e desconta proporcionalmente
+                        const recItensRes = await client.query(
+                            "SELECT ingrediente_id, quantidade FROM receita_itens WHERE receita_id = $1",
+                            [item.receita_id]
+                        );
+                        
+                        const multiplicadorQtd = parseFloat(item.quantidade) || 1;
+                        for (let recItem of recItensRes.rows) {
+                            const qtdConsumida = (parseFloat(recItem.quantidade) || 0) * multiplicadorQtd;
+                            await client.query(
+                                "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
+                                [qtdConsumida, recItem.ingrediente_id]
+                            );
+                        }
                     }
                 }
             }
