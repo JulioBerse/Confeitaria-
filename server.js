@@ -247,48 +247,47 @@ app.patch('/api/orcamentos/:id/concluir', async (req, res) => {
         // 2. Atualiza o status para concluído
         await client.query("UPDATE orcamentos SET status = 'concluido' WHERE id = $1", [id]);
 
-        // 3. Processa a baixa automática no estoque baseada nos itens salvos
+        // 3. Processa a baixa automática no estoque
         if (orc.itens_json) {
             let itensPedido = [];
             try {
-                if (typeof orc.itens_json === 'string') {
-                    itensPedido = JSON.parse(orc.itens_json);
-                } else {
-                    itensPedido = orc.itens_json;
-                }
+                itensPedido = typeof orc.itens_json === 'string' ? JSON.parse(orc.itens_json) : orc.itens_json;
             } catch (e) {
-                console.error("Erro ao parsear itens_json do orçamento:", e);
+                console.error("Erro ao parsear itens_json:", e);
             }
 
-            console.log("=== INICIO BAIXA ESTOQUE ORÇAMENTO ===", id);
-            console.log("Itens do pedido a processar:", itensPedido);
+            console.log(">>> PROCESSANDO ORÇAMENTO CONCLUÍDO ID:", id);
+            console.log(">>> ITENS ENCONTRADOS:", JSON.stringify(itensPedido));
 
             if (Array.isArray(itensPedido)) {
                 for (let item of itensPedido) {
-                    // Trata item avulso ou extra
-                    if (item.tipo === 'avulso' && item.ingrediente_id) {
-                        console.log(`[AVULSO] Baixando ingrediente ID ${item.ingrediente_id}: qtd ${item.quantidade}`);
+                    // Verifica se é um ingrediente avulso/extra direto
+                    const ingredienteAvulsoId = item.ingrediente_id || item.ingredienteId;
+                    const qtdItem = parseFloat(item.quantidade) || 0;
+
+                    if (item.tipo === 'avulso' && ingredienteAvulsoId) {
+                        console.log(`[BAIXA AVULSO] Ingrediente ID: ${ingredienteAvulsoId} | Qtd: ${qtdItem}`);
                         await client.query(
                             "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
-                            [parseFloat(item.quantidade) || 0, item.ingrediente_id]
+                            [qtdItem, ingredienteAvulsoId]
                         );
                     } 
-                    // Trata Ficha Técnica / Receita
-                    else if (item.tipo === 'receita' || item.receita_id || item.receitaId) {
-                        const recId = item.receita_id || item.receitaId;
-                        console.log(`[RECEITA] Buscando itens da receita ID: ${recId}`);
+                    
+                    // Verifica se é Receita / Ficha Técnica (independente de como venha a chave do ID)
+                    const receitaId = item.receita_id || item.receitaId;
+                    if (receitaId) {
+                        console.log(`[BAIXA RECEITA] Buscando ingredientes para a Receita ID: ${receitaId}`);
 
                         const recItensRes = await client.query(
                             "SELECT ingrediente_id, quantidade FROM receita_itens WHERE receita_id = $1",
-                            [recId]
+                            [receitaId]
                         );
                         
-                        console.log("[RECEITA] Ingredientes encontrados na tabela receita_itens:", recItensRes.rows);
+                        console.log("[BAIXA RECEITA] Itens da receita no banco:", recItensRes.rows);
 
-                        const multiplicadorQtd = parseFloat(item.quantidade) || 1;
                         for (let recItem of recItensRes.rows) {
-                            const qtdConsumida = (parseFloat(recItem.quantidade) || 0) * multiplicadorQtd;
-                            console.log(`[RECEITA] Descontando ingrediente ID ${recItem.ingrediente_id}: qtd consumida ${qtdConsumida}`);
+                            const qtdConsumida = (parseFloat(recItem.quantidade) || 0) * qtdItem;
+                            console.log(`[BAIXA RECEITA] Descontando Ingrediente ID ${recItem.ingrediente_id} | Qtd a baixar: ${qtdConsumida}`);
                             
                             await client.query(
                                 "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
@@ -298,7 +297,6 @@ app.patch('/api/orcamentos/:id/concluir', async (req, res) => {
                     }
                 }
             }
-            console.log("=== FIM BAIXA ESTOQUE ORÇAMENTO ===");
         }
 
         await client.query('COMMIT');
