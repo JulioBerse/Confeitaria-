@@ -544,17 +544,19 @@
             } catch (e) { console.error(e); }
         }
 
-        async function cadastrarIngrediente(event) {
+  async function cadastrarIngrediente(event) {
             event.preventDefault();
             const nomeInput = document.getElementById('cad-nome').value.trim();
             const unidade = document.getElementById('cad-unidade').value;
             const quantidade_embalagem = parseFloat(document.getElementById('cad-qtd-emb').value);
             const preco_embalagem = parseFloat(document.getElementById('cad-preco').value);
 
+            // Procura o ingrediente ignorando maiúsculas/minúsculas
             const ingredienteExistente = ingredientesCache.find(item => item.nome.toLowerCase() === nomeInput.toLowerCase());
 
             try {
                 if (ingredienteExistente) {
+                    // SE JÁ EXISTE: Atualiza o estoque somando a nova quantidade E atualiza o preço/embalagem nova!
                     await fetch(`/api/ingredientes/${ingredienteExistente.id}/estoque`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
@@ -565,15 +567,24 @@
                         })
                     });
                 } else {
+                    // SE NÃO EXISTE: Cria um novo ingrediente do zero
                     await fetch('/api/ingredientes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ nome: nomeInput, unidade, quantidade_embalagem, preco_embalagem, estoque_atual: quantidade_embalagem })
+                        body: JSON.stringify({ 
+                            nome: nomeInput, 
+                            unidade, 
+                            quantidade_embalagem, 
+                            preco_embalagem, 
+                            estoque_atual: quantidade_embalagem 
+                        })
                     });
                 }
                 document.getElementById('form-cadastrar-ingrediente').reset();
                 carregarTabelaEstoque();
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error("Erro ao salvar ingrediente:", err); 
+            }
         }
 
         async function ajustarEstoque(id, qtd) {
