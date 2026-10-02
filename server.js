@@ -54,20 +54,37 @@ app.delete('/api/ingredientes/:id', async (req, res) => {
     }
 });
 
-// Rota de Estoque (Atualizar rápido)
+// Rota de Estoque e Atualização de Ingrediente (Atualizar rápido ou com novo preço/embalagem)
 app.patch('/api/ingredientes/:id/estoque', async (req, res) => {
   const { id } = req.params;
-  const { quantidade } = req.body;
+  const { quantidade, preco_embalagem, quantidade_embalagem } = req.body;
   try {
-    const query = `
-      UPDATE ingredientes 
-      SET estoque_atual = GREATEST(0, estoque_atual + $1) 
-      WHERE id = $2 RETURNING *;
-    `;
-    const result = await pool.query(query, [quantidade, id]);
+    let query, values;
+    
+    // Se foram enviados novos preços e tamanhos de embalagem, atualizamos tudo junto somando o estoque
+    if (preco_embalagem !== undefined && quantidade_embalagem !== undefined) {
+      query = `
+        UPDATE ingredientes 
+        SET estoque_atual = GREATEST(0, estoque_atual + $1),
+            preco_embalagem = $2,
+            quantidade_embalagem = $3
+        WHERE id = $4 RETURNING *;
+      `;
+      values = [quantidade, preco_embalagem, quantidade_embalagem, id];
+    } else {
+      // Caso contrário, apenas atualiza o estoque somando/subtraindo
+      query = `
+        UPDATE ingredientes 
+        SET estoque_atual = GREATEST(0, estoque_atual + $1) 
+        WHERE id = $2 RETURNING *;
+      `;
+      values = [quantidade, id];
+    }
+
+    const result = await pool.query(query, values);
     res.json(result.rows[0]);
   } catch (err) {
-    console.error("Erro ao atualizar estoque:", err.message);
+    console.error("Erro ao atualizar estoque/ingrediente:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -256,39 +273,27 @@ app.patch('/api/orcamentos/:id/concluir', async (req, res) => {
                 console.error("Erro ao parsear itens_json:", e);
             }
 
-            console.log(">>> PROCESSANDO ORÇAMENTO CONCLUÍDO ID:", id);
-            console.log(">>> ITENS ENCONTRADOS:", JSON.stringify(itensPedido));
-
             if (Array.isArray(itensPedido)) {
                 for (let item of itensPedido) {
-                    // Verifica se é um ingrediente avulso/extra direto
                     const ingredienteAvulsoId = item.ingrediente_id || item.ingredienteId;
                     const qtdItem = parseFloat(item.quantidade) || 0;
 
                     if (item.tipo === 'avulso' && ingredienteAvulsoId) {
-                        console.log(`[BAIXA AVULSO] Ingrediente ID: ${ingredienteAvulsoId} | Qtd: ${qtdItem}`);
                         await client.query(
                             "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
                             [qtdItem, ingredienteAvulsoId]
                         );
                     } 
                     
-                    // Verifica se é Receita / Ficha Técnica (independente de como venha a chave do ID)
                     const receitaId = item.receita_id || item.receitaId;
                     if (receitaId) {
-                        console.log(`[BAIXA RECEITA] Buscando ingredientes para a Receita ID: ${receitaId}`);
-
                         const recItensRes = await client.query(
                             "SELECT ingrediente_id, quantidade FROM receita_itens WHERE receita_id = $1",
                             [receitaId]
                         );
-                        
-                        console.log("[BAIXA RECEITA] Itens da receita no banco:", recItensRes.rows);
 
                         for (let recItem of recItensRes.rows) {
                             const qtdConsumida = (parseFloat(recItem.quantidade) || 0) * qtdItem;
-                            console.log(`[BAIXA RECEITA] Descontando Ingrediente ID ${recItem.ingrediente_id} | Qtd a baixar: ${qtdConsumida}`);
-                            
                             await client.query(
                                 "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
                                 [qtdConsumida, recItem.ingrediente_id]
