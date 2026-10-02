@@ -558,7 +558,11 @@
                     await fetch(`/api/ingredientes/${ingredienteExistente.id}/estoque`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ quantidade: quantidade_embalagem })
+                        body: JSON.stringify({ 
+                            quantidade: quantidade_embalagem,
+                            preco_embalagem: preco_embalagem,
+                            quantidade_embalagem: quantidade_embalagem
+                        })
                     });
                 } else {
                     await fetch('/api/ingredientes', {
@@ -570,6 +574,26 @@
                 document.getElementById('form-cadastrar-ingrediente').reset();
                 carregarTabelaEstoque();
             } catch (err) { console.error(err); }
+        }
+
+        async function ajustarEstoque(id, qtd) {
+            const novoPreco = prompt("Deseja atualizar o preço total desta embalagem? (Deixe em branco para manter o preço atual):");
+            const novaQtdEmb = prompt("Deseja atualizar o tamanho da embalagem em gramas/ml? (Deixe em branco para manter):");
+
+            let payload = { quantidade: qtd };
+            if (novoPreco && !isNaN(parseFloat(novoPreco)) && novaQtdEmb && !isNaN(parseFloat(novaQtdEmb))) {
+                payload.preco_embalagem = parseFloat(novoPreco);
+                payload.quantidade_embalagem = parseFloat(novaQtdEmb);
+            }
+
+            try {
+                const res = await fetch(`/api/ingredientes/${id}/estoque`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) carregarTabelaEstoque();
+            } catch (e) { console.error(e); }
         }
 
         function atualizarDatalistSugestoes(dados) {
@@ -901,7 +925,6 @@
 
             orcamentoEditandoId = orc.id;
             
-            // Preenche todos os campos principais e parâmetros guardados no orçamento
             document.getElementById('input-cliente').value = orc.cliente || '';
             document.getElementById('input-pedido').value = orc.descricao || '';
             document.getElementById('input-horas').value = orc.horas || 0;
@@ -947,21 +970,21 @@
             document.getElementById('btn-acao-orcamento').textContent = '📄 Gerar Orçamento Profissional em PDF';
         }
 
-     async function concluirOrcamento(id) {
-    try {
-        const res = await fetch(`/api/orcamentos/${id}/concluir`, { method: 'PATCH' });
-        if (res.ok) {
-            carregarOrcamentosAbertos();
-            if (typeof carregarDadosFinanceiros === 'function') carregarDadosFinanceiros();
-            alert('Orçamento concluído e estoque baixado com sucesso!');
-        } else {
-            const erro = await res.json();
-            alert('Erro ao concluir: ' + (erro.error || 'Erro desconhecido'));
+        async function concluirOrcamento(id) {
+            try {
+                const res = await fetch(`/api/orcamentos/${id}/concluir`, { method: 'PATCH' });
+                if (res.ok) {
+                    carregarOrcamentosAbertos();
+                    if (typeof carregarDadosFinanceiros === 'function') carregarDadosFinanceiros();
+                    alert('Orçamento concluído e estoque baixado com sucesso!');
+                } else {
+                    const erro = await res.json();
+                    alert('Erro ao concluir: ' + (erro.error || 'Erro desconhecido'));
+                }
+            } catch (e) { 
+                console.error(e); 
+            }
         }
-    } catch (e) { 
-        console.error(e); 
-    }
-}
 
         async function removerOrcamento(id) {
             try {
@@ -1022,6 +1045,53 @@
 
         // ---------- GERAR PDF E SALVAR ORÇAMENTO COM ITENS ----------
         async function gerarPDFOrcamento() {
+            // --- VALIDAÇÃO PRÉVIA DE ESTOQUE ---
+            if (ingredientesCache.length === 0) {
+                const resIng = await fetch('/api/ingredientes');
+                if (resIng.ok) ingredientesCache = await resIng.json();
+            }
+            if (receitasCache.length === 0) {
+                const resRec = await fetch('/api/receitas');
+                if (resRec.ok) receitasCache = await resRec.json();
+            }
+
+            const consumoTotal = {};
+            for (let item of itensPedidoAtual) {
+                const multiplicador = parseFloat(item.quantidade) || 1;
+                if (item.tipo === 'avulso') {
+                    consumoTotal[item.ingrediente_id] = (consumoTotal[item.ingrediente_id] || 0) + multiplicador;
+                } else if (item.tipo === 'receita') {
+                    const recData = receitasCache.find(r => r.id === item.receita_id);
+                    if (recData && recData.itens) {
+                        for (let recItem of recData.itens) {
+                            const qtdNecessaria = (parseFloat(recItem.quantidade) || 0) * multiplicador;
+                            consumoTotal[recItem.ingrediente_id] = (consumoTotal[recItem.ingrediente_id] || 0) + qtdNecessaria;
+                        }
+                    }
+                }
+            }
+
+            let ingredientesEmFalta = [];
+            for (let ingId in consumoTotal) {
+                const ingInfo = ingredientesCache.find(i => i.id == ingId);
+                const estoqueDisponivel = ingInfo ? parseFloat(ingInfo.estoque_atual) || 0 : 0;
+                const necessario = consumoTotal[ingId];
+
+                if (necessario > estoqueDisponivel) {
+                    ingredientesEmFalta.push(`• ${ingInfo ? ingInfo.nome : 'Ingrediente'}: Necessário ${necessario.toFixed(2)}, Disponível ${estoqueDisponivel.toFixed(2)}`);
+                }
+            }
+
+            if (ingredientesEmFalta.length > 0) {
+                const prosseguir = confirm(
+                    "⚠️ ATENÇÃO: Os seguintes insumos estão com estoque insuficiente para este pedido:\n\n" +
+                    ingredientesEmFalta.join("\n") +
+                    "\n\nDeseja gerar o orçamento e prosseguir mesmo assim?"
+                );
+                if (!prosseguir) return;
+            }
+            // ------------------------------------
+
             const cliente = document.getElementById('input-cliente').value.trim() || 'cliente';
             const pedido = document.getElementById('input-pedido').value.trim() || 'Encomenda';
             const valorTotal = document.getElementById('resumo-preco-sugerido').textContent;
