@@ -900,9 +900,16 @@
             if (!orc) return;
 
             orcamentoEditandoId = orc.id;
+            
+            // Preenche todos os campos principais e parâmetros guardados no orçamento
             document.getElementById('input-cliente').value = orc.cliente || '';
             document.getElementById('input-pedido').value = orc.descricao || '';
             document.getElementById('input-horas').value = orc.horas || 0;
+            document.getElementById('input-valor-hora').value = orc.valor_hora || 25.00;
+            document.getElementById('input-custos-op').value = orc.custos_operacionais || 0;
+            document.getElementById('input-margem').value = orc.margem_lucro || 0;
+            document.getElementById('input-embalagem').value = orc.embalagem || 0.00;
+            document.getElementById('input-entrega').value = orc.taxa_entrega || 0.00;
             
             try {
                 if (typeof orc.itens_json === 'string') {
@@ -927,6 +934,11 @@
             document.getElementById('input-cliente').value = '';
             document.getElementById('input-pedido').value = '';
             document.getElementById('input-horas').value = '0';
+            document.getElementById('input-valor-hora').value = '25.00';
+            document.getElementById('input-custos-op').value = '0';
+            document.getElementById('input-margem').value = '0';
+            document.getElementById('input-embalagem').value = '0.00';
+            document.getElementById('input-entrega').value = '0.00';
             itensPedidoAtual = [];
             atualizarTabelaPedidoAdmin();
 
@@ -1008,7 +1020,13 @@
             const cliente = document.getElementById('input-cliente').value.trim() || 'cliente';
             const pedido = document.getElementById('input-pedido').value.trim() || 'Encomenda';
             const valorTotal = document.getElementById('resumo-preco-sugerido').textContent;
+            
             const horas = parseFloat(document.getElementById('input-horas').value) || 0;
+            const valor_hora = parseFloat(document.getElementById('input-valor-hora').value) || 0;
+            const custos_operacionais = parseFloat(document.getElementById('input-custos-op').value) || 0;
+            const margem_lucro = parseFloat(document.getElementById('input-margem').value) || 0;
+            const embalagem = parseFloat(document.getElementById('input-embalagem').value) || 0;
+            const taxa_entrega = parseFloat(document.getElementById('input-entrega').value) || 0;
 
             document.getElementById('pdf-cliente').textContent = cliente;
             document.getElementById('pdf-descricao').textContent = pedido;
@@ -1035,6 +1053,11 @@
                             descricao: pedido,
                             valor: valorLimpo,
                             horas,
+                            valor_hora,
+                            custos_operacionais,
+                            margem_lucro,
+                            embalagem,
+                            taxa_entrega,
                             itens: itensPedidoAtual
                         })
                     });
