@@ -123,9 +123,14 @@
 
         <!-- ================= MÓDULO 3: ORÇAMENTOS & CUSTOS ================= -->
         <div id="secao-orcamento" class="hidden space-y-6">
-            <div class="mb-6">
-                <h2 class="text-xl font-bold text-stone-800">Calculadora de Orçamento e Custos</h2>
-                <p class="text-xs text-stone-500 mt-1">Monte o pedido com base nas Fichas Técnicas, recheios e ingredientes avulsos do estoque.</p>
+            <div class="mb-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-stone-800" id="titulo-modo-orcamento">Calculadora de Orçamento e Custos</h2>
+                    <p class="text-xs text-stone-500 mt-1">Monte o pedido com base nas Fichas Técnicas, recheios e ingredientes avulsos do estoque.</p>
+                </div>
+                <div id="container-cancelar-edicao" class="hidden">
+                    <button onclick="cancelarEdicaoOrcamento()" class="bg-stone-300 hover:bg-stone-400 text-stone-800 text-xs font-semibold px-3 py-1.5 rounded-lg transition">Cancelar Edição</button>
+                </div>
             </div>
 
             <div class="space-y-6">
@@ -231,8 +236,8 @@
                     </div>
                 </div>
 
-                <div class="pt-2 flex justify-end">
-                    <button onclick="gerarPDFOrcamento()" class="bg-rose-800 hover:bg-rose-900 text-white font-bold px-6 py-3 rounded-lg text-sm transition shadow flex items-center gap-2">
+                <div class="pt-2 flex justify-end gap-2">
+                    <button onclick="gerarPDFOrcamento()" id="btn-acao-orcamento" class="bg-rose-800 hover:bg-rose-900 text-white font-bold px-6 py-3 rounded-lg text-sm transition shadow flex items-center gap-2">
                         📄 Gerar Orçamento Profissional em PDF
                     </button>
                 </div>
@@ -856,21 +861,23 @@
         });
 
         // ---------- ORÇAMENTOS EM ABERTO ----------
+        let orcamentosCache = [];
+
         async function carregarOrcamentosAbertos() {
             try {
                 const res = await fetch('/api/orcamentos');
                 if (!res.ok) return;
-                const dados = await res.json();
+                orcamentosCache = await res.json();
                 const tbody = document.getElementById('tabela-orcamentos-abertos');
                 if (!tbody) return;
 
                 tbody.innerHTML = '';
-                if (dados.length === 0) {
+                if (orcamentosCache.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="4" style="padding: 10px; text-align: center; color: #888; font-style: italic;">Nenhum orçamento em aberto.</td></tr>';
                     return;
                 }
 
-                dados.forEach(orc => {
+                orcamentosCache.forEach((orc) => {
                     const valorNum = parseFloat(orc.valor) || 0;
                     tbody.innerHTML += `
                         <tr style="border-bottom: 1px solid #f3d1dc;">
@@ -878,6 +885,7 @@
                             <td style="padding: 8px;">${orc.descricao}</td>
                             <td style="padding: 8px; text-align: right; font-weight: bold;">R$ ${valorNum.toFixed(2)}</td>
                             <td style="padding: 8px; text-align: center; display: flex; gap: 5px; justify-content: center;">
+                                <button onclick="clicarEditarOrcamento(${orc.id})" style="background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Editar</button>
                                 <button onclick="concluirOrcamento(${orc.id})" style="background: #047857; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Concluir</button>
                                 <button onclick="removerOrcamento(${orc.id})" style="background: #be123c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Remover</button>
                             </td>
@@ -885,6 +893,46 @@
                     `;
                 });
             } catch (e) { console.error(e); }
+        }
+
+        function clicarEditarOrcamento(id) {
+            const orc = orcamentosCache.find(o => o.id === id);
+            if (!orc) return;
+
+            orcamentoEditandoId = orc.id;
+            document.getElementById('input-cliente').value = orc.cliente || '';
+            document.getElementById('input-pedido').value = orc.descricao || '';
+            document.getElementById('input-horas').value = orc.horas || 0;
+            
+            try {
+                if (typeof orc.itens_json === 'string') {
+                    itensPedidoAtual = JSON.parse(orc.itens_json) || [];
+                } else {
+                    itensPedidoAtual = orc.itens_json || [];
+                }
+            } catch(e) {
+                itensPedidoAtual = [];
+            }
+
+            atualizarTabelaPedidoAdmin();
+
+            document.getElementById('titulo-modo-orcamento').textContent = `Editando Orçamento #${orc.id}`;
+            document.getElementById('container-cancelar-edicao').classList.remove('hidden');
+            document.getElementById('btn-acao-orcamento').textContent = '💾 Atualizar Orçamento';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelarEdicaoOrcamento() {
+            orcamentoEditandoId = null;
+            document.getElementById('input-cliente').value = '';
+            document.getElementById('input-pedido').value = '';
+            document.getElementById('input-horas').value = '0';
+            itensPedidoAtual = [];
+            atualizarTabelaPedidoAdmin();
+
+            document.getElementById('titulo-modo-orcamento').textContent = 'Calculadora de Orçamento e Custos';
+            document.getElementById('container-cancelar-edicao').classList.add('hidden');
+            document.getElementById('btn-acao-orcamento').textContent = '📄 Gerar Orçamento Profissional em PDF';
         }
 
         async function concluirOrcamento(id) {
@@ -975,24 +1023,20 @@
                 elemento.style.display = 'none';
 
                 const valorLimpo = parseFloat(valorTotal.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
+                const url = orcamentoEditandoId ? `/api/orcamentos/${orcamentoEditandoId}` : '/api/orcamentos';
+                const method = orcamentoEditandoId ? 'PUT' : 'POST';
 
                 try {
-                    await fetch('/api/orcamentos', {
-                        method: 'POST',
+                    await fetch(url, {
+                        method,
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             cliente,
                             descricao: pedido,
                             valor: valorLimpo,
-                            horas,
-                            itens: itensPedidoAtual
                         })
                     });
-                    document.getElementById('input-cliente').value = '';
-                    document.getElementById('input-pedido').value = '';
-                    document.getElementById('input-horas').value = '0';
-                    itensPedidoAtual = [];
-                    atualizarTabelaPedidoAdmin();
+                    cancelarEdicaoOrcamento();
                     carregarOrcamentosAbertos();
                 } catch (err) { console.error(err); }
             });
