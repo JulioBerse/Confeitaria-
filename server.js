@@ -165,13 +165,13 @@ app.put('/api/receitas/:id', async (req, res) => {
   }
 });
 
-// Rota para salvar um novo orçamento
+// Rota para salvar um novo orçamento (Com suporte a itens_json)
 app.post('/api/orcamentos', async (req, res) => {
     try {
-        const { cliente, descricao, valor, horas } = req.body;
+        const { cliente, descricao, valor, horas, itens } = req.body;
         const novo = await pool.query(
-            'INSERT INTO orcamentos (cliente, descricao, valor, horas, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [cliente, descricao, valor, horas || 0, 'aberto']
+            'INSERT INTO orcamentos (cliente, descricao, valor, horas, status, itens_json) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [cliente, descricao, valor, horas || 0, 'aberto', JSON.stringify(itens || [])]
         );
         res.json(novo.rows[0]);
     } catch (err) {
@@ -184,10 +184,10 @@ app.post('/api/orcamentos', async (req, res) => {
 app.put('/api/orcamentos/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { cliente, descricao, valor, horas } = req.body;
+        const { cliente, descricao, valor, horas, itens } = req.body;
         const atualizado = await pool.query(
-            'UPDATE orcamentos SET cliente = $1, descricao = $2, valor = $3, horas = $4 WHERE id = $5 RETURNING *',
-            [cliente, descricao, valor, horas || 0, id]
+            'UPDATE orcamentos SET cliente = $1, descricao = $2, valor = $3, horas = $4, itens_json = $5 WHERE id = $6 RETURNING *',
+            [cliente, descricao, valor, horas || 0, JSON.stringify(itens || []), id]
         );
         res.json(atualizado.rows[0]);
     } catch (err) {
@@ -228,14 +228,67 @@ app.get('/api/orcamentos/concluidos', async (req, res) => {
     }
 });
 
-// Rota para concluir um orçamento
+// Rota para concluir um orçamento E DAR BAIXA AUTOMÁTICA NO ESTOQUE
 app.patch('/api/orcamentos/:id/concluir', async (req, res) => {
+    const { id } = req.params;
+    const client = await pool.connect();
+
     try {
-        const { id } = req.params;
-        await pool.query("UPDATE orcamentos SET status = 'concluido' WHERE id = $1", [id]);
-        res.json({ mensagem: 'Orçamento concluído com sucesso!' });
+        await client.query('BEGIN');
+
+        // 1. Busca os detalhes do orçamento
+        const orcRes = await client.query("SELECT * FROM orcamentos WHERE id = $1", [id]);
+        if (orcRes.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Orçamento não encontrado.' });
+        }
+        const orc = orcRes.rows[0];
+
+        // 2. Atualiza o status para concluído
+        await client.query("UPDATE orcamentos SET status = 'concluido' WHERE id = $1", [id]);
+
+        // 3. Processa a baixa automática no estoque baseada nos itens salvos
+        if (orc.itens_json) {
+            let itensPedido = [];
+            try {
+                itensPedido = typeof orc.itens_json === 'string' ? JSON.parse(orc.itens_json) : orc.itens_json;
+            } catch (e) {
+                console.error("Erro ao processar itens_json do orçamento:", e);
+            }
+
+            for (let item of itensPedido) {
+                if (item.tipo === 'avulso') {
+                    // Desconta diretamente o ingrediente extra do estoque
+                    await client.query(
+                        "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
+                        [item.quantidade, item.ingrediente_id]
+                    );
+                } else if (item.receita_id && item.receita_id > 0) {
+                    // Busca os ingredientes da ficha técnica/recheio e desconta proporcionalmente
+                    const recItensRes = await client.query(
+                        "SELECT ingrediente_id, quantidade FROM receita_itens WHERE receita_id = $1",
+                        [item.receita_id]
+                    );
+                    
+                    for (let recItem of recItensRes.rows) {
+                        const qtdConsumida = recItem.quantidade * item.quantidade;
+                        await client.query(
+                            "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
+                            [qtdConsumida, recItem.ingrediente_id]
+                        );
+                    }
+                }
+            }
+        }
+
+        await client.query('COMMIT');
+        res.json({ mensagem: 'Orçamento concluído e estoque atualizado com sucesso!' });
     } catch (err) {
-        res.status(500).send('Erro ao concluir orçamento');
+        await client.query('ROLLBACK');
+        console.error('Erro ao concluir orçamento e baixar estoque:', err);
+        res.status(500).json({ error: err.message });
+    } finally {
+        client.release();
     }
 });
 
