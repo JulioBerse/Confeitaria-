@@ -198,7 +198,7 @@
                         <label class="block text-[11px] font-bold text-stone-600 uppercase">Adicionar Ingrediente Extra / Avulso do Estoque</label>
                         <div class="flex flex-col sm:flex-row gap-2 items-center">
                             <select id="select-ingrediente-avulso-orcamento" class="flex-1 border border-stone-300 rounded p-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-rose-800">
-                                <option value="">Selecione um ingrediente extra (ex: Morango, Granulado)...</option>
+                                <option value="">Selecione um ingrediente extra...</option>
                             </select>
                             <input type="number" step="0.01" id="input-qtd-ingrediente-avulso" placeholder="Qtd (g/ml/un)" class="w-full sm:w-32 border border-stone-300 rounded p-2 text-sm text-center">
                             <button type="button" onclick="adicionarIngredienteAvulsoPedido()" class="w-full sm:w-auto bg-stone-700 hover:bg-stone-800 text-white text-xs font-semibold px-4 py-2.5 rounded transition shadow-xs">+ Adicionar Extra</button>
@@ -780,13 +780,34 @@
 
                 receitasCache.forEach(rec => {
                     let custoTotalReceita = 0;
-                    if (rec.itens) {
+                    let maxUnidadesPossiveis = Infinity;
+
+                    if (rec.itens && rec.itens.length > 0) {
                         rec.itens.forEach(i => {
                             const ingData = ingredientesCache.find(x => x.id === i.ingrediente_id);
-                            if (ingData) custoTotalReceita += (parseFloat(ingData.preco_embalagem) / parseFloat(ingData.quantidade_embalagem)) * parseFloat(i.quantidade);
+                            if (ingData) {
+                                const custoItem = (parseFloat(ingData.preco_embalagem) / parseFloat(ingData.quantidade_embalagem)) * parseFloat(i.quantidade);
+                                custoTotalReceita += custoItem;
+
+                                const estoqueDisp = parseFloat(ingData.estoque_atual) || 0;
+                                const qtdNecessariaNaReceita = parseFloat(i.quantidade) || 1;
+                                const unidadesComEsteIngrediente = estoqueDisp / qtdNecessariaNaReceita;
+                                if (unidadesComEsteIngrediente < maxUnidadesPossiveis) {
+                                    maxUnidadesPossiveis = unidadesComEsteIngrediente;
+                                }
+                            } else {
+                                maxUnidadesPossiveis = 0;
+                            }
                         });
+                    } else {
+                        maxUnidadesPossiveis = 0;
                     }
-                    if (selectRec) selectRec.innerHTML += `<option value="${rec.id}" data-custo="${custoTotalReceita}">${rec.nome} (Custo Base: R$ ${custoTotalReceita.toFixed(2)})</option>`;
+
+                    if (maxUnidadesPossiveis === Infinity) maxUnidadesPossiveis = 0;
+
+                    if (selectRec) {
+                        selectRec.innerHTML += `<option value="${rec.id}" data-custo="${custoTotalReceita}">${rec.nome} (Custo: R$ ${custoTotalReceita.toFixed(2)}) — Estoque Suficiente para: ${maxUnidadesPossiveis.toFixed(1)} un</option>`;
+                    }
                 });
 
                 ingredientesCache.forEach(ing => {
