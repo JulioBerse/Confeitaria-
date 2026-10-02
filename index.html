@@ -947,16 +947,21 @@
             document.getElementById('btn-acao-orcamento').textContent = '📄 Gerar Orçamento Profissional em PDF';
         }
 
-        async function concluirOrcamento(id) {
-            try {
-                const res = await fetch(`/api/orcamentos/${id}/concluir`, { method: 'PATCH' });
-                if (res.ok) {
-                    carregarOrcamentosAbertos();
-                    if (typeof carregarDadosFinanceiros === 'function') carregarDadosFinanceiros();
-                    alert('Orçamento concluído e estoque baixado com sucesso!');
-                }
-            } catch (e) { console.error(e); }
+     async function concluirOrcamento(id) {
+    try {
+        const res = await fetch(`/api/orcamentos/${id}/concluir`, { method: 'PATCH' });
+        if (res.ok) {
+            carregarOrcamentosAbertos();
+            if (typeof carregarDadosFinanceiros === 'function') carregarDadosFinanceiros();
+            alert('Orçamento concluído e estoque baixado com sucesso!');
+        } else {
+            const erro = await res.json();
+            alert('Erro ao concluir: ' + (erro.error || 'Erro desconhecido'));
         }
+    } catch (e) { 
+        console.error(e); 
+    }
+}
 
         async function removerOrcamento(id) {
             try {
