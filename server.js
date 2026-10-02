@@ -179,6 +179,28 @@ app.put('/api/receitas/:id', async (req, res) => {
   }
 });
 
+// Rota de Receitas (Excluir)
+app.delete('/api/receitas/:id', async (req, res) => {
+  const { id } = req.params;
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
+    
+    await client.query('DELETE FROM receita_itens WHERE receita_id = $1', [id]);
+    await client.query('DELETE FROM receitas WHERE id = $1', [id]);
+
+    await client.query('COMMIT');
+    res.status(200).json({ message: 'Receita excluída com sucesso!' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error("Erro ao excluir receita:", err.message);
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
 // Rota para salvar um novo orçamento (Com suporte a itens_json)
 app.post('/api/orcamentos', async (req, res) => {
     try {
