@@ -272,6 +272,23 @@
             </div>
 
             <div class="space-y-3">
+                <!-- Botão para alternar modo de importação por texto -->
+                <div class="flex justify-between items-center bg-stone-50 p-2 rounded-lg border border-stone-200">
+                    <span class="text-xs font-bold text-stone-700">Modo de Cadastro:</span>
+                    <button type="button" onclick="alternarModoImportacaoTexto()" id="btn-modo-texto" class="text-xs bg-rose-100 text-rose-800 font-semibold px-3 py-1 rounded hover:bg-rose-200 transition">
+                        ✨ Colar / Importar Receita em Texto
+                    </button>
+                </div>
+
+                <!-- Área de Texto para Colar a Receita (Inicia Oculta) -->
+                <div id="container-importar-texto" class="hidden space-y-2 border border-rose-200 bg-rose-50/30 p-3 rounded-lg">
+                    <label class="block text-xs font-bold text-rose-900">Cole o texto da receita abaixo:</label>
+                    <textarea id="input-texto-receita" rows="5" placeholder="Ex:&#10;Bolo de Chocolate&#10;Rendimento: 1200 g&#10;500g Açúcar Cristal&#10;200g Cacau em Pó 100%" class="w-full border border-stone-300 rounded p-2 text-xs bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none"></textarea>
+                    <button type="button" onclick="processarTextoReceita()" class="w-full bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold py-2 rounded transition shadow-xs">
+                        🪄 Interpretar e Preencher Receita Automaticamente
+                    </button>
+                </div>
+
                 <div>
                     <label class="block text-xs font-bold text-stone-600 mb-1">Nome da Receita</label>
                     <input type="text" id="rec-nome" placeholder="Ex: Bolo de Chocolate" class="w-full border border-stone-300 rounded p-2 text-sm focus:ring-1 focus:ring-rose-800 focus:outline-none">
@@ -555,7 +572,6 @@
 
             try {
                 if (ingredienteExistente) {
-                    // Atualiza o estoque somando a quantidade e definindo o novo preço da embalagem comprada
                     await fetch(`/api/ingredientes/${ingredienteExistente.id}/estoque`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
@@ -665,6 +681,7 @@
             document.getElementById('modal-receita').classList.remove('hidden');
             document.getElementById('rec-nome').value = '';
             document.getElementById('rec-rendimento').value = '';
+            document.getElementById('input-texto-receita').value = '';
             itensReceitaAtual = [];
             atualizarTabelaItensReceitaModal();
             carregarSelectIngredientesModal();
@@ -676,6 +693,7 @@
             document.getElementById('modal-receita').classList.remove('hidden');
             document.getElementById('rec-nome').value = rec.nome;
             document.getElementById('rec-rendimento').value = rec.rendimento;
+            document.getElementById('input-texto-receita').value = '';
             itensReceitaAtual = rec.itens.map(i => ({ ingrediente_id: i.ingrediente_id, nome: i.nome, unidade: i.unidade, quantidade: parseFloat(i.quantidade), preco_embalagem: i.preco_embalagem, quantidade_embalagem: i.quantidade_embalagem }));
             atualizarTabelaItensReceitaModal();
             carregarSelectIngredientesModal();
@@ -683,6 +701,97 @@
 
         function fecharModalNovaReceita() {
             document.getElementById('modal-receita').classList.add('hidden');
+        }
+
+        // Funções de Importação por Texto
+        function alternarModoImportacaoTexto() {
+            const container = document.getElementById('container-importar-texto');
+            const btn = document.getElementById('btn-modo-texto');
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                btn.textContent = '✖ Fechar Importação por Texto';
+                btn.className = 'text-xs bg-stone-200 text-stone-700 font-semibold px-3 py-1 rounded hover:bg-stone-300 transition';
+            } else {
+                container.classList.add('hidden');
+                btn.textContent = '✨ Colar / Importar Receita em Texto';
+                btn.className = 'text-xs bg-rose-100 text-rose-800 font-semibold px-3 py-1 rounded hover:bg-rose-200 transition';
+            }
+        }
+
+        function processarTextoReceita() {
+            const texto = document.getElementById('input-texto-receita').value.trim();
+            if (!texto) return alert('Por favor, cole o texto da receita.');
+
+            const linhas = texto.split('\n');
+            let nomeDetectado = '';
+            let rendimentoDetectado = 1000;
+            let novosItens = [];
+
+            linhas.forEach((linha, indice) => {
+                let linhaLimpa = linha.trim();
+                if (!linhaLimpa) return;
+
+                if (indice === 0 && !linhaLimpa.toLowerCase().includes('rendimento') && !/\d/.test(linhaLimpa)) {
+                    nomeDetectado = linhaLimpa;
+                    return;
+                }
+
+                if (linhaLimpa.toLowerCase().includes('rendimento')) {
+                    const matchRend = linhaLimpa.match(/[\d.,]+/);
+                    if (matchRend) rendimentoDetectado = parseFloat(matchRend[0].replace(',', '.')) || 1000;
+                    return;
+                }
+
+                const matchQtd = linhaLimpa.match(/([\d.,]+)\s*(g|ml|kg|l|un|gramas|mililitros)?/i);
+                
+                if (matchQtd) {
+                    let qtd = parseFloat(matchQtd[1].replace(',', '.')) || 0;
+                    let unidadeTexto = (matchQtd[2] || '').toLowerCase();
+
+                    if (unidadeTexto === 'kg' || unidadeTexto === 'l') {
+                        qtd *= 1000;
+                    }
+
+                    let nomeIngredienteCandidato = linhaLimpa
+                        .replace(matchQtd[0], '')
+                        .replace(/[-–—:]/g, '')
+                        .replace(/de\s/gi, '')
+                        .trim();
+
+                    if (nomeIngredienteCandidato.length > 1 && qtd > 0) {
+                        const ingEncontrado = ingredientesCache.find(ing => 
+                            ing.nome.toLowerCase().includes(nomeIngredienteCandidato.toLowerCase()) ||
+                            nomeIngredienteCandidato.toLowerCase().includes(ing.nome.toLowerCase())
+                        );
+
+                        if (ingEncontrado) {
+                            const jaExiste = novosItens.some(i => i.ingrediente_id === ingEncontrado.id);
+                            if (!jaExiste) {
+                                novosItens.push({
+                                    ingrediente_id: ingEncontrado.id,
+                                    nome: ingEncontrado.nome,
+                                    unidade: ingEncontrado.unidade,
+                                    quantidade: qtd,
+                                    preco_embalagem: ingEncontrado.preco_embalagem,
+                                    quantidade_embalagem: ingEncontrado.quantidade_embalagem
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+
+            if (nomeDetectado) document.getElementById('rec-nome').value = nomeDetectado;
+            document.getElementById('rec-rendimento').value = rendimentoDetectado;
+
+            if (novosItens.length > 0) {
+                itensReceitaAtual = novosItens;
+                atualizarTabelaItensReceitaModal();
+                alert(`Sucesso! Foram identificados e associados ${novosItens.length} ingredientes automaticamente.`);
+                alternarModoImportacaoTexto();
+            } else {
+                alert('Não foi possível associar automaticamente os ingredientes. Verifique se os nomes no texto coincidem com os nomes cadastrados no seu estoque.');
+            }
         }
 
         async function carregarSelectIngredientesModal() {
