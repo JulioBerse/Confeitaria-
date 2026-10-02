@@ -260,34 +260,35 @@ app.patch('/api/orcamentos/:id/concluir', async (req, res) => {
                 console.error("Erro ao parsear itens_json do orçamento:", e);
             }
 
-            console.log("Itens do pedido a processar para baixa:", itensPedido);
+            console.log("=== INICIO BAIXA ESTOQUE ORÇAMENTO ===", id);
+            console.log("Itens do pedido a processar:", itensPedido);
 
             if (Array.isArray(itensPedido)) {
                 for (let item of itensPedido) {
                     // Trata item avulso ou extra
                     if (item.tipo === 'avulso' && item.ingrediente_id) {
-                        console.log(`Baixando avulso ID ${item.ingrediente_id}: qtd ${item.quantidade}`);
+                        console.log(`[AVULSO] Baixando ingrediente ID ${item.ingrediente_id}: qtd ${item.quantidade}`);
                         await client.query(
                             "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
                             [parseFloat(item.quantidade) || 0, item.ingrediente_id]
                         );
                     } 
-                    // Trata Ficha Técnica / Receita (seja pelo tipo 'receita' ou por ter receita_id)
-                    else if (item.tipo === 'receita' || (item.receita_id && item.receita_id > 0)) {
-                        const recId = item.receita_id;
-                        console.log(`Buscando itens da receita ID: ${recId}`);
+                    // Trata Ficha Técnica / Receita
+                    else if (item.tipo === 'receita' || item.receita_id || item.receitaId) {
+                        const recId = item.receita_id || item.receitaId;
+                        console.log(`[RECEITA] Buscando itens da receita ID: ${recId}`);
 
                         const recItensRes = await client.query(
                             "SELECT ingrediente_id, quantidade FROM receita_itens WHERE receita_id = $1",
                             [recId]
                         );
                         
-                        console.log("Ingredientes da receita encontrados:", recItensRes.rows);
+                        console.log("[RECEITA] Ingredientes encontrados na tabela receita_itens:", recItensRes.rows);
 
                         const multiplicadorQtd = parseFloat(item.quantidade) || 1;
                         for (let recItem of recItensRes.rows) {
                             const qtdConsumida = (parseFloat(recItem.quantidade) || 0) * multiplicadorQtd;
-                            console.log(`Baixando ingrediente ID ${recItem.ingrediente_id}: qtd consumida ${qtdConsumida}`);
+                            console.log(`[RECEITA] Descontando ingrediente ID ${recItem.ingrediente_id}: qtd consumida ${qtdConsumida}`);
                             
                             await client.query(
                                 "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
@@ -297,6 +298,7 @@ app.patch('/api/orcamentos/:id/concluir', async (req, res) => {
                     }
                 }
             }
+            console.log("=== FIM BAIXA ESTOQUE ORÇAMENTO ===");
         }
 
         await client.query('COMMIT');
