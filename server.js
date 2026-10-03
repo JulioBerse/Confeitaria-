@@ -7,15 +7,16 @@ const { GoogleGenAI } = require('@google/genai');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Inicialização do Gemini utilizando a chave de ambiente do .env
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY});
+// Inicialização do Gemini utilizando a chave de ambiente do .env ou do Render
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname)));
 
-// Conexão com o Banco PostgreSQL usando a variável do .env
+// Conexão com o Banco PostgreSQL usando obrigatoriamente a variável de ambiente
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL='postgresql://neondb_owner:npg_TisYFN81oGeP@ep-super-cloud-ayjdqwgy-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
 });
 
 pool.connect((err, client, release) => {
@@ -63,7 +64,6 @@ async function inicializarBanco() {
             );
         `);
 
-        // Garante que as colunas essenciais existam na tabela receitas existente
         await pool.query(`
             DO $$ 
             BEGIN 
@@ -110,13 +110,13 @@ app.patch('/api/ingredientes/:id/estoque', async (req, res) => {
     const { id } = req.params;
     const { quantidade, preco_embalagem } = req.body;
     try {
-        let query = 'UPDATE ingredientes SET estoque_atual = estoque_atual + $1';
-        let params = [quantidade, id];
+        let query, params;
         if (preco_embalagem !== undefined) {
             query = 'UPDATE ingredientes SET estoque_atual = estoque_atual + $1, preco_embalagem = $3 WHERE id = $2 RETURNING *';
             params = [quantidade, id, preco_embalagem];
         } else {
             query = 'UPDATE ingredientes SET estoque_atual = estoque_atual + $1 WHERE id = $2 RETURNING *';
+            params = [quantidade, id];
         }
         const result = await pool.query(query, params);
         res.json(result.rows[0]);
@@ -148,7 +148,6 @@ app.get('/api/receitas', async (req, res) => {
 app.post('/api/receitas', async (req, res) => {
     const { nome, rendimento, unidade_rendimento, itens } = req.body;
     try {
-        // Garante que todos os itens tenham um formato seguro para JSONB
         const itensTratados = Array.isArray(itens) ? itens.map(i => ({
             ingrediente_id: i.ingrediente_id ? parseInt(i.ingrediente_id) : null,
             nome: i.nome || 'Ingrediente',
@@ -198,13 +197,13 @@ app.post('/api/ia/interpretar-receita', async (req, res) => {
         const prompt = `Analise o texto ou imagem da receita fornecida e extraia os dados estritamente em formato JSON válido, sem blocos de markdown adicionais.
         
         IMPORTANTE SOBRE CONVERSÃO DE MEDIDAS CASEIRAS PARA PESO/VOLUME (PADRÃO CONFEITARIA):
-        - 1 xícara de farinha de trigo = 120g a 130g
-        - 1 xícara de açúcar = 180g a 200g
-        - 1 xícara de fubá = 150g
-        - 1 xícara de leite ou óleo = 240 ml
-        - 1 copo americano = 150 ml ou g
-        - 1 colher de sopa = 15g ou 15 ml
-        - 1 colher de chá = 5g ou 5 ml
+- 1 xícara de farinha de trigo = 120g a 130g
+- 1 xícara de açúcar = 180g a 200g
+- 1 xícara de fubá = 150g
+- 1 xícara de leite ou óleo = 240 ml
+- 1 copo americano = 150 ml ou g
+- 1 colher de sopa = 15g ou 15 ml
+- 1 colher de chá = 5g ou 5 ml
         Sempre converta xícaras, copos e colheres para o valor total correspondente em gramas (g) ou mililitros (ml) nos campos "quantidade" e defina a unidade como "g" ou "ml" (exceto para ovos ou unidades inteiras).
 
         Retorne exatamente esta estrutura JSON:
@@ -237,7 +236,7 @@ app.post('/api/ia/interpretar-receita', async (req, res) => {
         }
 
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-2.5-flash',
             contents: contents,
             config: {
                 responseMimeType: 'application/json'
