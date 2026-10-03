@@ -237,7 +237,7 @@ app.post('/api/ia/interpretar-receita', async (req, res) => {
 
         // Chamada explícita passando a chave de ambiente e o modelo
         const response = await ai.models.generateContent({
-            model: 'gemini-3.5-flash',
+            model: 'gemini-1.5-flash',
             contents: contents,
             config: {
                 responseMimeType: 'application/json'
