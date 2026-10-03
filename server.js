@@ -239,9 +239,8 @@ app.post('/api/ia/interpretar-receita', async (req, res) => {
         let data;
         let tentativas = 3;
 
-        // Lógica de tentativas automáticas para lidar com alta procura na API
         while (tentativas > 0) {
-            response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
