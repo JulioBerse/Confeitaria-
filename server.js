@@ -2,13 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
-const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 const port = process.env.PORT || 3000;
-
-// Inicialização segura do Gemini passando a chave explicitamente para o ambiente de produção
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname)));
@@ -189,11 +185,15 @@ app.put('/api/receitas/:id', async (req, res) => {
 });
 
 
-// ================= ROTA DE INTELIGÊNCIA ARTIFICIAL PARA RECEITAS =================
+// ================= ROTA DE INTELIGÊNCIA ARTIFICIAL PARA RECEITAS (VIA FETCH) =================
 app.post('/api/ia/interpretar-receita', async (req, res) => {
     const { texto, imagemBase64, mimeType } = req.body;
     try {
-        let contents = [];
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            throw new Error("A chave GEMINI_API_KEY não está definida nas variáveis de ambiente.");
+        }
+
         const prompt = `Analise o texto ou imagem da receita fornecida e extraia os dados estritamente em formato JSON válido, sem blocos de markdown adicionais.
         
         IMPORTANTE SOBRE CONVERSÃO DE MEDIDAS CASEIRAS PARA PESO/VOLUME (PADRÃO CONFEITARIA):
@@ -220,10 +220,10 @@ app.post('/api/ia/interpretar-receita', async (req, res) => {
           ]
         }`;
 
-        contents.push(prompt);
+        let parts = [{ text: prompt }];
 
         if (imagemBase64) {
-            contents.push({
+            parts.push({
                 inlineData: {
                     data: imagemBase64,
                     mimeType: mimeType || 'image/jpeg'
@@ -232,20 +232,29 @@ app.post('/api/ia/interpretar-receita', async (req, res) => {
         }
 
         if (texto) {
-            contents.push(`Texto da receita:\n${texto}`);
+            parts.push({ text: `Texto da receita:\n${texto}` });
         }
 
-        // Chamada utilizando o modelo estável gemini-2.5-flash e repassando a chave explicitamente
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: contents,
-            config: {
-                apiKey: process.env.GEMINI_API_KEY,
-                responseMimeType: 'application/json'
-            }
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{ parts: parts }],
+                generationConfig: {
+                    responseMimeType: 'application/json'
+                }
+            })
         });
 
-        const textoBruto = response.text || "{}";
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error?.message || 'Erro na API do Gemini');
+        }
+
+        const textoBruto = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
         const textoResposta = textoBruto.replace(/```json/g, '').replace(/```/g, '').trim();
         const resultadoJson = JSON.parse(textoResposta);
         res.json(resultadoJson);
@@ -254,7 +263,6 @@ app.post('/api/ia/interpretar-receita', async (req, res) => {
         res.status(500).json({ error: 'Erro ao interpretar receita com IA: ' + err.message });
     }
 });
-
 
 // ================= ROTAS DE ORÇAMENTOS & FINANCEIRO =================
 app.get('/api/orcamentos', async (req, res) => {
