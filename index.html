@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Silvia Iamassaki - Bolos e Doces Artesanais</title>
-    <!-- Link para o Manifesto do PWA -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#9f1239">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,7 +15,6 @@
         
         <!-- Cabeçalho com Logo, Título e Navegação -->
         <div class="text-center border-b pb-6 mb-6">
-            <!-- LOGO NO TOPO DA PÁGINA -->
             <div class="flex justify-center mb-4">
                  <img src="Menu.jpg" alt="Silvia Iamassaki - Bolos e Doces Artesanais" class="h-28 w-auto object-contain rounded-xl shadow-xs border border-rose-100 p-1 bg-white" id="logo-principal"> 
             </div>
@@ -45,7 +43,6 @@
             </div>
 
             <div id="container-lista-estoque" class="space-y-6 pt-2">
-                <!-- Formulário de Novo Ingrediente -->
                 <div class="border border-rose-200 rounded-lg p-4 bg-rose-50/20">
                     <h3 class="text-xs font-bold text-rose-900 uppercase tracking-wider mb-3">Novo Ingrediente</h3>
                     <form id="form-cadastrar-ingrediente" onsubmit="cadastrarIngrediente(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
@@ -76,7 +73,6 @@
                     </form>
                 </div>
 
-                <!-- Tabela de Ingredientes -->
                 <div class="border border-stone-200 rounded-lg p-4 bg-white shadow-xs">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
@@ -177,11 +173,9 @@
                     </div>
                 </div>
 
-                <!-- SEÇÃO DUPLA: FICHAS TÉCNICAS E INGREDIENTES AVULSOS NO ORÇAMENTO -->
                 <div class="border border-stone-200 rounded-lg p-4 bg-white shadow-xs space-y-4">
                     <h3 class="text-xs font-bold text-stone-700 uppercase tracking-wider">Composição do Pedido (Receitas, Recheios e Extras)</h3>
                     
-                    <!-- Adicionar Ficha Técnica / Recheio -->
                     <div class="p-3 bg-stone-50 rounded-lg border border-stone-100 space-y-2">
                         <label class="block text-[11px] font-bold text-stone-600 uppercase">Adicionar Ficha Técnica / Recheio</label>
                         <div class="flex flex-col sm:flex-row gap-2 items-center">
@@ -193,7 +187,6 @@
                         </div>
                     </div>
 
-                    <!-- Adicionar Ingrediente Avulso / Extra do Estoque -->
                     <div class="p-3 bg-stone-50 rounded-lg border border-stone-100 space-y-2">
                         <label class="block text-[11px] font-bold text-stone-600 uppercase">Adicionar Ingrediente Extra / Avulso do Estoque</label>
                         <div class="flex flex-col sm:flex-row gap-2 items-center">
@@ -205,7 +198,6 @@
                         </div>
                     </div>
 
-                    <!-- Tabela Unificada de Itens -->
                     <div class="overflow-x-auto pt-2">
                         <table class="w-full text-left text-sm" id="tabela-itens-admin">
                             <thead>
@@ -243,7 +235,6 @@
                 </div>
             </div>
 
-            <!-- Tabela de Orçamentos em Aberto -->
             <div style="margin-top: 30px; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #f3d1dc;">
                 <h3 style="color: #8c5867; margin-top: 0; font-size: 16px;">Orçamentos em Aberto</h3>
                 <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
@@ -263,75 +254,79 @@
         </div>
     </div>
 
-    <!-- MODAL DE CADASTRO/EDIÇÃO DE RECEITA -->
+    <!-- MODAL DE CADASTRO/EDIÇÃO DE RECEITA (COM IA GEMINI E UPLOAD DE FOTO) -->
     <div id="modal-receita" class="fixed inset-0 bg-stone-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl space-y-4 max-h-[95vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="font-bold text-stone-800 text-base" id="modal-titulo-receita">Nova Ficha Técnica (Receita)</h3>
                 <button onclick="fecharModalNovaReceita()" class="text-stone-400 hover:text-stone-700 font-bold text-lg">×</button>
             </div>
 
-            <div class="space-y-3">
-                <!-- Botão para alternar modo de importação por texto -->
-                <div class="flex justify-between items-center bg-stone-50 p-2 rounded-lg border border-stone-200">
-                    <span class="text-xs font-bold text-stone-700">Modo de Cadastro:</span>
-                    <button type="button" onclick="alternarModoImportacaoTexto()" id="btn-modo-texto" class="text-xs bg-rose-100 text-rose-800 font-semibold px-3 py-1 rounded hover:bg-rose-200 transition">
-                        ✨ Colar / Importar Receita em Texto
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- COLUNA DA ESQUERDA: IA PARA TEXTO E FOTO -->
+                <div class="space-y-3 border border-rose-200 bg-rose-50/30 p-4 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="text-xs font-bold text-rose-900 uppercase tracking-wider">✨ Leitura Inteligente por IA</h4>
+                            <label class="text-[11px] bg-rose-200 text-rose-900 font-bold px-2.5 py-1.5 rounded cursor-pointer hover:bg-rose-300 transition shadow-xs flex items-center gap-1">
+                                📷 Enviar Foto/Print
+                                <input type="file" id="input-foto-receita" accept="image/*" class="hidden" onchange="processarFotoReceita(event)">
+                            </label>
+                        </div>
+                        <p class="text-[11px] text-stone-500 mb-2">Cole o texto ou envie uma foto da receita. A IA extrai tudo perfeitamente!</p>
+                        <textarea id="input-texto-receita" rows="12" placeholder="Ex:&#10;Bolo de Fubá da Vovó&#10;2 xícaras de fubá&#10;1 xícara de farinha de trigo&#10;1 1/2 xícara de açúcar" class="w-full border border-stone-300 rounded-lg p-3 text-xs bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none"></textarea>
+                    </div>
+                    <button type="button" onclick="processarTextoComIA()" id="btn-ia-interpretar" class="w-full bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold py-2.5 rounded-lg transition shadow-xs">
+                        🤖 Interpretar Receita com IA
                     </button>
                 </div>
 
-                <!-- Área de Texto para Colar a Receita (Inicia Oculta) -->
-                <div id="container-importar-texto" class="hidden space-y-2 border border-rose-200 bg-rose-50/30 p-3 rounded-lg">
-                    <label class="block text-xs font-bold text-rose-900">Cole o texto da receita abaixo:</label>
-                    <textarea id="input-texto-receita" rows="5" placeholder="Ex:&#10;Bolo de Chocolate&#10;Rendimento: 1200 g&#10;500g Açúcar Cristal&#10;200g Cacau em Pó 100%" class="w-full border border-stone-300 rounded p-2 text-xs bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none"></textarea>
-                    <button type="button" onclick="processarTextoReceita()" class="w-full bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold py-2 rounded transition shadow-xs">
-                        🪄 Interpretar e Preencher Receita Automaticamente
-                    </button>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-stone-600 mb-1">Nome da Receita</label>
-                    <input type="text" id="rec-nome" placeholder="Ex: Bolo de Chocolate" class="w-full border border-stone-300 rounded p-2 text-sm focus:ring-1 focus:ring-rose-800 focus:outline-none">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
+                <!-- COLUNA DA DIREITA: DADOS E TABELA -->
+                <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-stone-600 mb-1">Rendimento</label>
-                        <input type="number" step="0.01" id="rec-rendimento" placeholder="1200" class="w-full border border-stone-300 rounded p-2 text-sm focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                        <label class="block text-xs font-bold text-stone-600 mb-1">Nome da Receita</label>
+                        <input type="text" id="rec-nome" placeholder="Ex: Bolo de Chocolate" class="w-full border border-stone-300 rounded p-2 text-sm focus:ring-1 focus:ring-rose-800 focus:outline-none">
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-stone-600 mb-1">Unidade de Rendimento</label>
-                        <select id="rec-unidade" class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
-                            <option value="g">g</option>
-                            <option value="ml">ml</option>
-                            <option value="unidade">unidade</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="border-t pt-3">
-                    <h4 class="text-xs font-bold text-stone-700 uppercase mb-2">Adicionar Ingredientes à Receita</h4>
-                    <div class="flex gap-2 mb-3">
-                        <select id="rec-select-ingrediente" class="flex-1 border border-stone-300 rounded p-2 text-sm bg-white">
-                            <option value="">Carregando ingredientes...</option>
-                        </select>
-                        <input type="number" step="0.01" id="rec-qtd-ingrediente" placeholder="Qtd" class="w-28 border border-stone-300 rounded p-2 text-sm text-center">
-                        <button type="button" onclick="adicionarIngredienteReceitaForm()" class="bg-stone-800 hover:bg-stone-900 text-white text-xs px-4 rounded font-semibold">+ Inserir</button>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">Rendimento</label>
+                            <input type="number" step="0.01" id="rec-rendimento" placeholder="1200" class="w-full border border-stone-300 rounded p-2 text-sm focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 mb-1">Unidade</label>
+                            <select id="rec-unidade" class="w-full border border-stone-300 rounded p-2 text-sm bg-white focus:ring-1 focus:ring-rose-800 focus:outline-none">
+                                <option value="g">g</option>
+                                <option value="ml">ml</option>
+                                <option value="unidade">unidade</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="border rounded-lg overflow-hidden">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-stone-100 text-stone-700">
-                                <tr>
-                                    <th class="p-2">Ingrediente</th>
-                                    <th class="p-2 text-center">Qtd</th>
-                                    <th class="p-2 text-right">Custo Parcial</th>
-                                    <th class="p-2 text-center">Remover</th>
-                                </tr>
-                            </thead>
-                            <tbody id="rec-tabela-itens">
-                                <tr><td colspan="4" class="p-3 text-center text-stone-400 italic">Nenhum ingrediente adicionado.</td></tr>
-                            </tbody>
-                        </table>
+                    <div class="border-t pt-3">
+                        <h4 class="text-xs font-bold text-stone-700 uppercase mb-2">Ingredientes da Ficha</h4>
+                        <div class="flex gap-2 mb-3">
+                            <select id="rec-select-ingrediente" class="flex-1 border border-stone-300 rounded p-2 text-xs bg-white">
+                                <option value="">Selecionar...</option>
+                            </select>
+                            <input type="number" step="0.01" id="rec-qtd-ingrediente" placeholder="Qtd" class="w-20 border border-stone-300 rounded p-2 text-xs text-center">
+                            <button type="button" onclick="adicionarIngredienteReceitaForm()" class="bg-stone-800 hover:bg-stone-900 text-white text-xs px-3 rounded font-semibold">+ Inserir</button>
+                        </div>
+
+                        <div class="border rounded-lg overflow-hidden max-h-48 overflow-y-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-stone-100 text-stone-700 sticky top-0">
+                                    <tr>
+                                        <th class="p-2">Ingrediente</th>
+                                        <th class="p-2 text-center">Qtd</th>
+                                        <th class="p-2 text-right">Custo</th>
+                                        <th class="p-2 text-center">X</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rec-tabela-itens">
+                                    <tr><td colspan="4" class="p-3 text-center text-stone-400 italic">Nenhum ingrediente.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -644,12 +639,29 @@
                     receitas.forEach(rec => {
                         let custoTotal = 0;
                         let itensHtml = '';
-                        if (rec.itens && rec.itens.length > 0) {
-                            rec.itens.forEach(i => {
+                        let recItens = rec.itens;
+                        if (typeof recItens === 'string') {
+                            try { recItens = JSON.parse(recItens); } catch(e) { recItens = []; }
+                        }
+
+                        if (recItens && recItens.length > 0) {
+                            recItens.forEach(i => {
                                 const ingData = ingredientesCache.find(x => x.id === i.ingrediente_id);
-                                let custoItem = ingData ? (parseFloat(ingData.preco_embalagem) / parseFloat(ingData.quantidade_embalagem)) * parseFloat(i.quantidade) : 0;
+                                let custoItem = 0;
+                                let qtdCalculo = parseFloat(i.quantidade) || 0;
+                                let unidadeExibicao = i.unidade || 'g';
+
+                                if (ingData) {
+                                    if (unidadeExibicao === 'xícara' || unidadeExibicao === 'copo') {
+                                        qtdCalculo *= 150; 
+                                    } else if (unidadeExibicao === 'colher') {
+                                        qtdCalculo *= 15;
+                                    }
+                                    custoItem = (parseFloat(ingData.preco_embalagem) / parseFloat(ingData.quantidade_embalagem)) * qtdCalculo;
+                                }
+
                                 custoTotal += custoItem;
-                                itensHtml += `<div class="flex justify-between text-xs py-1 border-b border-stone-100"><span class="text-stone-700">${i.nome}</span><span class="text-stone-500">${i.quantidade} ${i.unidade} (R$ ${custoItem.toFixed(2)})</span></div>`;
+                                itensHtml += `<div class="flex justify-between text-xs py-1 border-b border-stone-100"><span class="text-stone-700">${i.nome}</span><span class="text-stone-500">${i.quantidade} ${i.unidade || 'g'} (R$ ${custoItem.toFixed(2)})</span></div>`;
                             });
                         }
                         const rendimento = parseFloat(rec.rendimento) || 1;
@@ -694,7 +706,20 @@
             document.getElementById('rec-nome').value = rec.nome;
             document.getElementById('rec-rendimento').value = rec.rendimento;
             document.getElementById('input-texto-receita').value = '';
-            itensReceitaAtual = rec.itens.map(i => ({ ingrediente_id: i.ingrediente_id, nome: i.nome, unidade: i.unidade, quantidade: parseFloat(i.quantidade), preco_embalagem: i.preco_embalagem, quantidade_embalagem: i.quantidade_embalagem }));
+            
+            let recItens = rec.itens;
+            if (typeof recItens === 'string') {
+                try { recItens = JSON.parse(recItens); } catch(e) { recItens = []; }
+            }
+
+            itensReceitaAtual = recItens.map(i => ({ 
+                ingrediente_id: i.ingrediente_id || null, 
+                nome: i.nome, 
+                unidade: i.unidade || 'g', 
+                quantidade: parseFloat(i.quantidade) || 0, 
+                preco_embalagem: i.preco_embalagem || 0, 
+                quantidade_embalagem: i.quantidade_embalagem || 1 
+            }));
             atualizarTabelaItensReceitaModal();
             carregarSelectIngredientesModal();
         }
@@ -703,101 +728,99 @@
             document.getElementById('modal-receita').classList.add('hidden');
         }
 
-        // Funções de Importação por Texto
-        function alternarModoImportacaoTexto() {
-            const container = document.getElementById('container-importar-texto');
-            const btn = document.getElementById('btn-modo-texto');
-            if (container.classList.contains('hidden')) {
-                container.classList.remove('hidden');
-                btn.textContent = '✖ Fechar Importação por Texto';
-                btn.className = 'text-xs bg-stone-200 text-stone-700 font-semibold px-3 py-1 rounded hover:bg-stone-300 transition';
-            } else {
-                container.classList.add('hidden');
-                btn.textContent = '✨ Colar / Importar Receita em Texto';
-                btn.className = 'text-xs bg-rose-100 text-rose-800 font-semibold px-3 py-1 rounded hover:bg-rose-200 transition';
-            }
+        // 🤖 LEITURA DE FOTO/PRINT COM IA
+        async function processarFotoReceita(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Data = e.target.result.split(',')[1];
+                const btn = document.getElementById('btn-ia-interpretar');
+                btn.textContent = '⏳ IA Lendo Foto...';
+                btn.disabled = true;
+
+                try {
+                    const res = await fetch('/api/ia/interpretar-receita', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imagemBase64: base64Data, mimeType: file.type })
+                    });
+                    const dados = await res.json();
+                    aplicarDadosReceitaIA(dados);
+                } catch (err) {
+                    alert('Erro ao processar imagem com IA.');
+                    console.error(err);
+                } finally {
+                    btn.textContent = '🤖 Interpretar Receita com IA';
+                    btn.disabled = false;
+                }
+            };
+            reader.readAsDataURL(file);
         }
 
-        function processarTextoReceita() {
+        // 🤖 LEITURA DE TEXTO COM IA
+        async function processarTextoComIA() {
             const texto = document.getElementById('input-texto-receita').value.trim();
             if (!texto) return alert('Por favor, cole o texto da receita.');
 
-            const linhas = texto.split('\n');
-            let nomeDetectado = '';
-            let rendimentoDetectado = 1000;
-            let novosItens = [];
+            const btn = document.getElementById('btn-ia-interpretar');
+            btn.textContent = '⏳ IA Analisando...';
+            btn.disabled = true;
 
-            linhas.forEach((linha, indice) => {
-                let linhaLimpa = linha.trim();
-                if (!linhaLimpa) return;
+            try {
+                const res = await fetch('/api/ia/interpretar-receita', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ texto })
+                });
+                const dados = await res.json();
+                aplicarDadosReceitaIA(dados);
+            } catch (err) {
+                alert('Erro ao interpretar texto com IA.');
+                console.error(err);
+            } finally {
+                btn.textContent = '🤖 Interpretar Receita com IA';
+                btn.disabled = false;
+            }
+        }
 
-                if (indice === 0 && !linhaLimpa.toLowerCase().includes('rendimento') && !/\d/.test(linhaLimpa)) {
-                    nomeDetectado = linhaLimpa;
-                    return;
-                }
+        function aplicarDadosReceitaIA(dados) {
+            if (dados.nome) document.getElementById('rec-nome').value = dados.nome;
+            if (dados.rendimento) document.getElementById('rec-rendimento').value = dados.rendimento;
+            if (dados.unidade_rendimento) document.getElementById('rec-unidade').value = dados.unidade_rendimento;
 
-                if (linhaLimpa.toLowerCase().includes('rendimento')) {
-                    const matchRend = linhaLimpa.match(/[\d.,]+/);
-                    if (matchRend) rendimentoDetectado = parseFloat(matchRend[0].replace(',', '.')) || 1000;
-                    return;
-                }
+            if (dados.itens && Array.isArray(dados.itens)) {
+                let novosItens = [...itensReceitaAtual];
+                dados.itens.forEach(i => {
+                    const ingEncontrado = ingredientesCache.find(ing => 
+                        ing.nome.toLowerCase() === i.nome.toLowerCase() ||
+                        ing.nome.toLowerCase().includes(i.nome.toLowerCase()) ||
+                        i.nome.toLowerCase().includes(ing.nome.toLowerCase())
+                    );
 
-                const matchQtd = linhaLimpa.match(/([\d.,]+)\s*(g|ml|kg|l|un|gramas|mililitros)?/i);
-                
-                if (matchQtd) {
-                    let qtd = parseFloat(matchQtd[1].replace(',', '.')) || 0;
-                    let unidadeTexto = (matchQtd[2] || '').toLowerCase();
-
-                    if (unidadeTexto === 'kg' || unidadeTexto === 'l') {
-                        qtd *= 1000;
+                    const jaExiste = novosItens.some(item => item.nome.toLowerCase() === i.nome.toLowerCase());
+                    if (!jaExiste) {
+                        novosItens.push({
+                            ingrediente_id: ingEncontrado ? ingEncontrado.id : null,
+                            nome: ingEncontrado ? ingEncontrado.nome : i.nome,
+                            unidade: ingEncontrado ? ingEncontrado.unidade : (i.unidade || 'g'),
+                            quantidade: parseFloat(i.quantidade) || 1,
+                            preco_embalagem: ingEncontrado ? ingEncontrado.preco_embalagem : 0,
+                            quantidade_embalagem: ingEncontrado ? ingEncontrado.quantidade_embalagem : 1
+                        });
                     }
-
-                    let nomeIngredienteCandidato = linhaLimpa
-                        .replace(matchQtd[0], '')
-                        .replace(/[-–—:]/g, '')
-                        .replace(/de\s/gi, '')
-                        .trim();
-
-                    if (nomeIngredienteCandidato.length > 1 && qtd > 0) {
-                        const ingEncontrado = ingredientesCache.find(ing => 
-                            ing.nome.toLowerCase().includes(nomeIngredienteCandidato.toLowerCase()) ||
-                            nomeIngredienteCandidato.toLowerCase().includes(ing.nome.toLowerCase())
-                        );
-
-                        if (ingEncontrado) {
-                            const jaExiste = novosItens.some(i => i.ingrediente_id === ingEncontrado.id);
-                            if (!jaExiste) {
-                                novosItens.push({
-                                    ingrediente_id: ingEncontrado.id,
-                                    nome: ingEncontrado.nome,
-                                    unidade: ingEncontrado.unidade,
-                                    quantidade: qtd,
-                                    preco_embalagem: ingEncontrado.preco_embalagem,
-                                    quantidade_embalagem: ingEncontrado.quantidade_embalagem
-                                });
-                            }
-                        }
-                    }
-                }
-            });
-
-            if (nomeDetectado) document.getElementById('rec-nome').value = nomeDetectado;
-            document.getElementById('rec-rendimento').value = rendimentoDetectado;
-
-            if (novosItens.length > 0) {
+                });
                 itensReceitaAtual = novosItens;
                 atualizarTabelaItensReceitaModal();
-                alert(`Sucesso! Foram identificados e associados ${novosItens.length} ingredientes automaticamente.`);
-                alternarModoImportacaoTexto();
-            } else {
-                alert('Não foi possível associar automaticamente os ingredientes. Verifique se os nomes no texto coincidem com os nomes cadastrados no seu estoque.');
+                alert('Sucesso! Receita interpretada e preenchida pela IA.');
             }
         }
 
         async function carregarSelectIngredientesModal() {
             const select = document.getElementById('rec-select-ingrediente');
             if (!select) return;
-            select.innerHTML = '<option value="">Selecione um ingrediente...</option>';
+            select.innerHTML = '<option value="">Selecionar...</option>';
             if (ingredientesCache.length === 0) {
                 const res = await fetch('/api/ingredientes');
                 if (res.ok) ingredientesCache = await res.json();
@@ -823,13 +846,27 @@
             const tbody = document.getElementById('rec-tabela-itens');
             if (!tbody) return;
             if (itensReceitaAtual.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-stone-400 italic">Nenhum ingrediente adicionado.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-stone-400 italic">Nenhum ingrediente.</td></tr>';
                 return;
             }
             tbody.innerHTML = '';
             itensReceitaAtual.forEach((item, index) => {
-                const custo = (parseFloat(item.preco_embalagem) / parseFloat(item.quantidade_embalagem)) * item.quantidade;
-                tbody.innerHTML += `<tr class="border-b"><td class="p-2">${item.nome}</td><td class="p-2 text-center">${item.quantidade} ${item.unidade}</td><td class="p-2 text-right">R$ ${custo.toFixed(2)}</td><td class="p-2 text-center"><button type="button" onclick="removerItemReceitaModal(${index})" class="text-rose-600 font-bold">X</button></td></tr>`;
+                let custo = 0;
+                let qtdParaCusto = item.quantidade;
+                if (item.ingrediente_id && item.preco_embalagem && item.quantidade_embalagem) {
+                    if (item.unidade === 'xícara' || item.unidade === 'copo') qtdParaCusto *= 150;
+                    if (item.unidade === 'colher') qtdParaCusto *= 15;
+                    custo = (parseFloat(item.preco_embalagem) / parseFloat(item.quantidade_embalagem)) * qtdParaCusto;
+                }
+                const textoCusto = item.ingrediente_id ? `R$ ${custo.toFixed(2)}` : `<span class="text-amber-600" title="Cadastre este item no estoque">Sem vínculo</span>`;
+                tbody.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-2">${item.nome}</td>
+                        <td class="p-2 text-center">${item.quantidade} ${item.unidade || 'g'}</td>
+                        <td class="p-2 text-right">${textoCusto}</td>
+                        <td class="p-2 text-center"><button type="button" onclick="removerItemReceitaModal(${index})" class="text-rose-600 font-bold">X</button></td>
+                    </tr>
+                `;
             });
         }
 
@@ -844,12 +881,28 @@
             const unidade_rendimento = document.getElementById('rec-unidade').value;
             if (!nome || !rendimento || itensReceitaAtual.length === 0) return alert('Preencha todos os campos e adicione ingredientes.');
             
-            const payload = { nome, rendimento, unidade_rendimento, itens: itensReceitaAtual.map(i => ({ ingrediente_id: i.ingrediente_id, quantidade: i.quantidade })) };
+            const payload = { 
+                nome, 
+                rendimento, 
+                unidade_rendimento, 
+                itens: itensReceitaAtual.map(i => ({ 
+                    ingrediente_id: i.ingrediente_id || null, 
+                    nome: i.nome,
+                    unidade: i.unidade,
+                    quantidade: (i.unidade === 'xícara' || i.unidade === 'copo') ? i.quantidade * 150 : ((i.unidade === 'colher') ? i.quantidade * 15 : i.quantidade)
+                })) 
+            };
+            
             const url = receitaEditandoId ? `/api/receitas/${receitaEditandoId}` : '/api/receitas';
             const method = receitaEditandoId ? 'PUT' : 'POST';
 
             const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (res.ok) { fecharModalNovaReceita(); carregarReceitas(); }
+            if (res.ok) { 
+                fecharModalNovaReceita(); 
+                carregarReceitas(); 
+            } else {
+                alert('Erro ao salvar receita.');
+            }
         }
 
         async function deletarReceita(id) {
@@ -870,7 +923,7 @@
             }
         }
 
-        // ---------- ORÇAMENTOS (COM RECEITAS E EXTRAS) ----------
+        // ---------- ORÇAMENTOS E DEMAIS FUNÇÕES ----------
         async function carregarSelectOrcamento() {
             const selectRec = document.getElementById('select-receita-orcamento');
             const selectIng = document.getElementById('select-ingrediente-avulso-orcamento');
@@ -889,8 +942,13 @@
                     let custoTotalReceita = 0;
                     let maxUnidadesPossiveis = Infinity;
 
-                    if (rec.itens && rec.itens.length > 0) {
-                        rec.itens.forEach(i => {
+                    let recItens = rec.itens;
+                    if (typeof recItens === 'string') {
+                        try { recItens = JSON.parse(recItens); } catch(e) { recItens = []; }
+                    }
+
+                    if (recItens && recItens.length > 0) {
+                        recItens.forEach(i => {
                             const ingData = ingredientesCache.find(x => x.id === i.ingrediente_id);
                             if (ingData) {
                                 const custoItem = (parseFloat(ingData.preco_embalagem) / parseFloat(ingData.quantidade_embalagem)) * parseFloat(i.quantidade);
@@ -1015,7 +1073,6 @@
             document.getElementById(id)?.addEventListener('input', () => atualizarTabelaPedidoAdmin());
         });
 
-        // ---------- ORÇAMENTOS EM ABERTO ----------
         let orcamentosCache = [];
 
         async function carregarOrcamentosAbertos() {
@@ -1055,7 +1112,6 @@
             if (!orc) return;
 
             orcamentoEditandoId = orc.id;
-            
             document.getElementById('input-cliente').value = orc.cliente || '';
             document.getElementById('input-pedido').value = orc.descricao || '';
             document.getElementById('input-horas').value = orc.horas || 0;
@@ -1066,17 +1122,10 @@
             document.getElementById('input-entrega').value = orc.taxa_entrega || 0.00;
             
             try {
-                if (typeof orc.itens_json === 'string') {
-                    itensPedidoAtual = JSON.parse(orc.itens_json) || [];
-                } else {
-                    itensPedidoAtual = orc.itens_json || [];
-                }
-            } catch(e) {
-                itensPedidoAtual = [];
-            }
+                itensPedidoAtual = typeof orc.itens_json === 'string' ? JSON.parse(orc.itens_json) : (orc.itens_json || []);
+            } catch(e) { itensPedidoAtual = []; }
 
             atualizarTabelaPedidoAdmin();
-
             document.getElementById('titulo-modo-orcamento').textContent = `Editando Orçamento #${orc.id}`;
             document.getElementById('container-cancelar-edicao').classList.remove('hidden');
             document.getElementById('btn-acao-orcamento').textContent = '💾 Atualizar Orçamento';
@@ -1095,7 +1144,6 @@
             document.getElementById('input-entrega').value = '0.00';
             itensPedidoAtual = [];
             atualizarTabelaPedidoAdmin();
-
             document.getElementById('titulo-modo-orcamento').textContent = 'Calculadora de Orçamento e Custos';
             document.getElementById('container-cancelar-edicao').classList.add('hidden');
             document.getElementById('btn-acao-orcamento').textContent = '📄 Gerar Orçamento Profissional em PDF';
@@ -1112,9 +1160,7 @@
                     const erro = await res.json();
                     alert('Erro ao concluir: ' + (erro.error || 'Erro desconhecido'));
                 }
-            } catch (e) { 
-                console.error(e); 
-            }
+            } catch (e) { console.error(e); }
         }
 
         async function removerOrcamento(id) {
@@ -1124,7 +1170,6 @@
             } catch (e) { console.error(e); }
         }
 
-        // ---------- FINANCEIRO ----------
         function popularSeletorMeses() {
             const select = document.getElementById('select-mes-financeiro');
             if (!select || select.children.length > 0) return;
@@ -1174,11 +1219,8 @@
             if (res.ok) carregarDadosFinanceiros();
         }
 
-        // ---------- GERAR PDF E SALVAR ORÇAMENTO COM ITENS ----------
         async function gerarPDFOrcamento() {
-            if (itensPedidoAtual.length === 0) {
-                return alert('Adicione pelo menos um item ao pedido para gerar o orçamento.');
-            }
+            if (itensPedidoAtual.length === 0) return alert('Adicione pelo menos um item ao pedido para gerar o orçamento.');
 
             if (ingredientesCache.length === 0) {
                 const resIng = await fetch('/api/ingredientes');
@@ -1197,9 +1239,13 @@
                 } else if (item.tipo === 'receita') {
                     const recData = receitasCache.find(r => r.id === item.receita_id);
                     if (recData && recData.itens) {
-                        for (let recItem of recData.itens) {
-                            const qtdNecessaria = (parseFloat(recItem.quantidade) || 0) * multiplicador;
-                            consumoTotal[recItem.ingrediente_id] = (consumoTotal[recItem.ingrediente_id] || 0) + qtdNecessaria;
+                        let recItens = recData.itens;
+                        if (typeof recItens === 'string') {
+                            try { recItens = JSON.parse(recItens); } catch(e) { recItens = []; }
+                        }
+                        for (let recItem of recItens) {
+                            const qtdNec = (parseFloat(recItem.quantidade) || 0) * multiplicador;
+                            consumoTotal[recItem.ingrediente_id] = (consumoTotal[recItem.ingrediente_id] || 0) + qtdNec;
                         }
                     }
                 }
@@ -1208,21 +1254,16 @@
             let ingredientesEmFalta = [];
             for (let ingId in consumoTotal) {
                 const ingInfo = ingredientesCache.find(i => i.id == ingId);
-                const estoqueDisponivel = ingInfo ? parseFloat(ingInfo.estoque_atual) || 0 : 0;
+                const estoqueDisp = ingInfo ? parseFloat(ingInfo.estoque_atual) || 0 : 0;
                 const necessario = consumoTotal[ingId];
 
-                if (necessario > estoqueDisponivel) {
-                    ingredientesEmFalta.push(`• ${ingInfo ? ingInfo.nome : 'Ingrediente'}: Necessário ${necessario.toFixed(2)}, Disponível ${estoqueDisponivel.toFixed(2)}`);
+                if (necessario > estoqueDisp) {
+                    ingredientesEmFalta.push(`• ${ingInfo ? ingInfo.nome : 'Ingrediente'}: Necessário ${necessario.toFixed(2)}, Disponível ${estoqueDisp.toFixed(2)}`);
                 }
             }
 
-            // TRAVA RIGOROSA BLOQUEANTE
             if (ingredientesEmFalta.length > 0) {
-                alert(
-                    "❌ OPERAÇÃO BLOQUEADA: Não é possível gerar o orçamento pois os seguintes insumos estão em falta ou com saldo insuficiente no estoque:\n\n" +
-                    ingredientesEmFalta.join("\n") +
-                    "\n\nPor favor, atualize o estoque na aba 'Ingredientes & Estoque' antes de prosseguir."
-                );
+                alert("❌ OPERAÇÃO BLOQUEADA: Saldo insuficiente no estoque:\n\n" + ingredientesEmFalta.join("\n"));
                 return;
             }
 
@@ -1258,16 +1299,8 @@
                         method,
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            cliente,
-                            descricao: pedido,
-                            valor: valorLimpo,
-                            horas,
-                            valor_hora,
-                            custos_operacionais,
-                            margem_lucro,
-                            embalagem,
-                            taxa_entrega,
-                            itens: itensPedidoAtual
+                            cliente, descricao: pedido, valor: valorLimpo, horas, valor_hora,
+                            custos_operacionais, margem_lucro, embalagem, taxa_entrega, itens: itensPedidoAtual
                         })
                     });
                     cancelarEdicaoOrcamento();

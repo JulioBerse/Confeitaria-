@@ -1,351 +1,382 @@
 require('dotenv').config();
 const express = require('express');
+const { Pool } = require('pg');
 const path = require('path');
-const { pool } = require('./pool');
+const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// Inicialização do Gemini utilizando a chave de ambiente do .env
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Rota principal para servir o index.html da raiz
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.static(path.join(__dirname)));
+
+// Conexão com o Banco PostgreSQL usando a variável do .env
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL
 });
 
-// Rota de Ingredientes (Listar)
+pool.connect((err, client, release) => {
+    if (err) {
+        return console.error('Erro ao conectar ao Banco Neon:', err.stack);
+    }
+    console.log('Conectado com sucesso ao Banco Neon!');
+    release();
+});
+
+async function inicializarBanco() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS ingredientes (
+                id SERIAL PRIMARY KEY,
+                nome TEXT NOT NULL,
+                unidade TEXT NOT NULL,
+                quantidade_embalagem NUMERIC NOT NULL,
+                preco_embalagem NUMERIC NOT NULL,
+                estoque_atual NUMERIC DEFAULT 0
+            );
+
+            CREATE TABLE IF NOT EXISTS receitas (
+                id SERIAL PRIMARY KEY,
+                nome TEXT NOT NULL,
+                rendimento NUMERIC NOT NULL,
+                unidade_rendimento TEXT DEFAULT 'g',
+                itens JSONB DEFAULT '[]'
+            );
+
+            CREATE TABLE IF NOT EXISTS orcamentos (
+                id SERIAL PRIMARY KEY,
+                cliente TEXT,
+                descricao TEXT,
+                valor NUMERIC,
+                horas NUMERIC DEFAULT 0,
+                valor_hora NUMERIC DEFAULT 25,
+                custos_operacionais NUMERIC DEFAULT 0,
+                margem_lucro NUMERIC DEFAULT 0,
+                embalagem NUMERIC DEFAULT 0,
+                taxa_entrega NUMERIC DEFAULT 0,
+                itens_json JSONB DEFAULT '[]',
+                status TEXT DEFAULT 'aberto',
+                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        // Garante que as colunas essenciais existam na tabela receitas existente
+        await pool.query(`
+            DO $$ 
+            BEGIN 
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='receitas' and column_name='itens') THEN
+                    ALTER TABLE receitas ADD COLUMN itens JSONB DEFAULT '[]';
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='receitas' and column_name='unidade_rendimento') THEN
+                    ALTER TABLE receitas ADD COLUMN unidade_rendimento TEXT DEFAULT 'g';
+                END IF;
+            END $$;
+        `);
+
+        console.log('Tabelas e colunas verificadas/atualizadas com sucesso no Banco Neon.');
+    } catch (e) {
+        console.error('Erro ao inicializar tabelas:', e);
+    }
+}
+inicializarBanco();
+
+// ================= ROTAS DE INGREDIENTES =================
 app.get('/api/ingredientes', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT id, nome, unidade, quantidade_embalagem, preco_embalagem, estoque_atual FROM ingredientes ORDER BY nome ASC');
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Erro ao buscar ingredientes:", err.message);
-    res.status(500).json({ error: err.message });
-  }
+    try {
+        const result = await pool.query('SELECT * FROM ingredientes ORDER BY nome ASC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// Rota de Ingredientes (Cadastrar)
 app.post('/api/ingredientes', async (req, res) => {
-  const { nome, unidade, quantidade_embalagem, preco_embalagem, estoque_atual } = req.body;
-  try {
-    const query = `
-      INSERT INTO ingredientes (nome, unidade, quantidade_embalagem, preco_embalagem, estoque_atual) 
-      VALUES ($1, $2, $3, $4, $5) RETURNING *;
-    `;
-    const values = [nome, unidade, quantidade_embalagem, preco_embalagem, estoque_atual || quantidade_embalagem];
-    const result = await pool.query(query, values);
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    console.error("Erro ao cadastrar ingrediente:", err.message);
-    res.status(500).json({ error: err.message });
-  }
+    const { nome, unidade, quantidade_embalagem, preco_embalagem, estoque_atual } = req.body;
+    try {
+        const result = await pool.query(
+            'INSERT INTO ingredientes (nome, unidade, quantidade_embalagem, preco_embalagem, estoque_atual) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [nome, unidade, quantidade_embalagem, preco_embalagem, estoque_atual || quantidade_embalagem]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// --- ROTA DELETE PARA INGREDIENTES ---
+app.patch('/api/ingredientes/:id/estoque', async (req, res) => {
+    const { id } = req.params;
+    const { quantidade, preco_embalagem } = req.body;
+    try {
+        let query = 'UPDATE ingredientes SET estoque_atual = estoque_atual + $1';
+        let params = [quantidade, id];
+        if (preco_embalagem !== undefined) {
+            query = 'UPDATE ingredientes SET estoque_atual = estoque_atual + $1, preco_embalagem = $3 WHERE id = $2 RETURNING *';
+            params = [quantidade, id, preco_embalagem];
+        } else {
+            query = 'UPDATE ingredientes SET estoque_atual = estoque_atual + $1 WHERE id = $2 RETURNING *';
+        }
+        const result = await pool.query(query, params);
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.delete('/api/ingredientes/:id', async (req, res) => {
     const { id } = req.params;
     try {
         await pool.query('DELETE FROM ingredientes WHERE id = $1', [id]);
-        res.status(200).json({ message: 'Ingrediente excluído com sucesso!' });
+        res.json({ success: true });
     } catch (err) {
-        console.error('Erro ao excluir ingrediente:', err);
         res.status(500).json({ error: err.message });
     }
 });
 
-// Rota de Estoque e Atualização de Ingrediente (Soma ao estoque atual e atualiza o preço, mantendo o tamanho base da embalagem)
-app.patch('/api/ingredientes/:id/estoque', async (req, res) => {
-  const { id } = req.params;
-  const { quantidade, preco_embalagem } = req.body;
-  try {
-    let query, values;
-    
-    if (preco_embalagem !== undefined) {
-      query = `
-        UPDATE ingredientes 
-        SET estoque_atual = GREATEST(0, estoque_atual + $1),
-            preco_embalagem = $2
-        WHERE id = $3 RETURNING *;
-      `;
-      values = [quantidade, preco_embalagem, id];
-    } else {
-      query = `
-        UPDATE ingredientes 
-        SET estoque_atual = GREATEST(0, estoque_atual + $1) 
-        WHERE id = $2 RETURNING *;
-      `;
-      values = [quantidade, id];
-    }
-
-    const result = await pool.query(query, values);
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error("Erro ao atualizar estoque/ingrediente:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Rota de Receitas (Listar)
+// ================= ROTAS DE RECEITAS =================
 app.get('/api/receitas', async (req, res) => {
-  try {
-    const receitasQuery = await pool.query('SELECT * FROM receitas ORDER BY nome ASC');
-    const receitas = receitasQuery.rows;
-
-    for (let receita of receitas) {
-      const itensQuery = await pool.query(`
-        SELECT ri.*, i.nome, i.unidade, i.quantidade_embalagem, i.preco_embalagem 
-        FROM receita_itens ri
-        JOIN ingredientes i ON ri.ingrediente_id = i.id
-        WHERE ri.receita_id = $1
-      `, [receita.id]);
-      receita.itens = itensQuery.rows;
+    try {
+        const result = await pool.query('SELECT * FROM receitas ORDER BY nome ASC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-
-    res.json(receitas);
-  } catch (err) {
-    console.error("Erro ao buscar receitas:", err.message);
-    res.status(500).json({ error: err.message });
-  }
 });
 
-// Rota de Receitas (Cadastrar)
 app.post('/api/receitas', async (req, res) => {
-  const { nome, rendimento, unidade_rendimento, itens } = req.body;
-  const client = await pool.connect();
-  
-  try {
-    await client.query('BEGIN');
-    const receitaQuery = `
-      INSERT INTO receitas (nome, rendimento, unidade_rendimento) 
-      VALUES ($1, $2, $3) RETURNING id;
-    `;
-    const receitaResult = await client.query(receitaQuery, [nome, rendimento, unidade_rendimento]);
-    const receitaId = receitaResult.rows[0].id;
+    const { nome, rendimento, unidade_rendimento, itens } = req.body;
+    try {
+        // Garante que todos os itens tenham um formato seguro para JSONB
+        const itensTratados = Array.isArray(itens) ? itens.map(i => ({
+            ingrediente_id: i.ingrediente_id ? parseInt(i.ingrediente_id) : null,
+            nome: i.nome || 'Ingrediente',
+            quantidade: parseFloat(i.quantidade) || 0,
+            unidade: i.unidade || 'g'
+        })) : [];
 
-    for (let item of itens) {
-      const itemQuery = `
-        INSERT INTO receita_itens (receita_id, ingrediente_id, quantidade) 
-        VALUES ($1, $2, $3);
-      `;
-      await client.query(itemQuery, [receitaId, item.ingrediente_id, item.quantidade]);
+        const result = await pool.query(
+            'INSERT INTO receitas (nome, rendimento, unidade_rendimento, itens) VALUES ($1, $2, $3, $4) RETURNING *',
+            [nome, parseFloat(rendimento) || 1, unidade_rendimento || 'g', JSON.stringify(itensTratados)]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Erro ao salvar receita:', err);
+        res.status(500).json({ error: err.message });
     }
-
-    await client.query('COMMIT');
-    res.status(201).json({ message: 'Receita cadastrada com sucesso!' });
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error("Erro ao cadastrar receita:", err.message);
-    res.status(500).json({ error: err.message });
-  } finally {
-    client.release();
-  }
 });
 
-// Rota de Receitas (Atualizar / Editar)
 app.put('/api/receitas/:id', async (req, res) => {
-  const { id } = req.params;
-  const { nome, rendimento, unidade_rendimento, itens } = req.body;
-  const client = await pool.connect();
-  
-  try {
-    await client.query('BEGIN');
-    
-    const receitaQuery = `
-      UPDATE receitas 
-      SET nome = $1, rendimento = $2, unidade_rendimento = $3 
-      WHERE id = $4;
-    `;
-    await client.query(receitaQuery, [nome, rendimento, unidade_rendimento, id]);
-
-    await client.query('DELETE FROM receita_itens WHERE receita_id = $1', [id]);
-
-    for (let item of itens) {
-      const itemQuery = `
-        INSERT INTO receita_itens (receita_id, ingrediente_id, quantidade) 
-        VALUES ($1, $2, $3);
-      `;
-      await client.query(itemQuery, [id, item.ingrediente_id, item.quantidade]);
-    }
-
-    await client.query('COMMIT');
-    res.status(200).json({ message: 'Receita atualizada com sucesso!' });
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error("Erro ao atualizar receita:", err.message);
-    res.status(500).json({ error: err.message });
-  } finally {
-    client.release();
-  }
-});
-
-// Rota de Receitas (Excluir)
-app.delete('/api/receitas/:id', async (req, res) => {
-  const { id } = req.params;
-  const client = await pool.connect();
-  
-  try {
-    await client.query('BEGIN');
-    
-    await client.query('DELETE FROM receita_itens WHERE receita_id = $1', [id]);
-    await client.query('DELETE FROM receitas WHERE id = $1', [id]);
-
-    await client.query('COMMIT');
-    res.status(200).json({ message: 'Receita excluída com sucesso!' });
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error("Erro ao excluir receita:", err.message);
-    res.status(500).json({ error: err.message });
-  } finally {
-    client.release();
-  }
-});
-
-// Rota para salvar um novo orçamento (Com suporte a itens_json)
-app.post('/api/orcamentos', async (req, res) => {
+    const { id } = req.params;
+    const { nome, rendimento, unidade_rendimento, itens } = req.body;
     try {
-        const { cliente, descricao, valor, horas, valor_hora, custos_operacionais, margem_lucro, embalagem, taxa_entrega, itens } = req.body;
-        const novo = await pool.query(
-            'INSERT INTO orcamentos (cliente, descricao, valor, horas, valor_hora, custos_operacionais, margem_lucro, embalagem, taxa_entrega, status, itens_json) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
-            [cliente, descricao, valor, horas || 0, valor_hora || 25.00, custos_operacionais || 0, margem_lucro || 0, embalagem || 0.00, taxa_entrega || 0.00, 'aberto', JSON.stringify(itens || [])]
+        const itensTratados = Array.isArray(itens) ? itens.map(i => ({
+            ingrediente_id: i.ingrediente_id ? parseInt(i.ingrediente_id) : null,
+            nome: i.nome || 'Ingrediente',
+            quantidade: parseFloat(i.quantidade) || 0,
+            unidade: i.unidade || 'g'
+        })) : [];
+
+        const result = await pool.query(
+            'UPDATE receitas SET nome = $1, rendimento = $2, unidade_rendimento = $3, itens = $4 WHERE id = $5 RETURNING *',
+            [nome, parseFloat(rendimento) || 1, unidade_rendimento || 'g', JSON.stringify(itensTratados), id]
         );
-        res.json(novo.rows[0]);
+        res.json(result.rows[0]);
     } catch (err) {
-        console.error('Erro ao salvar orçamento:', err);
-        res.status(500).send('Erro ao salvar orçamento');
+        console.error('Erro ao atualizar receita:', err);
+        res.status(500).json({ error: err.message });
     }
 });
 
-// Rota para atualizar um orçamento existente (EDITAR)
-app.put('/api/orcamentos/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { cliente, descricao, valor, horas, valor_hora, custos_operacionais, margem_lucro, embalagem, taxa_entrega, itens } = req.body;
-        const atualizado = await pool.query(
-            'UPDATE orcamentos SET cliente = $1, descricao = $2, valor = $3, horas = $4, valor_hora = $5, custos_operacionais = $6, margem_lucro = $7, embalagem = $8, taxa_entrega = $9, itens_json = $10 WHERE id = $11 RETURNING *',
-            [cliente, descricao, valor, horas || 0, valor_hora || 25.00, custos_operacionais || 0, margem_lucro || 0, embalagem || 0.00, taxa_entrega || 0.00, JSON.stringify(itens || []), id]
-        );
-        res.json(atualizado.rows[0]);
-    } catch (err) {
-        console.error('Erro ao atualizar orçamento:', err);
-        res.status(500).send('Erro ao atualizar orçamento');
-    }
-});
 
-// Rota para listar apenas os orçamentos em aberto
-app.get('/api/orcamentos', async (req, res) => {
+// ================= ROTA DE INTELIGÊNCIA ARTIFICIAL PARA RECEITAS =================
+app.post('/api/ia/interpretar-receita', async (req, res) => {
+    const { texto, imagemBase64, mimeType } = req.body;
     try {
-        const lista = await pool.query("SELECT * FROM orcamentos WHERE status = 'aberto' ORDER BY id DESC");
-        res.json(lista.rows);
-    } catch (err) {
-        res.status(500).send('Erro ao buscar orçamentos');
-    }
-});
+        let contents = [];
+        const prompt = `Analise o texto ou imagem da receita fornecida e extraia os dados estritamente em formato JSON válido, sem blocos de markdown adicionais.
+        
+        IMPORTANTE SOBRE CONVERSÃO DE MEDIDAS CASEIRAS PARA PESO/VOLUME (PADRÃO CONFEITARIA):
+        - 1 xícara de farinha de trigo = 120g a 130g
+        - 1 xícara de açúcar = 180g a 200g
+        - 1 xícara de fubá = 150g
+        - 1 xícara de leite ou óleo = 240 ml
+        - 1 copo americano = 150 ml ou g
+        - 1 colher de sopa = 15g ou 15 ml
+        - 1 colher de chá = 5g ou 5 ml
+        Sempre converta xícaras, copos e colheres para o valor total correspondente em gramas (g) ou mililitros (ml) nos campos "quantidade" e defina a unidade como "g" ou "ml" (exceto para ovos ou unidades inteiras).
 
-// Rota para buscar orçamentos concluídos (com suporte a filtro mensal opcional)
-app.get('/api/orcamentos/concluidos', async (req, res) => {
-    const { mes } = req.query; 
-    try {
-        let query = "SELECT * FROM orcamentos WHERE status = 'concluido'";
-        let params = [];
+        Retorne exatamente esta estrutura JSON:
+        {
+          "nome": "Nome da receita",
+          "rendimento": número em gramas ou ml,
+          "unidade_rendimento": "g" ou "ml" ou "unidade",
+          "itens": [
+            {
+              "nome": "Nome limpo do ingrediente",
+              "quantidade": número convertido em gramas/ml/unidades,
+              "unidade": "g" ou "ml" ou "unidade"
+            }
+          ]
+        }`;
 
-        if (mes) {
-            query += " AND TO_CHAR(criado_em, 'YYYY-MM') = $1";
-            params.push(mes);
+        contents.push(prompt);
+
+        if (imagemBase64) {
+            contents.push({
+                inlineData: {
+                    data: imagemBase64,
+                    mimeType: mimeType || 'image/jpeg'
+                }
+            });
         }
 
-        query += " ORDER BY criado_em DESC";
-        
-        const resultado = await pool.query(query, params);
-        res.status(200).json(resultado.rows);
+        if (texto) {
+            contents.push(`Texto da receita:\n${texto}`);
+        }
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: contents,
+            config: {
+                responseMimeType: 'application/json'
+            }
+        });
+
+        const textoBruto = response.text || "{}";
+        const textoResposta = textoBruto.replace(/```json/g, '').replace(/```/g, '').trim();
+        const resultadoJson = JSON.parse(textoResposta);
+        res.json(resultadoJson);
     } catch (err) {
-        console.error('Erro ao buscar orçamentos concluídos:', err);
+        console.error('Erro na IA:', err);
+        res.status(500).json({ error: 'Erro ao interpretar receita com IA: ' + err.message });
+    }
+});
+
+
+// ================= ROTAS DE ORÇAMENTOS & FINANCEIRO =================
+app.get('/api/orcamentos', async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM orcamentos WHERE status = 'aberto' ORDER BY id DESC");
+        res.json(result.rows);
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Rota para concluir um orçamento E DAR BAIXA AUTOMÁTICA NO ESTOQUE
+app.post('/api/orcamentos', async (req, res) => {
+    const { cliente, descricao, valor, horas, valor_hora, custos_operacionais, margem_lucro, embalagem, taxa_entrega, itens } = req.body;
+    try {
+        const result = await pool.query(
+            'INSERT INTO orcamentos (cliente, descricao, valor, horas, valor_hora, custos_operacionais, margem_lucro, embalagem, taxa_entrega, itens_json, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+            [cliente, descricao, valor, horas, valor_hora, custos_operacionais, margem_lucro, embalagem, taxa_entrega, JSON.stringify(itens), 'aberto']
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/orcamentos/:id', async (req, res) => {
+    const { id } = req.params;
+    const { cliente, descricao, valor, horas, valor_hora, custos_operacionais, margem_lucro, embalagem, taxa_entrega, itens } = req.body;
+    try {
+        const result = await pool.query(
+            'UPDATE orcamentos SET cliente = $1, descricao = $2, valor = $3, horas = $4, valor_hora = $5, custos_operacionais = $6, margem_lucro = $7, embalagem = $8, taxa_entrega = $9, itens_json = $10 WHERE id = $11 RETURNING *',
+            [cliente, descricao, valor, horas, valor_hora, custos_operacionais, margem_lucro, embalagem, taxa_entrega, JSON.stringify(itens), id]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.patch('/api/orcamentos/:id/concluir', async (req, res) => {
     const { id } = req.params;
     const client = await pool.connect();
-
     try {
         await client.query('BEGIN');
-
-        // 1. Busca os detalhes do orçamento
-        const orcRes = await client.query("SELECT * FROM orcamentos WHERE id = $1", [id]);
-        if (orcRes.rows.length === 0) {
-            await client.query('ROLLBACK');
-            return res.status(404).json({ error: 'Orçamento não encontrado.' });
-        }
+        const orcRes = await client.query('SELECT * FROM orcamentos WHERE id = $1', [id]);
+        if (orcRes.rows.length === 0) throw new Error('Orçamento não encontrado');
         const orc = orcRes.rows[0];
+        let itensPedido = orc.itens_json;
+        if (typeof itensPedido === 'string') itensPedido = JSON.parse(itensPedido);
 
-        // 2. Atualiza o status para concluído
-        await client.query("UPDATE orcamentos SET status = 'concluido' WHERE id = $1", [id]);
+        const recRes = await client.query('SELECT * FROM receitas');
+        const receitasMap = recRes.rows;
 
-        // 3. Processa a baixa automática no estoque
-        if (orc.itens_json) {
-            let itensPedido = [];
-            try {
-                itensPedido = typeof orc.itens_json === 'string' ? JSON.parse(orc.itens_json) : orc.itens_json;
-            } catch (e) {
-                console.error("Erro ao parsear itens_json:", e);
-            }
-
-            if (Array.isArray(itensPedido)) {
-                for (let item of itensPedido) {
-                    const ingredienteAvulsoId = item.ingrediente_id || item.ingredienteId;
-                    const qtdItem = parseFloat(item.quantidade) || 0;
-
-                    if (item.tipo === 'avulso' && ingredienteAvulsoId) {
-                        await client.query(
-                            "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
-                            [qtdItem, ingredienteAvulsoId]
-                        );
-                    } 
-                    
-                    const receitaId = item.receita_id || item.receitaId;
-                    if (receitaId) {
-                        const recItensRes = await client.query(
-                            "SELECT ingrediente_id, quantidade FROM receita_itens WHERE receita_id = $1",
-                            [receitaId]
-                        );
-
-                        for (let recItem of recItensRes.rows) {
-                            const qtdConsumida = (parseFloat(recItem.quantidade) || 0) * qtdItem;
-                            await client.query(
-                                "UPDATE ingredientes SET estoque_atual = GREATEST(0, estoque_atual - $1) WHERE id = $2",
-                                [qtdConsumida, recItem.ingrediente_id]
-                            );
-                        }
+        const consumoTotal = {};
+        for (let item of itensPedido) {
+            const multi = parseFloat(item.quantidade) || 1;
+            if (item.tipo === 'avulso') {
+                consumoTotal[item.ingrediente_id] = (consumoTotal[item.ingrediente_id] || 0) + multi;
+            } else if (item.tipo === 'receita') {
+                const rec = receitasMap.find(r => r.id === item.receita_id);
+                if (rec && rec.itens) {
+                    let recItens = rec.itens;
+                    if (typeof recItens === 'string') recItens = JSON.parse(recItens);
+                    for (let ri of recItens) {
+                        const qtdNec = (parseFloat(ri.quantidade) || 0) * multi;
+                        consumoTotal[ri.ingrediente_id] = (consumoTotal[ri.ingrediente_id] || 0) + qtdNec;
                     }
                 }
             }
         }
 
+        for (let ingId in consumoTotal) {
+            const ingRes = await client.query('SELECT * FROM ingredientes WHERE id = $1', [ingId]);
+            if (ingRes.rows.length > 0) {
+                const estoqueAtual = parseFloat(ingRes.rows[0].estoque_atual) || 0;
+                const necess = consumoTotal[ingId];
+                if (estoqueAtual < necess) {
+                    throw new Error(`Estoque insuficiente para o ingrediente ${ingRes.rows[0].nome}. Necessário: ${necess}, Disponível: ${estoqueAtual}`);
+                }
+            }
+        }
+
+        for (let ingId in consumoTotal) {
+            await client.query('UPDATE ingredientes SET estoque_atual = estoque_atual - $1 WHERE id = $2', [consumoTotal[ingId], ingId]);
+        }
+
+        await client.query("UPDATE orcamentos SET status = 'concluido' WHERE id = $1", [id]);
         await client.query('COMMIT');
-        res.json({ mensagem: 'Orçamento concluído e estoque atualizado com sucesso!' });
+        res.json({ success: true });
     } catch (err) {
         await client.query('ROLLBACK');
-        console.error('Erro ao concluir orçamento e baixar estoque:', err);
-        res.status(500).json({ error: err.message });
+        res.status(400).json({ error: err.message });
     } finally {
         client.release();
     }
 });
 
-// Rota para apagar orçamento
 app.delete('/api/orcamentos/:id', async (req, res) => {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
         await pool.query('DELETE FROM orcamentos WHERE id = $1', [id]);
-        res.json({ mensagem: 'Orçamento removido com sucesso!' });
+        res.json({ success: true });
     } catch (err) {
-        res.status(500).send('Erro ao remover orçamento');
+        res.status(500).json({ error: err.message });
     }
 });
 
-// Inicialização do servidor
+app.get('/api/orcamentos/concluidos', async (req, res) => {
+    const { mes } = req.query;
+    try {
+        let query = "SELECT * FROM orcamentos WHERE status = 'concluido'";
+        let params = [];
+        if (mes) {
+            query += " AND to_char(data_criacao, 'YYYY-MM') = $1";
+            params.push(mes);
+        }
+        query += " ORDER BY id DESC";
+        const result = await pool.query(query, params);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.listen(port, () => {
-  console.log(`Servidor a correr na porta ${port}`);
+    console.log(`Servidor rodando na porta ${port}`);
 });
