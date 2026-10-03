@@ -8,7 +8,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Inicialização do Gemini utilizando a chave de ambiente do .env ou do Render
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY.trim() });
+// Inicialização segura do Gemini
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname)));
