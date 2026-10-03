@@ -662,7 +662,11 @@
 
                         if (recItens && recItens.length > 0) {
                             recItens.forEach(i => {
-                                const ingData = ingredientesCache.find(x => x.id === i.ingrediente_id);
+                                let ingData = ingredientesCache.find(x => x.id === i.ingrediente_id);
+                                if (!ingData && i.nome) {
+                                    ingData = ingredientesCache.find(x => x.nome.toLowerCase() === i.nome.toLowerCase() || x.nome.toLowerCase().includes(i.nome.toLowerCase()));
+                                }
+
                                 let custoItem = 0;
                                 let qtdCalculo = parseFloat(i.quantidade) || 0;
                                 let unidadeExibicao = i.unidade || 'g';
@@ -744,7 +748,6 @@
             document.getElementById('modal-receita').classList.add('hidden');
         }
 
-        // 🤖 LEITURA DE FOTO/PRINT COM IA
         async function processarFotoReceita(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -775,7 +778,6 @@
             reader.readAsDataURL(file);
         }
 
-        // 🤖 LEITURA DE TEXTO COM IA
         async function processarTextoComIA() {
             const texto = document.getElementById('input-texto-receita').value.trim();
             if (!texto) return alert('Por favor, cole o texto da receita.');
@@ -939,7 +941,7 @@
             }
         }
 
-        // ---------- ORÇAMENTOS E DEMAIS FUNÇÕES ----------
+        // ---------- ORÇAMENTOS E DEMAIS FUNÇÕES (COM BUSCA DUPLA CORRIGIDA) ----------
         async function carregarSelectOrcamento() {
             const selectRec = document.getElementById('select-receita-orcamento');
             const selectIng = document.getElementById('select-ingrediente-avulso-orcamento');
@@ -965,26 +967,34 @@
 
                     if (recItens && recItens.length > 0) {
                         recItens.forEach(i => {
-                            const ingData = ingredientesCache.find(x => x.id === i.ingrediente_id);
+                            let ingData = ingredientesCache.find(x => x.id === i.ingrediente_id);
+                            if (!ingData && i.nome) {
+                                ingData = ingredientesCache.find(x => x.nome.toLowerCase() === i.nome.toLowerCase() || x.nome.toLowerCase().includes(i.nome.toLowerCase()));
+                            }
+
                             if (ingData) {
-                                const custoItem = (parseFloat(ingData.preco_embalagem) / parseFloat(ingData.quantidade_embalagem)) * parseFloat(i.quantidade);
+                                const precoEmb = parseFloat(ingData.preco_embalagem) || 0;
+                                const qtdEmb = parseFloat(ingData.quantidade_embalagem) || 1;
+                                let qtdItem = parseFloat(i.quantidade) || 0;
+                                
+                                if (i.unidade === 'xícara' || i.unidade === 'copo') qtdItem *= 150;
+                                if (i.unidade === 'colher') qtdItem *= 15;
+
+                                const custoItem = (precoEmb / qtdEmb) * qtdItem;
                                 custoTotalReceita += custoItem;
 
                                 const estoqueDisp = parseFloat(ingData.estoque_atual) || 0;
-                                const qtdNecessariaNaReceita = parseFloat(i.quantidade) || 1;
-                                const unidadesComEsteIngrediente = estoqueDisp / qtdNecessariaNaReceita;
+                                const unidadesComEsteIngrediente = qtdItem > 0 ? (estoqueDisp / qtdItem) : 0;
                                 if (unidadesComEsteIngrediente < maxUnidadesPossiveis) {
                                     maxUnidadesPossiveis = unidadesComEsteIngrediente;
                                 }
-                            } else {
-                                maxUnidadesPossiveis = 0;
                             }
                         });
                     } else {
                         maxUnidadesPossiveis = 0;
                     }
 
-                    if (maxUnidadesPossiveis === Infinity) maxUnidadesPossiveis = 0;
+                    if (maxUnidadesPossiveis === Infinity || isNaN(maxUnidadesPossiveis)) maxUnidadesPossiveis = 0;
 
                     if (selectRec) {
                         selectRec.innerHTML += `<option value="${rec.id}" data-custo="${custoTotalReceita}">${rec.nome} (Custo: R$ ${custoTotalReceita.toFixed(2)}) — Estoque Suficiente para: ${maxUnidadesPossiveis.toFixed(1)} un</option>`;
@@ -992,7 +1002,9 @@
                 });
 
                 ingredientesCache.forEach(ing => {
-                    const custoUnit = parseFloat(ing.preco_embalagem) / parseFloat(ing.quantidade_embalagem);
+                    const precoEmb = parseFloat(ing.preco_embalagem) || 0;
+                    const qtdEmb = parseFloat(ing.quantidade_embalagem) || 1;
+                    const custoUnit = qtdEmb > 0 ? (precoEmb / qtdEmb) : 0;
                     const estoqueDisp = parseFloat(ing.estoque_atual) || 0;
                     if (selectIng) {
                         selectIng.innerHTML += `<option value="${ing.id}" data-custo-unit="${custoUnit}" data-unidade="${ing.unidade}">${ing.nome} (R$ ${custoUnit.toFixed(4)}/${ing.unidade}) — Estoque: ${estoqueDisp.toFixed(2)} ${ing.unidade}</option>`;
@@ -1331,8 +1343,14 @@
                             try { recItens = JSON.parse(recItens); } catch(e) { recItens = []; }
                         }
                         for (let recItem of recItens) {
-                            const qtdNec = (parseFloat(recItem.quantidade) || 0) * multiplicador;
-                            consumoTotal[recItem.ingrediente_id] = (consumoTotal[recItem.ingrediente_id] || 0) + qtdNec;
+                            let ingMatch = ingredientesCache.find(x => x.id === recItem.ingrediente_id);
+                            if (!ingMatch && recItem.nome) {
+                                ingMatch = ingredientesCache.find(x => x.nome.toLowerCase() === recItem.nome.toLowerCase() || x.nome.toLowerCase().includes(recItem.nome.toLowerCase()));
+                            }
+                            if (ingMatch) {
+                                const qtdNec = (parseFloat(recItem.quantidade) || 0) * multiplicador;
+                                consumoTotal[ingMatch.id] = (consumoTotal[ingMatch.id] || 0) + qtdNec;
+                            }
                         }
                     }
                 }
