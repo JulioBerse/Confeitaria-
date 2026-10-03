@@ -8,7 +8,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Inicialização do Gemini utilizando a chave de ambiente do .env ou do Render
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new GoogleGenAI({});
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname)));
@@ -235,10 +235,12 @@ app.post('/api/ia/interpretar-receita', async (req, res) => {
             contents.push(`Texto da receita:\n${texto}`);
         }
 
+        // Chamada explícita passando a chave de ambiente e o modelo
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: contents,
             config: {
+                apiKey: process.env.GEMINI_API_KEY,
                 responseMimeType: 'application/json'
             }
         });
