@@ -8,14 +8,14 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Inicialização do Gemini utilizando a chave de ambiente do .env
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY});
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname)));
 
 // Conexão com o Banco PostgreSQL usando a variável do .env
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
+    connectionString: process.env.DATABASE_URL='postgresql://neondb_owner:npg_TisYFN81oGeP@ep-super-cloud-ayjdqwgy-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
 });
 
 pool.connect((err, client, release) => {
