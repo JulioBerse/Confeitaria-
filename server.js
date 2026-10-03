@@ -185,7 +185,108 @@ app.put('/api/receitas/:id', async (req, res) => {
 });
 
 
+// ================= ROTA DE INTELIGÊNCIA ARTIFICIAL PARA RECEITAS (COM LOG DETALHADO) =================
+app.post('/api/ia/interpretar-receita', async (req, res) => {
+    const { texto, imagemBase64, mimeType } = req.body;
+    try {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            throw new Error("A chave GEMINI_API_KEY não está definida nas variáveis de ambiente.");
+        }
 
+        const prompt = `Analise o texto ou imagem da receita fornecida e extraia os dados estritamente em formato JSON válido, sem blocos de markdown adicionais.
+        
+        IMPORTANTE SOBRE CONVERSÃO DE MEDIDAS CASEIRAS PARA PESO/VOLUME (PADRÃO CONFEITARIA):
+- 1 xícara de farinha de trigo = 120g a 130g
+- 1 xícara de açúcar = 180g a 200g
+- 1 xícara de fubá = 150g
+- 1 xícara de leite ou óleo = 240 ml
+- 1 copo americano = 150 ml ou g
+- 1 colher de sopa = 15g ou 15 ml
+- 1 colher de chá = 5g ou 5 ml
+        Sempre converta xícaras, copos e colheres para o valor total correspondente em gramas (g) ou mililitros (ml) nos campos "quantidade" e defina a unidade como "g" ou "ml" (exceto para ovos ou unidades inteiras).
+
+        Retorne exatamente esta estrutura JSON:
+        {
+          "nome": "Nome da receita",
+          "rendimento": número em gramas ou ml,
+          "unidade_rendimento": "g" ou "ml" ou "unidade",
+          "itens": [
+            {
+              "nome": "Nome limpo do ingrediente",
+              "quantidade": número convertido em gramas/ml/unidades,
+              "unidade": "g" ou "ml" ou "unidade"
+            }
+          ]
+        }`;
+
+        let parts = [{ text: prompt }];
+
+        if (imagemBase64) {
+            // Limpa o prefixo data:image/...;base64, caso venha junto na string
+            const base64Limpo = imagemBase64.includes('base64,') 
+                ? imagemBase64.split('base64,')[1] 
+                : imagemBase64;
+
+            parts.push({
+                inlineData: {
+                    data: base64Limpo,
+                    mimeType: mimeType || 'image/jpeg'
+                }
+            });
+        }
+
+        if (texto) {
+            parts.push({ text: `Texto da receita:\n${texto}` });
+        }
+
+        let response;
+        let data;
+        let tentativas = 3;
+
+        while (tentativas > 0) {
+            response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{ parts: parts }],
+                    generationConfig: {
+                        responseMimeType: 'application/json'
+                    }
+                })
+            });
+
+            data = await response.json();
+
+            if (response.ok) {
+                break;
+            }
+
+            console.warn(`Tentativa falhou (${tentativas} restantes). Resposta da API:`, JSON.stringify(data));
+
+            if (response.status === 503 || JSON.stringify(data).includes('high demand')) {
+                tentativas--;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            } else {
+                break;
+            }
+        }
+        
+        if (!response.ok) {
+            throw new Error(data.error?.message || JSON.stringify(data));
+        }
+
+        const textoBruto = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+        const textoResposta = textoBruto.replace(/```json/g, '').replace(/```/g, '').trim();
+        const resultadoJson = JSON.parse(textoResposta);
+        res.json(resultadoJson);
+    } catch (err) {
+        console.error('Erro detalhado na IA:', err);
+        res.status(500).json({ error: 'Erro ao interpretar receita com IA: ' + err.message });
+    }
+});
 
 // ================= ROTAS DE ORÇAMENTOS & FINANCEIRO =================
 app.get('/api/orcamentos', async (req, res) => {
