@@ -439,6 +439,22 @@
         </div>
     </div>
 
+    <!-- MODAL DE DETALHAMENTO FINANCEIRO DO PEDIDO -->
+    <div id="modal-detalhes-financeiros" class="fixed inset-0 bg-stone-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-stone-800 text-base" id="detalhe-titulo-modal">Raio-X do Pedido</h3>
+                <button onclick="fecharModalDetalhesFinanceiros()" class="text-stone-400 hover:text-stone-700 font-bold text-lg">×</button>
+            </div>
+            <div id="detalhe-conteudo-modal" class="space-y-4 text-sm text-stone-700">
+                <!-- Conteúdo dinâmico preenchido via JavaScript -->
+            </div>
+            <div class="flex justify-end pt-3 border-t">
+                <button onclick="fecharModalDetalhesFinanceiros()" class="bg-stone-800 hover:bg-stone-900 text-white text-xs font-semibold px-4 py-2 rounded transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <footer class="text-center py-4 bg-rose-100 text-xs text-rose-900 font-medium mt-16 w-full">
         Contato WhatsApp: (66) 99671-8582
     </footer>
@@ -1192,18 +1208,23 @@
                 if (!res.ok) return;
                 const dados = await res.json();
                 const tbody = document.getElementById('tabela-financeiro-concluidos');
+                if(!tbody) return;
                 tbody.innerHTML = '';
                 let fat = 0, horas = 0;
 
                 dados.forEach(orc => {
                     fat += parseFloat(orc.valor) || 0;
                     horas += parseFloat(orc.horas) || 0;
+                    
                     tbody.innerHTML += `
                         <tr style="border-bottom: 1px solid #f3d1dc;">
                             <td style="padding: 8px;">${orc.cliente}</td>
                             <td style="padding: 8px;">${orc.descricao}</td>
                             <td style="padding: 8px; text-align: right; color: #047857; font-weight: bold;">R$ ${parseFloat(orc.valor).toFixed(2)}</td>
-                            <td style="padding: 8px; text-align: center;"><button onclick="removerOrcamentoFinanceiro(${orc.id})" style="background: #be123c; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px;">Remover</button></td>
+                            <td style="padding: 8px; text-align: center; display: flex; gap: 5px; justify-content: center;">
+                                <button onclick='abrirModalDetalhesFinanceiros(${JSON.stringify(orc)})' style="background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">👁️ Detalhes</button>
+                                <button onclick="removerOrcamentoFinanceiro(${orc.id})" style="background: #be123c; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">Remover</button>
+                            </td>
                         </tr>
                     `;
                 });
@@ -1211,6 +1232,72 @@
                 document.getElementById('fin-total-pedidos').textContent = dados.length;
                 document.getElementById('fin-total-horas').textContent = `${horas.toFixed(1)}h`;
             } catch (e) { console.error(e); }
+        }
+
+        function abrirModalDetalhesFinanceiros(orc) {
+            document.getElementById('detalhe-titulo-modal').textContent = `Raio-X do Pedido #${orc.id} - ${orc.cliente}`;
+            
+            let custoInsumos = 0;
+            let itensArray = [];
+            try {
+                itensArray = typeof orc.itens_json === 'string' ? JSON.parse(orc.itens_json) : (orc.itens_json || []);
+            } catch(e) { itensArray = []; }
+
+            let itensHtml = '';
+            itensArray.forEach(item => {
+                const parcial = item.tipo === 'avulso' ? (item.custo_total_receita || 0) : ((item.custo_total_receita || 0) * (item.quantidade || 1));
+                custoInsumos += parcial;
+                itensHtml += `<li class="flex justify-between py-1 border-b border-stone-100"><span>${item.nome} (${item.quantidade} ${item.unidade || 'un'})</span> <span class="font-semibold">R$ ${parcial.toFixed(2)}</span></li>`;
+            });
+
+            const horas = parseFloat(orc.horas) || 0;
+            const valorHora = parseFloat(orc.valor_hora) || 25;
+            const maoDeObra = horas * valorHora;
+            const custosOpPct = parseFloat(orc.custos_operacionais) || 0;
+            const custoOp = (custoInsumos * custosOpPct) / 100;
+            const embalagem = parseFloat(orc.embalagem) || 0;
+            const taxaEntrega = parseFloat(orc.taxa_entrega) || 0;
+            
+            const custoTotalProducao = custoInsumos + maoDeObra + custoOp + embalagem + taxaEntrega;
+            const valorFaturado = parseFloat(orc.valor) || 0;
+            const lucroLiquidoReal = valorFaturado - custoTotalProducao;
+
+            document.getElementById('detalhe-conteudo-modal').innerHTML = `
+                <div class="bg-rose-50/50 p-3 rounded-lg border border-rose-100 space-y-1">
+                    <p><strong>Cliente:</strong> ${orc.cliente}</p>
+                    <p><strong>Descrição:</strong> ${orc.descricao}</p>
+                    <p><strong>Faturamento (Valor Cobrado):</strong> <span class="text-emerald-700 font-bold">R$ ${valorFaturado.toFixed(2)}</span></p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-xs uppercase text-stone-600 mb-2">Itens e Insumos Consumidos:</h4>
+                    <ul class="text-xs bg-stone-50 p-3 rounded border max-h-36 overflow-y-auto">${itensHtml || 'Nenhum item detalhado.'}</ul>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs bg-stone-100 p-3 rounded">
+                    <div><strong>Custo de Insumos:</strong> R$ ${custoInsumos.toFixed(2)}</div>
+                    <div><strong>Mão de Obra (${horas}h x R$ ${valorHora}):</strong> R$ ${maoDeObra.toFixed(2)}</div>
+                    <div><strong>Custos Operacionais (${custosOpPct}%):</strong> R$ ${custoOp.toFixed(2)}</div>
+                    <div><strong>Embalagem / Entrega:</strong> R$ ${(embalagem + taxaEntrega).toFixed(2)}</div>
+                </div>
+
+                <div class="bg-stone-900 text-white p-3 rounded-lg flex justify-between items-center">
+                    <div>
+                        <span class="text-[10px] uppercase text-stone-400 block">Custo Total de Produção:</span>
+                        <span class="text-base font-bold">R$ ${custoTotalProducao.toFixed(2)}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] uppercase text-rose-300 block">Lucro Líquido Real:</span>
+                        <span class="text-lg font-extrabold text-rose-400">R$ ${lucroLiquidoReal.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-detalhes-financeiros').classList.remove('hidden');
+        }
+
+        function fecharModalDetalhesFinanceiros() {
+            document.getElementById('modal-detalhes-financeiros').classList.add('hidden');
         }
 
         async function removerOrcamentoFinanceiro(id) {
