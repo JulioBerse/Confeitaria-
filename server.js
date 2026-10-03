@@ -185,7 +185,7 @@ app.put('/api/receitas/:id', async (req, res) => {
 });
 
 
-// ================= ROTA DE INTELIGÊNCIA ARTIFICIAL PARA RECEITAS (VIA FETCH) =================
+// ================= ROTA DE INTELIGÊNCIA ARTIFICIAL PARA RECEITAS (VIA FETCH COM RETRY) =================
 app.post('/api/ia/interpretar-receita', async (req, res) => {
     const { texto, imagemBase64, mimeType } = req.body;
     try {
@@ -235,20 +235,38 @@ app.post('/api/ia/interpretar-receita', async (req, res) => {
             parts.push({ text: `Texto da receita:\n${texto}` });
         }
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                contents: [{ parts: parts }],
-                generationConfig: {
-                    responseMimeType: 'application/json'
-                }
-            })
-        });
+        let response;
+        let data;
+        let tentativas = 3;
 
-        const data = await response.json();
+        // Lógica de tentativas automáticas para lidar com alta procura na API
+        while (tentativas > 0) {
+            response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{ parts: parts }],
+                    generationConfig: {
+                        responseMimeType: 'application/json'
+                    }
+                })
+            });
+
+            data = await response.json();
+
+            if (response.ok) {
+                break;
+            }
+
+            if (response.status === 503 || JSON.stringify(data).includes('high demand')) {
+                tentativas--;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            } else {
+                break;
+            }
+        }
         
         if (!response.ok) {
             throw new Error(data.error?.message || 'Erro na API do Gemini');
